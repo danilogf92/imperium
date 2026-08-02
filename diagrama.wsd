@@ -1,0 +1,306 @@
+@startuml Projects
+
+
+' =====================================
+' USERS AND SECURITY
+' =====================================
+
+
+entity Users {
+
+  * id : bigint [PK]
+  --
+  * name : varchar
+  * email : varchar
+  * password : varchar
+  * is_active : boolean
+  * area_id : bigint [FK]
+  * created_at : timestamp
+  * updated_at : timestamp
+}
+
+
+
+' Spatie Permission
+
+entity Roles {
+
+  * id : bigint [PK]
+  --
+  * name : varchar
+  * guard_name : varchar
+  * created_at : timestamp
+  * updated_at : timestamp
+
+}
+
+
+
+entity Permissions {
+
+  * id : bigint [PK]
+  --
+  * name : varchar
+  * guard_name : varchar
+  * created_at : timestamp
+  * updated_at : timestamp
+
+}
+
+
+
+entity ModelHasRoles {
+
+  * role_id : bigint [FK]
+  * model_type : varchar
+  * model_id : bigint
+
+}
+
+
+
+entity ModelHasPermissions {
+
+  * permission_id : bigint [FK]
+  * model_type : varchar
+  * model_id : bigint
+
+}
+
+
+
+' =====================================
+' ORGANIZATION
+' =====================================
+
+
+entity Companies {
+
+  * id : bigint [PK]
+  --
+  * company_name : varchar
+  * company_code : varchar
+  * city_id : bigint [FK]
+  * created_at : timestamp
+  * updated_at : timestamp
+
+}
+
+
+
+entity CompanyUser {
+
+  * id : bigint [PK]
+  --
+  * company_id : bigint [FK]
+  * user_id : bigint [FK]
+
+}
+
+
+
+entity Areas {
+
+  * id : bigint [PK]
+  --
+  * name : varchar
+  * description : text
+  * company_id : bigint [FK]
+  * manager_id : bigint [FK]
+
+}
+
+
+
+
+' =====================================
+' LOCATION
+' =====================================
+
+
+entity Cities {
+
+  * id : bigint [PK]
+  --
+  * name : varchar
+  * city_code : varchar
+  * state : varchar
+  * country_id : bigint [FK]
+
+}
+
+
+
+entity Countries {
+
+  * id : bigint [PK]
+  --
+  * country_name : varchar
+  * country_code : varchar
+  * flag : varchar
+  * phone_code : varchar
+
+}
+
+
+
+
+' =====================================
+' PROJECTS
+' =====================================
+
+
+entity Projects {
+
+    * id : bigint [PK]
+    --
+    * company_id : bigint [FK]
+    * created_by : bigint [FK]
+    * responsible_id : bigint [FK]
+    * name : varchar
+    * pda_code : varchar
+    * rate : decimal
+    * state : enum
+    * investments : enum
+    * justification : enum
+    * classification_of_investments : enum
+    * data_uploaded : boolean
+    * quartile_date : date
+    * start_date : date
+    * finish_date : date
+    * file_name : varchar
+    * upload_pda : varchar
+    * approve_date : date
+    * close_date : date
+    * created_at : timestamp
+    * updated_at : timestamp
+}
+
+entity Data {
+    * id : bigint [PK]
+    --
+    * project_id : bigint [FK]
+    * area : varchar
+    * group_1 : varchar
+    * group_2 : varchar
+    * description : text
+    * general_classification : varchar
+    * item_type : varchar
+    * unit : varchar
+    * qty : decimal
+    * unit_price : decimal
+    * global_price : decimal
+    * stage : varchar
+    * real_value : decimal
+    * committed : decimal
+    * percentage : decimal
+    * executed_dollars : decimal
+    * executed_euros : decimal
+    * supplier : varchar
+    * code : varchar
+    * order_no : varchar
+    * input_num : varchar
+    * observations : text
+    * booked : decimal
+    * global_price_euros : decimal
+    * real_value_euros : decimal
+    * booked_euros : decimal
+    * created_at : timestamp
+    * updated_at : timestamp
+}
+
+' =====================================
+' RELATIONSHIPS
+' =====================================
+
+' Users
+
+Users }o--o{ Companies : "assigned plants"
+Users }o--|| Areas : belongs_to
+
+
+
+' Spatie
+
+Users ||--o{ ModelHasRoles
+Roles ||--o{ ModelHasRoles
+Users ||--o{ ModelHasPermissions
+Permissions ||--o{ ModelHasPermissions
+
+
+' Organization
+
+Companies ||--o{ Areas : contains
+Areas }o--|| Users : manager
+Companies }|--|| Cities : located_in
+Cities }|--|| Countries : belongs_to
+
+
+' Projects
+
+Companies ||--o{ Projects : owns
+Users ||--o{ Projects : creates
+Users ||--o{ Projects : responsible
+Projects ||--o{ Data : contains
+
+
+
+
+' =====================================
+' NOTES
+' =====================================
+
+
+note right of Companies
+
+Represents:
+
+- Plants
+- Business Units
+
+Examples:
+
+CIESA
+GRALCO
+SEAFMAN
+
+end note
+
+
+
+note right of Projects
+
+Project lifecycle:
+
+CAPEX
+|
+Planning
+|
+Execution
+|
+Finished
+
+
+end note
+
+
+
+note right of Roles
+
+Managed by:
+
+Spatie Laravel Permission
+
+
+Examples:
+ADMIN
+PROJECT_MANAGER
+APPROVER
+USER
+
+
+end note
+
+
+
+@enduml
