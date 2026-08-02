@@ -32,6 +32,10 @@ class UsersTable
                 IconColumn::make('is_active')
                     ->boolean(),
 
+                IconColumn::make('can_access_admin')
+                    ->label('Admin access')
+                    ->boolean(),
+
 
                 TextColumn::make('area.name')
                     ->label('Area')

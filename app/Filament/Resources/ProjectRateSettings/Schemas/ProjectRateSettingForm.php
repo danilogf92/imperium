@@ -16,16 +16,14 @@ class ProjectRateSettingForm
                 ->minValue(0.3)
                 ->maxValue(2)
                 ->step(0.0001)
-                ->required()
-                ->rule('lt:max_rate'),
+                ->required(),
             TextInput::make('max_rate')
                 ->label('Maximum rate')
                 ->numeric()
                 ->minValue(0.3)
                 ->maxValue(2)
                 ->step(0.0001)
-                ->required()
-                ->rule('gt:min_rate'),
+                ->required(),
         ]);
     }
 }

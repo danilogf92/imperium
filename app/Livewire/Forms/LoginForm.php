@@ -44,6 +44,12 @@ class LoginForm extends Form
             ]);
         }
 
+        if (! $user->is_active) {
+            throw ValidationException::withMessages([
+                'form.email' => 'Your account is disabled. Contact an administrator to enable it.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
 
         if ($user->hasEnabledTwoFactorAuthentication()) {

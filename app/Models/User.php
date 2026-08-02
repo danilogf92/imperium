@@ -13,10 +13,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Validation\ValidationException;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
     use Auditable, HasFactory, Notifiable, HasRoles, TwoFactorAuthenticatable;
@@ -38,6 +41,7 @@ class User extends Authenticatable
         'profile_photo_path',
         'password',
         'is_active',
+        'can_access_admin',
         'area_id',
     ];
 
@@ -64,8 +68,41 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'can_access_admin' => 'boolean',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $panel->getId() === 'admin'
+            && $this->is_active
+            && $this->can_access_admin;
+    }
+
+    protected static function booted(): void
+    {
+        static::updating(function (User $user): void {
+            if (
+                $user->isDirty('is_active')
+                && ! (bool) $user->is_active
+                && (int) auth()->id() === (int) $user->getKey()
+            ) {
+                throw ValidationException::withMessages([
+                    'is_active' => 'You cannot disable your own account. Another administrator must do it.',
+                ]);
+            }
+
+
+            if (
+                $user->isDirty('can_access_admin')
+                && (int) auth()->id() === (int) $user->getKey()
+            ) {
+                throw ValidationException::withMessages([
+                    'can_access_admin' => 'You cannot change your own admin access. Another administrator must do it.',
+                ]);
+            }
+        });
     }
 
     public function profilePhotoUrl(): ?string

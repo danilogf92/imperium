@@ -32,6 +32,15 @@ class UserForm
                     ->dehydrateStateUsing(fn($state) => Hash::make($state)),
 
                 Toggle::make('is_active')
+                    ->default(true)
+                    ->disabled(fn ($record): bool => $record?->is(auth()->user()) ?? false)
+                    ->required(),
+
+                Toggle::make('can_access_admin')
+                    ->label('Admin access')
+                    ->helperText('Admin users can enter Filament. Normal users only access the application.')
+                    ->default(false)
+                    ->disabled(fn ($record): bool => $record?->is(auth()->user()) ?? false)
                     ->required(),
 
                 Select::make('area_id')
