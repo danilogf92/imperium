@@ -563,7 +563,7 @@
         </div>
 
         <x-modal name="upload-project-document" maxWidth="lg" focusable>
-            <div class="p-6" x-data="{ uploading: false, progress: 0, confirmDelete: false }" x-on:livewire-upload-start="uploading = true; progress = 0"
+            <div class="p-6" x-data="{ uploading: false, progress: 0 }" x-on:livewire-upload-start="uploading = true; progress = 0"
                 x-on:livewire-upload-progress="progress = $event.detail.progress"
                 x-on:livewire-upload-finish="progress = 100; uploading = false"
                 x-on:livewire-upload-error="uploading = false; progress = 0"
@@ -642,7 +642,8 @@
         </x-modal>
 
         <x-modal name="import-project-data" maxWidth="lg" focusable>
-            <div class="p-6" x-data="{ uploading: false, progress: 0 }" x-on:livewire-upload-start="uploading = true; progress = 0"
+            <div class="p-6" x-data="{ uploading: false, progress: 0 }"
+                x-on:livewire-upload-start="uploading = true; progress = 0"
                 x-on:livewire-upload-progress="progress = $event.detail.progress"
                 x-on:livewire-upload-finish="progress = 100; uploading = false"
                 x-on:livewire-upload-error="uploading = false; progress = 0"
@@ -733,26 +734,13 @@
                         Cancel
                     </button>
                     @if ($dataImportExistingRows > 0)
-                        <button x-show="! confirmDelete" x-on:click="confirmDelete = true"
-                            data-no-global-loading type="button"
-                            class="inline-flex h-10 items-center gap-2 rounded-lg bg-red-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                            Delete project data
-                        </button>
-                        <div x-show="confirmDelete" x-cloak
-                            class="flex flex-wrap items-center justify-end gap-2 rounded-xl border border-red-200 bg-red-50 p-2">
-                            <span class="px-2 text-sm font-medium text-red-800">Delete all imported rows?</span>
-                            <button x-on:click="confirmDelete = false" data-no-global-loading type="button"
-                                class="inline-flex h-9 items-center rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                                Cancel
-                            </button>
-                            <button wire:click="deleteImportedProjectData" data-global-loading
+                        <button wire:click="deleteImportedProjectData" data-global-loading
                             wire:loading.attr="disabled" wire:target="deleteImportedProjectData"
-                                type="button"
-                                class="inline-flex h-9 items-center gap-2 rounded-lg bg-red-600 px-3 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:cursor-wait disabled:opacity-60">
-                            <span wire:loading.remove wire:target="deleteImportedProjectData">Yes, delete</span>
+                            type="button"
+                            class="inline-flex h-10 items-center gap-2 rounded-lg bg-red-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-wait disabled:opacity-60">
+                            <span wire:loading.remove wire:target="deleteImportedProjectData">Delete project data</span>
                             <span wire:loading wire:target="deleteImportedProjectData">Deleting...</span>
-                            </button>
-                        </div>
+                        </button>
                     @else
                         <button wire:click="importProjectData" wire:loading.attr="disabled"
                             wire:target="importProjectData,dataImportFile" data-global-loading type="button"

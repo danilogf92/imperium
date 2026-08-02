@@ -8,7 +8,7 @@
         ->count();
 @endphp
 
-<div x-data="{ open: false }" class="shrink-0">
+<div x-data="{ open: false }" x-on:scroll.window="open = false" class="shrink-0">
     <button x-ref="trigger" type="button"
         @click="open = !open; if (open) { $nextTick(() => { const rect = $refs.trigger.getBoundingClientRect(); $refs.menu.style.left = `${rect.left}px`; $refs.menu.style.top = `${rect.bottom + 8}px`; }); }"
         :class="open ? 'border-blue-500 ring-2 ring-blue-500/25 text-blue-700' : 'border-slate-300'"

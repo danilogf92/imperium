@@ -23,10 +23,6 @@ class Project extends Model
         'name',
         'pda_code',
         'rate',
-        'base_budgeted',
-        'budgeted',
-        'base_budgeted_euros',
-        'budgeted_euros',
         'state',
         'investments',
         'justification',
@@ -43,10 +39,6 @@ class Project extends Model
 
     protected $casts = [
         'rate' => 'decimal:2',
-        'base_budgeted' => 'decimal:2',
-        'budgeted' => 'decimal:2',
-        'base_budgeted_euros' => 'decimal:2',
-        'budgeted_euros' => 'decimal:2',
         'state' => ProjectStateEnum::class,
         'investments' => InvestmentEnum::class,
         'justification' => ProjectJustificationEnum::class,

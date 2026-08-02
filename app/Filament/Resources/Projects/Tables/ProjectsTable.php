@@ -31,20 +31,6 @@ class ProjectsTable
                     ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('base_budgeted')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('budgeted')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('base_budgeted_euros')
-                    ->numeric()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('budgeted_euros')
-                    ->numeric()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('state')
                     ->badge(),
                 TextColumn::make('investments')

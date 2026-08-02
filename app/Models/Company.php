@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\DB;
 
 class Company extends Model
 {
@@ -24,20 +23,6 @@ class Company extends Model
     protected $casts = [
         'multiplier' => 'decimal:6',
     ];
-
-    protected static function booted(): void
-    {
-        static::updated(function (Company $company): void {
-            if (! $company->wasChanged('multiplier')) {
-                return;
-            }
-
-            $company->projects()->update([
-                'budgeted' => DB::raw('ROUND(base_budgeted * '.(float) $company->multiplier.', 2)'),
-                'budgeted_euros' => DB::raw('ROUND(base_budgeted_euros * '.(float) $company->multiplier.', 2)'),
-            ]);
-        });
-    }
 
     public function city(): BelongsTo
     {

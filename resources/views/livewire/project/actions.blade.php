@@ -37,11 +37,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" />
                         </svg>
-                        <input id="projects-search" wire:model.live.debounce.400ms="search" type="text"
+                        <input id="projects-search" wire:model.live.debounce.400ms="search" data-global-loading type="text"
                             placeholder="Search project, PDA or plant" autocomplete="off"
                             class="block h-11 w-full rounded-lg border border-slate-300 bg-white py-2 pl-11 pr-11 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
                         @if (filled($search))
-                            <button wire:click="clearSearch" type="button" title="Clear search" aria-label="Clear search"
+                            <button wire:click="clearSearch" data-global-loading type="button" title="Clear search" aria-label="Clear search"
                                 class="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" d="m5 5 10 10M15 5 5 15" />

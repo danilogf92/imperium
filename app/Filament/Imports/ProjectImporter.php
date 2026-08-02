@@ -3,6 +3,7 @@
 namespace App\Filament\Imports;
 
 use App\Models\Project;
+use App\Models\ProjectRateSetting;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -16,6 +17,8 @@ class ProjectImporter extends Importer
 
     public static function getColumns(): array
     {
+        $rateSettings = ProjectRateSetting::current();
+
         return [
             ImportColumn::make('company')
                 ->label('Company code')
@@ -30,13 +33,12 @@ class ProjectImporter extends Importer
                 ->rules(['required', 'max:255']),
             ImportColumn::make('rate')
                 ->numeric()
-                ->rules(['nullable', 'numeric', 'min:0']),
-            ImportColumn::make('base_budgeted')
-                ->numeric()
-                ->rules(['nullable', 'numeric', 'min:0']),
-            ImportColumn::make('base_budgeted_euros')
-                ->numeric()
-                ->rules(['nullable', 'numeric', 'min:0']),
+                ->rules([
+                    'nullable',
+                    'numeric',
+                    'min:' . $rateSettings->min_rate,
+                    'max:' . $rateSettings->max_rate,
+                ]),
             ImportColumn::make('state')
                 ->rules(['nullable', 'in:Capex,Planning,Execution,Finished']),
             ImportColumn::make('investments')
@@ -74,9 +76,7 @@ class ProjectImporter extends Importer
         $userId = $this->import->user->getAuthIdentifier();
 
         $this->record->created_by ??= $userId;
-        $this->record->rate ??= 0;
-        $this->record->base_budgeted ??= 0;
-        $this->record->base_budgeted_euros ??= 0;
+        $this->record->rate ??= ProjectRateSetting::current()->min_rate;
         $this->record->state ??= 'Capex';
         $this->record->investments ??= 'Innovation';
         $this->record->justification ??= 'Normal Capex';

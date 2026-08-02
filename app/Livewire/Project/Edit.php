@@ -9,7 +9,9 @@ use App\Enums\ProjectJustificationEnum;
 use App\Enums\ProjectStateEnum;
 use App\Livewire\Forms\ProjectForm;
 use App\Models\Project;
+use App\Models\ProjectRateSetting;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class Edit extends Component
@@ -56,7 +58,40 @@ class Edit extends Component
 
         abort_unless($user, 403);
 
-        $project = $this->form->update($user);
+        $currentProject = $this->authorizedProject();
+        $newRate = (float) $this->form->rate;
+
+        if ($newRate <= 0 && $currentProject->data()->exists()) {
+            $this->addError(
+                'form.rate',
+                'The rate must be greater than zero because this project contains financial data.'
+            );
+
+            return;
+        }
+
+        $rateChanged = abs((float) $currentProject->rate - $newRate) > 0.0000001;
+
+        $project = DB::transaction(function () use ($user, $rateChanged, $newRate): Project {
+            $project = $this->form->update($user);
+
+            if ($rateChanged && $newRate > 0) {
+                $now = now();
+
+                $project->data()->update([
+                    'global_price_euros' => DB::raw("ROUND(global_price / {$newRate}, 2)"),
+                    'real_value_euros' => DB::raw("ROUND(real_value / {$newRate}, 2)"),
+                    'executed_euros' => DB::raw("ROUND(executed_dollars / {$newRate}, 2)"),
+                    'booked_euros' => DB::raw("ROUND(booked / {$newRate}, 2)"),
+                    'real_value_changed_at' => $now,
+                    'executed_changed_at' => $now,
+                    'booked_changed_at' => $now,
+                    'updated_at' => $now,
+                ]);
+            }
+
+            return $project;
+        });
 
         $this->dispatch(
             'project-updated',
@@ -77,6 +112,7 @@ class Edit extends Component
             'investmentOptions' => InvestmentEnum::cases(),
             'justificationOptions' => ProjectJustificationEnum::cases(),
             'classificationOptions' => InvestmentClassificationEnum::cases(),
+            'rateLimits' => ProjectRateSetting::current(),
         ]);
     }
 

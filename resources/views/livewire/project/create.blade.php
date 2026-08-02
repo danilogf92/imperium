@@ -67,7 +67,7 @@
                                     <span class="text-red-500">*</span>
                                 </label>
 
-                                <select id="company-id{{ $fieldSuffix }}" wire:model.live="form.company_id"
+                                <select id="company-id{{ $fieldSuffix }}" wire:model.live="form.company_id" data-no-global-loading
                                     data-no-global-loading
                                     class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                     <option value="">Select a company</option>
@@ -203,9 +203,13 @@
                             </label>
 
                             <input id="rate{{ $fieldSuffix }}" type="number" wire:model="form.rate" step="0.01"
-                                min="0"
+                                min="{{ $rateLimits->min_rate }}" max="{{ $rateLimits->max_rate }}"
                                 class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 placeholder="0.00">
+
+                            <p class="mt-1 text-xs text-gray-500">
+                                Allowed range: {{ (float) $rateLimits->min_rate }}–{{ (float) $rateLimits->max_rate }}.
+                            </p>
 
                             @error('form.rate')
                                 <p class="mt-1.5 text-sm text-red-600">

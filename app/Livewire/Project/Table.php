@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -390,6 +391,10 @@ class Table extends Component
 
     public function closeDataImportModal(): void
     {
+        if ($this->dataImportFile instanceof TemporaryUploadedFile) {
+            $this->dataImportFile->delete();
+        }
+
         $this->reset([
             'dataImportFile',
             'dataImportProjectId',
@@ -406,11 +411,18 @@ class Table extends Component
         abort_unless($this->dataImportProjectId, 404);
         $project = $this->authorizedDocumentProject($this->dataImportProjectId);
 
-        abort_if(
-            Data::query()->where('project_id', $project->id)->exists(),
-            409,
-            'Delete the existing project data before importing another Excel file.'
-        );
+        $this->dataImportExistingRows = Data::query()
+            ->where('project_id', $project->id)
+            ->count();
+
+        if ($this->dataImportExistingRows > 0) {
+            $this->addError(
+                'dataImportFile',
+                'Delete the existing project data before importing another Excel file.'
+            );
+
+            return;
+        }
 
         $this->validate([
             'dataImportFile' => ['required', 'file', 'extensions:xlsx,xls', 'max:20480'],

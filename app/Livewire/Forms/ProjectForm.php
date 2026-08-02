@@ -20,10 +20,6 @@ class ProjectForm extends Form
     public string $name = '';
     public string $pda_code = '';
     public string $rate = '';
-    public string $base_budgeted = '0';
-    public string $budgeted = '0';
-    public string $base_budgeted_euros = '0';
-    public string $budgeted_euros = '0';
     public string $state = ProjectStateEnum::Planning->value;
     public string $investments = '';
     public string $justification = '';
@@ -44,7 +40,6 @@ class ProjectForm extends Form
 
         if ($company) {
             $this->company_code = $this->normalizeCode($company->company_code);
-            $this->calculateBudgets((float) $company->multiplier);
         }
     }
 
@@ -89,10 +84,6 @@ class ProjectForm extends Form
             ? substr($project->pda_code, strlen($pdaPrefix))
             : $project->pda_code;
         $this->rate = (string) $project->rate;
-        $this->base_budgeted = (string) $project->base_budgeted;
-        $this->budgeted = (string) $project->budgeted;
-        $this->base_budgeted_euros = (string) $project->base_budgeted_euros;
-        $this->budgeted_euros = (string) $project->budgeted_euros;
         $this->state = $project->state->value;
         $this->investments = $project->investments->value;
         $this->justification = $project->justification->value;
@@ -141,7 +132,7 @@ class ProjectForm extends Form
         }
 
         return $user->availableCompaniesQuery()
-            ->select(['companies.id', 'companies.company_code', 'companies.multiplier'])
+            ->select(['companies.id', 'companies.company_code'])
             ->find($this->company_id);
     }
 
@@ -154,7 +145,7 @@ class ProjectForm extends Form
         }
 
         return $user->companiesForPermissionQuery($permission)
-            ->select(['companies.id', 'companies.company_code', 'companies.multiplier'])
+            ->select(['companies.id', 'companies.company_code'])
             ->find($this->company_id);
     }
 
@@ -184,7 +175,6 @@ class ProjectForm extends Form
 
         $this->name = trim($this->name);
         $this->pda_code = $this->company_code.'_'.$editablePdaCode;
-        $this->calculateBudgets((float) $company->multiplier);
 
         try {
             $validator = $project
@@ -210,19 +200,4 @@ class ProjectForm extends Form
         return strtoupper(trim($code));
     }
 
-    private function calculateBudgets(float $multiplier): void
-    {
-        $this->budgeted = number_format(
-            max((float) $this->base_budgeted, 0) * max($multiplier, 0),
-            2,
-            '.',
-            ''
-        );
-        $this->budgeted_euros = number_format(
-            max((float) $this->base_budgeted_euros, 0) * max($multiplier, 0),
-            2,
-            '.',
-            ''
-        );
-    }
 }

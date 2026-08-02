@@ -8,6 +8,7 @@ use App\Enums\InvestmentEnum;
 use App\Enums\ProjectJustificationEnum;
 use App\Enums\ProjectStateEnum;
 use App\Livewire\Forms\ProjectForm;
+use App\Models\ProjectRateSetting;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -78,6 +79,7 @@ class Create extends Component
             'investmentOptions' => InvestmentEnum::cases(),
             'justificationOptions' => ProjectJustificationEnum::cases(),
             'classificationOptions' => InvestmentClassificationEnum::cases(),
+            'rateLimits' => ProjectRateSetting::current(),
         ]);
     }
 }

@@ -52,6 +52,8 @@ class ImportProjectsFromSql extends Command
             return self::FAILURE;
         }
 
+        $this->ensureLegacyMappingTable();
+
         try {
             $this->info('Leyendo archivo SQL...');
             $sql = file_get_contents($path);
@@ -63,6 +65,7 @@ class ImportProjectsFromSql extends Command
             $legacySql = $this->extractLegacySql($sql);
 
             $this->info('Creando y cargando la tabla temporal legacy_projects...');
+            Schema::dropIfExists('legacy_projects');
             DB::unprepared($legacySql);
 
             if (! Schema::hasTable('legacy_projects')) {
@@ -165,10 +168,10 @@ class ImportProjectsFromSql extends Command
                             'upload_pda' => (bool) $legacy->upload_pda
                                 ? $legacy->file_name
                                 : null,
-                            'approve_date' => $legacy->approve_date,
-                            'close_date' => $legacy->close_date,
-                            'created_at' => $legacy->created_at ?? now(),
-                            'updated_at' => $legacy->updated_at ?? now(),
+                            'approve_date' => data_get($legacy, 'approve_date'),
+                            'close_date' => data_get($legacy, 'close_date'),
+                            'created_at' => data_get($legacy, 'created_at') ?? now(),
+                            'updated_at' => data_get($legacy, 'updated_at') ?? now(),
                         ];
 
                         $exists = DB::table('projects')
@@ -176,6 +179,10 @@ class ImportProjectsFromSql extends Command
                             ->exists();
 
                         if ($exists && ! $updateExisting) {
+                            $projectId = (int) DB::table('projects')
+                                ->where('pda_code', $pdaCode)
+                                ->value('id');
+                            $this->storeLegacyMapping((int) $legacy->id, $projectId, $pdaCode);
                             $skipped++;
                             $bar->advance();
                             continue;
@@ -186,11 +193,16 @@ class ImportProjectsFromSql extends Command
                                 ->where('pda_code', $pdaCode)
                                 ->update($project);
 
+                            $projectId = (int) DB::table('projects')
+                                ->where('pda_code', $pdaCode)
+                                ->value('id');
                             $updated++;
                         } else {
-                            DB::table('projects')->insert($project);
+                            $projectId = (int) DB::table('projects')->insertGetId($project);
                             $created++;
                         }
+
+                        $this->storeLegacyMapping((int) $legacy->id, $projectId, $pdaCode);
 
                         $bar->advance();
                     }
@@ -254,13 +266,52 @@ class ImportProjectsFromSql extends Command
             $sql = substr($sql, 0, $position);
         }
 
-        if (! str_contains($sql, 'legacy_projects')) {
+        if (str_contains($sql, '`legacy_projects`')) {
+            return $sql;
+        }
+
+        if (! preg_match('/\b(?:CREATE\s+TABLE|INSERT\s+INTO)\s+`projects`/i', $sql)) {
+            if (preg_match('/\b(?:CREATE\s+TABLE|INSERT\s+INTO)\s+`data`/i', $sql)) {
+                throw new RuntimeException(
+                    'Este archivo contiene data. Usa: php artisan data:import-sql ruta/data.sql --replace'
+                );
+            }
+
             throw new RuntimeException(
-                'El SQL no contiene la tabla legacy_projects requerida por este importador.'
+                'El SQL no contiene una tabla projects compatible con este importador.'
             );
         }
 
-        return $sql;
+        // Los dumps crudos apuntan a `projects`. Se renombran antes de ejecutarlos
+        // para impedir que CREATE, ALTER o INSERT afecten la tabla real.
+        return str_replace('`projects`', '`legacy_projects`', $sql);
+    }
+
+    private function ensureLegacyMappingTable(): void
+    {
+        if (Schema::hasTable('legacy_project_mappings')) {
+            return;
+        }
+
+        Schema::create('legacy_project_mappings', function ($table): void {
+            $table->unsignedBigInteger('legacy_project_id')->primary();
+            $table->unsignedBigInteger('project_id')->index();
+            $table->string('pda_code')->index();
+            $table->timestamps();
+        });
+    }
+
+    private function storeLegacyMapping(int $legacyId, int $projectId, string $pdaCode): void
+    {
+        DB::table('legacy_project_mappings')->updateOrInsert(
+            ['legacy_project_id' => $legacyId],
+            [
+                'project_id' => $projectId,
+                'pda_code' => $pdaCode,
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]
+        );
     }
 
     /**

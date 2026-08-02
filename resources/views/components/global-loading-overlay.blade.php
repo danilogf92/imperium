@@ -45,6 +45,7 @@
             const trackLoadingIntent = event => {
                 if (event.target.closest('[data-global-loading]')) {
                     suppressGlobalLoadingUntil = 0;
+                    show();
                     return;
                 }
 

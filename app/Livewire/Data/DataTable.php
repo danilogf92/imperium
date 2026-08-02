@@ -82,13 +82,6 @@ class DataTable extends Component
         'booked_euros',
     ];
 
-    private const EURO_TO_DOLLAR_COLUMNS = [
-        'global_price_euros' => 'global_price',
-        'real_value_euros' => 'real_value',
-        'executed_euros' => 'executed_dollars',
-        'booked_euros' => 'booked',
-    ];
-
     private const DOLLAR_TO_EURO_COLUMNS = [
         'global_price' => 'global_price_euros',
         'real_value' => 'real_value_euros',
@@ -306,7 +299,7 @@ class DataTable extends Component
         $this->authorizeProjectData(ProjectPermissionEnum::Update);
         abort_unless($this->creatingData, 409);
 
-        if (! $this->synchronizeDollarValues()) {
+        if (! $this->synchronizeEuroValues()) {
             return;
         }
 
@@ -332,7 +325,7 @@ class DataTable extends Component
         abort_unless($this->editingDataId, 404);
         $data = $this->authorizedData($this->editingDataId, ProjectPermissionEnum::Update);
 
-        if (! $this->synchronizeDollarValues()) {
+        if (! $this->synchronizeEuroValues()) {
             return;
         }
 
@@ -349,11 +342,10 @@ class DataTable extends Component
 
     public function updatedEditData(mixed $value, string $field): void
     {
-        $dollarField = self::EURO_TO_DOLLAR_COLUMNS[$field] ?? null;
         $euroField = self::DOLLAR_TO_EURO_COLUMNS[$field] ?? null;
         $rate = (float) $this->project->rate;
 
-        if (($dollarField === null && $euroField === null) || ! is_numeric($value)) {
+        if ($euroField === null || ! is_numeric($value)) {
             return;
         }
 
@@ -367,12 +359,6 @@ class DataTable extends Component
         }
 
         $this->resetValidation("editData.{$field}");
-
-        if ($dollarField !== null) {
-            $this->editData[$dollarField] = round((float) $value * $rate, 2);
-
-            return;
-        }
 
         $this->editData[$euroField] = round((float) $value / $rate, 2);
     }
@@ -547,30 +533,25 @@ class DataTable extends Component
         );
     }
 
-    private function synchronizeDollarValues(): bool
+    private function synchronizeEuroValues(): bool
     {
         $rate = (float) $this->project->rate;
-        $hasEuroValue = collect(array_keys(self::EURO_TO_DOLLAR_COLUMNS))
+        $hasDollarValue = collect(array_keys(self::DOLLAR_TO_EURO_COLUMNS))
             ->contains(fn(string $field) => abs((float) ($this->editData[$field] ?? 0)) > 0);
 
-        if ($rate <= 0 && $hasEuroValue) {
+        if ($rate <= 0 && $hasDollarValue) {
             $this->addError(
-                'editData.global_price_euros',
-                'The project rate must be greater than zero to convert euros to dollars.'
+                'editData.global_price',
+                'The project rate must be greater than zero to convert dollars to euros.'
             );
 
             return false;
         }
 
-        foreach (self::EURO_TO_DOLLAR_COLUMNS as $euroField => $dollarField) {
-            if (abs((float) ($this->editData[$euroField] ?? 0)) < 0.0000001) {
-                continue;
-            }
-
-            $this->editData[$dollarField] = round(
-                (float) ($this->editData[$euroField] ?? 0) * $rate,
-                2
-            );
+        foreach (self::DOLLAR_TO_EURO_COLUMNS as $dollarField => $euroField) {
+            $this->editData[$euroField] = $rate > 0
+                ? round((float) ($this->editData[$dollarField] ?? 0) / $rate, 2)
+                : 0;
         }
 
         return true;

@@ -22,7 +22,6 @@ class ProjectDataExport
 
         $headers = [
             'ID',
-            'Project ID',
             'Area',
             'Group 1',
             'Group 2',
@@ -57,7 +56,6 @@ class ProjectDataExport
         foreach ($rows as $row) {
             $sheet->fromArray([
                 $row->id,
-                $row->project_id,
                 $row->area,
                 $row->group_1,
                 $row->group_2,
@@ -90,7 +88,7 @@ class ProjectDataExport
 
         $lastRow = max(2, $rowNumber - 1);
 
-        $sheet->getStyle('A1:AA1')->applyFromArray([
+        $sheet->getStyle('A1:Z1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -107,17 +105,17 @@ class ProjectDataExport
 
         foreach (
             [
-                'J', // Qty
-                'K', // Unit Price
-                'L', // Global Price $
-                'N', // Real Value $
-                'O', // Committed
-                'Q', // Executed $
-                'R', // Executed €
-                'X', // Booked $
-                'Y', // Global Price €
-                'Z', // Real Value €
-                'AA', // Booked €
+                'I', // Qty
+                'J', // Unit Price
+                'K', // Global Price $
+                'M', // Real Value $
+                'N', // Committed
+                'P', // Executed $
+                'Q', // Executed €
+                'W', // Booked $
+                'X', // Global Price €
+                'Y', // Real Value €
+                'Z', // Booked €
             ] as $column
         ) {
             $sheet->getStyle("{$column}2:{$column}{$lastRow}")
@@ -125,18 +123,18 @@ class ProjectDataExport
                 ->setFormatCode('#,##0.00');
         }
 
-        $sheet->getStyle("P2:P{$lastRow}")
+        $sheet->getStyle("O2:O{$lastRow}")
             ->getNumberFormat()
             ->setFormatCode('0.00%');
 
         $sheet->getDefaultColumnDimension()->setWidth(16);
 
-        $sheet->getColumnDimension('F')->setWidth(50); // Description
-        $sheet->getColumnDimension('G')->setWidth(30); // Classification
-        $sheet->getColumnDimension('S')->setWidth(28); // Supplier
-        $sheet->getColumnDimension('W')->setWidth(40); // Observations
+        $sheet->getColumnDimension('E')->setWidth(50); // Description
+        $sheet->getColumnDimension('F')->setWidth(30); // Classification
+        $sheet->getColumnDimension('R')->setWidth(28); // Supplier
+        $sheet->getColumnDimension('V')->setWidth(40); // Observations
 
-        $sheet->setAutoFilter("A1:AA{$lastRow}");
+        $sheet->setAutoFilter("A1:Z{$lastRow}");
         $sheet->freezePane('A2');
 
         $spreadsheet->getProperties()

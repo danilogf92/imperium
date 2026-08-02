@@ -55,7 +55,7 @@
                             <circle cx="11" cy="11" r="7" />
                             <path stroke-linecap="round" d="m16 16 4 4" />
                         </svg>
-                        <input wire:model.live.debounce.500ms="search" type="search" placeholder="Search tasks..."
+                        <input wire:model.live.debounce.500ms="search" data-global-loading type="search" placeholder="Search tasks..."
                             style="padding-left: 2.75rem;"
                             class="h-11 w-full rounded-lg border-slate-300 bg-white text-sm shadow-sm transition hover:-translate-y-px hover:border-blue-400 hover:bg-blue-50 hover:shadow-md focus:border-blue-500 focus:bg-white focus:ring-blue-500">
                     </div>
@@ -96,7 +96,7 @@
                     <x-dashboard-filter-dropdown label="Columns" model="visibleColumns"
                         :options="collect($columnOptions)->map(fn ($label, $value) => ['value' => $value, 'label' => $label])->values()"
                         :selected="$visibleColumns" multiple />
-                    <button wire:click="resetColumns" type="button"
+                    <button wire:click="resetColumns" data-global-loading type="button"
                         class="inline-flex h-11 items-center rounded-lg px-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-px hover:brightness-110 hover:shadow-md"
                         style="background-color: #475569;">
                         Default columns
@@ -110,7 +110,7 @@
                     <thead class="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-700">
                         <tr>
                             @foreach ($visibleColumns as $column)
-                                <th @if (!in_array($column, ['pda_code', 'actions'], true)) wire:click="setSortBy('{{ $column }}')" @endif
+                                <th @if (!in_array($column, ['pda_code', 'actions'], true)) wire:click="setSortBy('{{ $column }}')" data-global-loading @endif
                                     @class([
                                         'whitespace-nowrap px-3 py-3',
                                         'cursor-pointer transition hover:bg-blue-100 hover:text-blue-700' => !in_array(
@@ -178,7 +178,7 @@
                                             @if (in_array($column, ['real_value', 'global_price', 'booked'], true))
                                                 $ {{ number_format((float) $item->{$column}, 2) }}
                                             @elseif ($column === 'percentage')
-                                                {{ number_format((float) $item->percentage, 2) }}%
+                                                {{ number_format((int) $item->percentage) }}%
                                             @else
                                                 {{ $item->{$column} }}
                                             @endif
@@ -216,6 +216,9 @@
                 <span class="mb-1.5 block text-sm font-medium text-gray-700">Percentage</span>
                 <div class="relative">
                     <input wire:model="editData.percentage" type="number" min="0" max="100" step="1"
+                        inputmode="numeric"
+                        x-on:keydown="if (['.', ',', 'e', 'E', '+', '-'].includes($event.key)) $event.preventDefault()"
+                        x-on:input="$el.value = $el.value.split(/[.,]/)[0].replace(/[^0-9]/g, '')"
                         style="padding-right: 2.75rem;"
                         class="h-11 w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     <span class="pointer-events-none absolute inline-flex items-center justify-center font-semibold text-gray-400"

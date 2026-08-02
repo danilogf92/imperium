@@ -315,7 +315,7 @@
                         ->map(fn($label, $value) => ['value' => $value, 'label' => $label])
                         ->values()"
                         :selected="$visibleColumns" multiple />
-                    <button wire:click="resetColumns" type="button"
+                    <button wire:click="resetColumns" data-global-loading type="button"
                         class="data-action-button data-default-columns inline-flex h-11 items-center justify-center rounded-lg px-3 text-sm font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                         Default columns
                     </button>
@@ -470,6 +470,12 @@
                 'booked',
                 'booked_euros',
             ];
+            $derivedEuroColumns = [
+                'global_price_euros',
+                'real_value_euros',
+                'executed_euros',
+                'booked_euros',
+            ];
         @endphp
 
         <x-dialog-modal name="edit-project-data" maxWidth="6xl">
@@ -532,7 +538,12 @@
                                     wire:model="editData.{{ $column }}" @endif
                                             type="{{ in_array($column, $numericColumns, true) ? 'number' : 'text' }}"
                                             @if (in_array($column, $numericColumns, true)) step="0.01" @endif
-                                            class="block h-10 w-full rounded-lg border-gray-300 bg-white px-3 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                            @readonly(in_array($column, $derivedEuroColumns, true))
+                                            @class([
+                                                'block h-10 w-full rounded-lg border-gray-300 px-3 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500',
+                                                'bg-white' => ! in_array($column, $derivedEuroColumns, true),
+                                                'cursor-not-allowed bg-gray-100 text-gray-600' => in_array($column, $derivedEuroColumns, true),
+                                            ])>
                                     @endif
                                     @error("editData.{$column}")
                                         <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>

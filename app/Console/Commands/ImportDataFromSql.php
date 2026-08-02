@@ -79,22 +79,37 @@ class ImportDataFromSql extends Command
                 ->map(fn($id) => (int) $id)
                 ->values();
 
-            $projects = DB::table('projects')
-                ->whereIn('id', $legacyProjectIds)
-                ->select(['id', 'rate'])
-                ->get()
-                ->keyBy('id');
-
+            $legacyToCurrentProjectIds = $this->resolveProjectMappings($legacyProjectIds);
             $missingProjectIds = $legacyProjectIds
-                ->reject(fn(int $projectId) => $projects->has($projectId))
+                ->reject(fn(int $projectId) => $legacyToCurrentProjectIds->has($projectId))
                 ->values()
                 ->all();
 
             if ($missingProjectIds !== []) {
                 throw new RuntimeException(
-                    'No existen en projects los siguientes project_id del archivo antiguo: '
+                    'No existe un mapeo para los siguientes project_id antiguos: '
                         . implode(', ', $missingProjectIds)
-                        . '. Los proyectos deben conservar los mismos ID usados por legacy_data.'
+                        . '. Ejecuta primero projects:import-sql projects.sql --update.'
+                );
+            }
+
+            $currentProjectIds = $legacyToCurrentProjectIds->values()->unique()->values();
+
+            $projects = DB::table('projects')
+                ->whereIn('id', $currentProjectIds)
+                ->select(['id', 'rate'])
+                ->get()
+                ->keyBy('id');
+
+            $missingCurrentProjectIds = $currentProjectIds
+                ->reject(fn(int $projectId) => $projects->has($projectId))
+                ->values()
+                ->all();
+
+            if ($missingCurrentProjectIds !== []) {
+                throw new RuntimeException(
+                    'No existen en projects los siguientes ID actuales: '
+                        . implode(', ', $missingCurrentProjectIds)
                 );
             }
 
@@ -115,7 +130,7 @@ class ImportDataFromSql extends Command
                 $this->warn('Eliminando datos actuales de los proyectos incluidos en el archivo...');
 
                 DB::table('data')
-                    ->whereIn('project_id', $legacyProjectIds)
+                    ->whereIn('project_id', $currentProjectIds)
                     ->delete();
             }
 
@@ -134,11 +149,12 @@ class ImportDataFromSql extends Command
 
             DB::table('legacy_data')
                 ->orderBy('id')
-                ->chunkById(500, function ($rows) use ($projects, &$inserted, $bar): void {
+                ->chunkById(500, function ($rows) use ($projects, $legacyToCurrentProjectIds, &$inserted, $bar): void {
                     $batch = [];
 
                     foreach ($rows as $legacy) {
-                        $project = $projects->get((int) $legacy->project_id);
+                        $currentProjectId = (int) $legacyToCurrentProjectIds->get((int) $legacy->project_id);
+                        $project = $projects->get($currentProjectId);
                         $rate = (float) $project->rate;
 
                         $globalPrice = $this->decimal($legacy->global_price);
@@ -147,7 +163,7 @@ class ImportDataFromSql extends Command
                         $executedDollars = $this->decimal($legacy->executed_dollars);
 
                         $batch[] = [
-                            'project_id' => (int) $legacy->project_id,
+                            'project_id' => $currentProjectId,
                             'area' => $legacy->area,
                             'group_1' => $legacy->group_1,
                             'group_2' => $legacy->group_2,
@@ -302,13 +318,35 @@ class ImportDataFromSql extends Command
 
     private function extractLegacySql(string $sql): string
     {
-        if (! str_contains($sql, 'legacy_data')) {
+        if (str_contains($sql, '`legacy_data`')) {
+            return $sql;
+        }
+
+        if (! preg_match('/\b(?:CREATE\s+TABLE|INSERT\s+INTO)\s+`data`/i', $sql)) {
             throw new RuntimeException(
-                'El SQL no contiene la tabla legacy_data requerida por este importador.'
+                'El SQL no contiene una tabla data compatible con este importador.'
             );
         }
 
-        return $sql;
+        $sql = str_replace('`data`', '`legacy_data`', $sql);
+
+        return preg_replace(
+            '/ALTER\s+TABLE\s+`legacy_data`\s+ADD\s+CONSTRAINT\s+.*?;/is',
+            '',
+            $sql
+        ) ?? $sql;
+    }
+
+    private function resolveProjectMappings($legacyProjectIds)
+    {
+        if (! Schema::hasTable('legacy_project_mappings')) {
+            return collect();
+        }
+
+        return DB::table('legacy_project_mappings')
+            ->whereIn('legacy_project_id', $legacyProjectIds)
+            ->pluck('project_id', 'legacy_project_id')
+            ->mapWithKeys(fn($projectId, $legacyId) => [(int) $legacyId => (int) $projectId]);
     }
 
     private function decimal(mixed $value): float

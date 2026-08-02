@@ -6,6 +6,7 @@ use App\Enums\InvestmentClassificationEnum;
 use App\Enums\InvestmentEnum;
 use App\Enums\ProjectJustificationEnum;
 use App\Enums\ProjectStateEnum;
+use App\Models\ProjectRateSetting;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -37,23 +38,9 @@ class ProjectForm
                 TextInput::make('rate')
                     ->required()
                     ->numeric()
-                    ->default(0.0),
-                TextInput::make('base_budgeted')
-                    ->required()
-                    ->numeric()
-                    ->default(0.0),
-                TextInput::make('budgeted')
-                    ->required()
-                    ->numeric()
-                    ->default(0.0),
-                TextInput::make('base_budgeted_euros')
-                    ->required()
-                    ->numeric()
-                    ->default(0.0),
-                TextInput::make('budgeted_euros')
-                    ->required()
-                    ->numeric()
-                    ->default(0.0),
+                    ->minValue(fn(): float => (float) ProjectRateSetting::current()->min_rate)
+                    ->maxValue(fn(): float => (float) ProjectRateSetting::current()->max_rate)
+                    ->default(fn(): float => (float) ProjectRateSetting::current()->min_rate),
                 Select::make('state')
                     ->options(ProjectStateEnum::class)
                     ->required(),

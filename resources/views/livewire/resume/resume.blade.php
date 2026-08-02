@@ -49,11 +49,11 @@
                             <circle cx="11" cy="11" r="7" />
                             <path stroke-linecap="round" d="m16 16 4 4" />
                         </svg>
-                        <input wire:model.live.debounce.400ms="search" type="text"
+                        <input wire:model.live.debounce.400ms="search" data-global-loading type="text"
                             placeholder="Search project or PDA code..."
                             class="h-11 w-full rounded-lg border-slate-300 bg-white pl-10 pr-10 text-sm text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/25">
                         @if ($search !== '')
-                            <button wire:click="$set('search', '')" data-no-global-loading type="button"
+                            <button wire:click="$set('search', '')" data-global-loading type="button"
                                 class="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-200 hover:text-slate-700"
                                 aria-label="Clear search">
                                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor">
@@ -101,7 +101,7 @@
                     <div class="min-w-36">
                         <label
                             class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Currency</label>
-                        <select wire:model.live="currency"
+                        <select wire:model.live="currency" data-global-loading
                             class="h-11 w-full cursor-pointer rounded-lg border-slate-300 bg-white text-sm font-medium text-slate-700 shadow-sm hover:border-blue-400 focus:border-blue-500 focus:ring-blue-500">
                             <option value="euro">EUR (&euro;)</option>
                             <option value="dollar">USD ($)</option>

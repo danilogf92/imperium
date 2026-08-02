@@ -23,11 +23,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" />
                         </svg>
-                        <input id="planification-search" type="text" wire:model.live.debounce.400ms="search"
+                        <input id="planification-search" type="text" wire:model.live.debounce.400ms="search" data-global-loading
                             placeholder="Search project or milestone" autocomplete="off"
                             class="block h-10 w-full rounded-lg border border-slate-300 bg-white py-2 pl-11 pr-11 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
                         @if (filled($search))
-                            <button type="button" wire:click="clearSearch" title="Clear search"
+                            <button type="button" wire:click="clearSearch" data-global-loading title="Clear search"
                                 aria-label="Clear search"
                                 class="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor"
@@ -112,7 +112,7 @@
 
                         <label class="shrink-0">
                             <span class="sr-only">Currency</span>
-                            <select wire:model.live="currency"
+                            <select wire:model.live="currency" data-global-loading
                                 class="h-11 rounded-lg border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                 <option value="usd">USD ($)</option>
                                 <option value="eur">EUR (&euro;)</option>
@@ -121,7 +121,7 @@
 
                         <label class="shrink-0">
                             <span class="sr-only">Cell content</span>
-                            <select wire:model.live="cellDisplay"
+                            <select wire:model.live="cellDisplay" data-global-loading
                                 class="h-11 rounded-lg border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                 <option value="combined">Milestone | Value</option>
                                 <option value="milestone">Milestone only</option>
@@ -129,7 +129,7 @@
                             </select>
                         </label>
 
-                        <button wire:click="toggleOnlyWithMilestones" wire:loading.attr="disabled"
+                        <button wire:click="toggleOnlyWithMilestones" data-global-loading wire:loading.attr="disabled"
                             wire:target="toggleOnlyWithMilestones" type="button"
                             class="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold shadow-sm transition hover:-translate-y-px hover:shadow-md disabled:opacity-60
                                 {{ $onlyWithMilestones

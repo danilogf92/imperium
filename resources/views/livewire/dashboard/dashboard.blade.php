@@ -34,7 +34,7 @@
                     )"
                         :selected="$companyFilter" multiple />
 
-                    <div x-data="{ open: false }" class="shrink-0">
+                    <div x-data="{ open: false }" x-on:scroll.window="open = false" class="shrink-0">
                         <button x-ref="trigger" type="button"
                             @click="
                             open = !open;
@@ -83,7 +83,7 @@
                                         ])
                                             onmouseenter="this.style.backgroundColor='#dbeafe'"
                                             onmouseleave="this.style.backgroundColor='{{ in_array($year, $yearSearch, true) ? '#eff6ff' : 'transparent' }}'">
-                                            <input wire:model.live="yearSearch" type="checkbox"
+                                            <input wire:model.live="yearSearch" data-global-loading type="checkbox"
                                                 value="{{ $year }}"
                                                 class="h-4 w-4 rounded border-slate-300 text-blue-600 transition focus:ring-2 focus:ring-blue-500 focus:ring-offset-1">
                                             <span>{{ $year }}</span>

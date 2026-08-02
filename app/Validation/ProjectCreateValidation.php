@@ -6,12 +6,15 @@ use App\Enums\InvestmentClassificationEnum;
 use App\Enums\InvestmentEnum;
 use App\Enums\ProjectJustificationEnum;
 use App\Enums\ProjectStateEnum;
+use App\Models\ProjectRateSetting;
 use Illuminate\Validation\Rule;
 
 class ProjectCreateValidation
 {
     public static function rules(): array
     {
+        $rateSettings = ProjectRateSetting::current();
+
         return [
             'company_id' => [
                 'required',
@@ -30,13 +33,9 @@ class ProjectCreateValidation
             'rate' => [
                 'required',
                 'numeric',
-                'min:0',
-                'max:1000',
+                'min:' . $rateSettings->min_rate,
+                'max:' . $rateSettings->max_rate,
             ],
-            'base_budgeted' => ['required', 'numeric', 'min:0'],
-            'budgeted' => ['required', 'numeric', 'min:0'],
-            'base_budgeted_euros' => ['required', 'numeric', 'min:0'],
-            'budgeted_euros' => ['required', 'numeric', 'min:0'],
 
             'state' => [
                 'required',
@@ -119,6 +118,8 @@ class ProjectCreateValidation
 
     public static function messages(): array
     {
+        $rateSettings = ProjectRateSetting::current();
+
         return [
             'company_id.required' =>
             'The company is required.',
@@ -160,22 +161,10 @@ class ProjectCreateValidation
             'The rate must be numeric.',
 
             'rate.min' =>
-            'The rate cannot be negative.',
+            "The rate must be at least {$rateSettings->min_rate}.",
 
             'rate.max' =>
-            'The rate may not be greater than 1000.',
-            'base_budgeted.required' => 'The USD base is required.',
-            'base_budgeted.numeric' => 'The USD base must be numeric.',
-            'base_budgeted.min' => 'The USD base cannot be negative.',
-            'budgeted.required' => 'The USD budgeted value is required.',
-            'budgeted.numeric' => 'The USD budgeted value must be numeric.',
-            'budgeted.min' => 'The USD budgeted value cannot be negative.',
-            'base_budgeted_euros.required' => 'The EUR base is required.',
-            'base_budgeted_euros.numeric' => 'The EUR base must be numeric.',
-            'base_budgeted_euros.min' => 'The EUR base cannot be negative.',
-            'budgeted_euros.required' => 'The EUR budgeted value is required.',
-            'budgeted_euros.numeric' => 'The EUR budgeted value must be numeric.',
-            'budgeted_euros.min' => 'The EUR budgeted value cannot be negative.',
+            "The rate may not be greater than {$rateSettings->max_rate}.",
 
             'state.required' =>
             'The project state is required.',
@@ -249,10 +238,6 @@ class ProjectCreateValidation
             'name' => 'project name',
             'pda_code' => 'PDA code',
             'rate' => 'rate',
-            'base_budgeted' => 'USD base',
-            'budgeted' => 'USD budgeted',
-            'base_budgeted_euros' => 'EUR base',
-            'budgeted_euros' => 'EUR budgeted',
             'state' => 'project state',
             'investments' => 'investment type',
             'justification' => 'justification',

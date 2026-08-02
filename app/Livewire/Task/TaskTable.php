@@ -176,7 +176,9 @@ class TaskTable extends Component
     {
         $data = $this->authorizedData($dataId, ProjectPermissionEnum::Update);
         $this->editingDataId = (int) $data->id;
-        $this->editData = $data->only(['percentage']);
+        $this->editData = [
+            'percentage' => (int) $data->percentage,
+        ];
         $this->resetValidation();
         $this->dispatch('open-modal', 'edit-task-data');
     }

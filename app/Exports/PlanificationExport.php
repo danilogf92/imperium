@@ -27,6 +27,8 @@ class PlanificationExport
                     ->orderBy('month')
                     ->orderBy('sequence'),
             ])
+            ->withSum('data as data_budgeted', 'global_price')
+            ->withSum('data as data_budgeted_euros', 'global_price_euros')
             ->whereIn(
                 'company_id',
                 $user->companiesForPermissionQuery(ProjectPermissionEnum::Export)
@@ -108,7 +110,7 @@ class PlanificationExport
                 $project->created_at?->year,
                 $project->company?->company_name,
                 $project->name,
-                (float) ($currency === 'eur' ? $project->budgeted_euros : $project->budgeted),
+                (float) ($currency === 'eur' ? $project->data_budgeted_euros : $project->data_budgeted),
                 $project->state?->value,
             ], null, "A{$row}");
 
@@ -135,8 +137,8 @@ class PlanificationExport
                     $codes = $cellMilestones
                         ->map(function ($item) use ($project, $currency, $currencySymbol, $cellDisplay): string {
                             $budget = (float) ($currency === 'eur'
-                                ? $project->budgeted_euros
-                                : $project->budgeted);
+                                ? $project->data_budgeted_euros
+                                : $project->data_budgeted);
                             $value = $budget * ((float) $item->percentage / 100);
 
                             return match ($cellDisplay) {
