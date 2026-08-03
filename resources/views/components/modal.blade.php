@@ -1,4 +1,4 @@
-@props(['name', 'show' => false, 'maxWidth' => '2xl'])
+@props(['name', 'show' => false, 'maxWidth' => '2xl', 'closeMethod' => null])
 
 @php
     $maxWidthClasses = [
@@ -27,6 +27,15 @@
 
 <div x-data="{
     show: @js($show),
+    closeMethod: @js($closeMethod),
+
+    dismiss() {
+        this.show = false;
+
+        if (this.closeMethod) {
+            this.$wire.call(this.closeMethod);
+        }
+    },
 
     focusables() {
         let selector = 'a, button, input:not([type=\'hidden\']), textarea, select, details, [tabindex]:not([tabindex=\'-1\'])';
@@ -84,7 +93,7 @@
             ? show = false
             : null
     "
-    x-on:close.stop="show = false" x-on:keydown.escape.window="show = false"
+    x-on:close.stop="dismiss()" x-on:keydown.escape.window="if (show) dismiss()"
     x-on:keydown.tab.prevent="
         $event.shiftKey || nextFocusable().focus()
     "
@@ -93,7 +102,7 @@
     " x-show="show"
     class="fixed inset-0 z-50 overflow-y-auto px-4 py-6 sm:px-6" style="display: {{ $show ? 'block' : 'none' }};">
     {{-- Fondo oscuro --}}
-    <div x-show="show" class="fixed inset-0 transform transition-all" x-on:click="show = false"
+    <div x-show="show" class="fixed inset-0 transform transition-all" x-on:click="dismiss()"
         x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
@@ -101,7 +110,7 @@
     </div>
 
     {{-- Contenedor para centrar el modal --}}
-    <div class="relative flex min-h-full items-center justify-center">
+    <div class="relative flex min-h-full items-center justify-center" x-on:click.self="dismiss()">
 
         {{-- Caja principal del modal --}}
         <div x-show="show"

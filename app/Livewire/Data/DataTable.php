@@ -20,9 +20,12 @@ class DataTable extends Component
 {
     use WithPagination;
 
-    private const PREFERENCE_KEY = 'data.table.visible_columns';
+    // Versioned because ID became a selectable default column. Existing users
+    // should receive the new default once, then remain free to customize it.
+    private const PREFERENCE_KEY = 'data.table.visible_columns.v2';
 
     private const COLUMN_OPTIONS = [
+        'id' => 'ID',
         'area' => 'Area',
         'group_1' => 'Group 1',
         'group_2' => 'Group 2',
@@ -37,7 +40,6 @@ class DataTable extends Component
         'stage' => 'Stage',
         'real_value' => 'Real $',
         'real_value_euros' => 'Real €',
-        'committed' => 'Committed',
         'percentage' => 'Percentage',
         'executed_dollars' => 'Executed $',
         'executed_euros' => 'Executed €',
@@ -52,6 +54,7 @@ class DataTable extends Component
     ];
 
     private const DEFAULT_COLUMNS = [
+        'id',
         'area',
         'group_1',
         'description',
@@ -74,7 +77,6 @@ class DataTable extends Component
         'global_price_euros',
         'real_value',
         'real_value_euros',
-        'committed',
         'percentage',
         'executed_dollars',
         'executed_euros',
@@ -190,7 +192,11 @@ class DataTable extends Component
             ->orderBy($this->sortBy, $this->sortDir)
             ->get();
 
-        return (new ProjectDataExport())->download($this->project, $rows);
+        return (new ProjectDataExport())->download(
+            $this->project,
+            $rows,
+            array_values(array_diff($this->visibleColumns, ['actions']))
+        );
     }
 
     public function updatedVisibleColumns(): void
@@ -575,6 +581,9 @@ class DataTable extends Component
     {
         $selected = array_values(array_intersect(array_keys(self::COLUMN_OPTIONS), $columns));
 
-        return $selected !== [] ? $selected : self::DEFAULT_COLUMNS;
+        $selected = array_values(array_diff($selected, ['actions']));
+        $selected[] = 'actions';
+
+        return count($selected) > 1 ? $selected : self::DEFAULT_COLUMNS;
     }
 }

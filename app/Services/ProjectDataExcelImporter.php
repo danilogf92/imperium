@@ -58,9 +58,6 @@ class ProjectDataExcelImporter
         'real value €' => 'real_value_euros',
         'real value euros' => 'real_value_euros',
 
-        'committed' => 'committed',
-        'committed $' => 'committed',
-
         'percentage' => 'percentage',
 
         'executed dollars' => 'executed_dollars',
@@ -127,7 +124,6 @@ class ProjectDataExcelImporter
         'global_price_euros',
         'real_value',
         'real_value_euros',
-        'committed',
         'booked',
         'booked_euros',
         'percentage',
@@ -319,7 +315,6 @@ class ProjectDataExcelImporter
             'global_price' => 0,
             'stage' => null,
             'real_value' => 0,
-            'committed' => 0,
             'percentage' => 0,
             'executed_dollars' => 0,
             'executed_euros' => 0,

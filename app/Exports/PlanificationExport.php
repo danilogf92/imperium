@@ -40,7 +40,7 @@ class PlanificationExport
             ->when($filters['creationYears'] !== [], function (Builder $query) use ($filters): void {
                 $query->where(function (Builder $query) use ($filters): void {
                     foreach ($filters['creationYears'] as $year) {
-                        $query->orWhereYear('created_at', $year);
+                        $query->orWhereYear('forecast_start_date', $year);
                     }
                 });
             })
@@ -49,6 +49,7 @@ class PlanificationExport
                 $search = '%' . trim($filters['search']) . '%';
                 $query->where(function (Builder $query) use ($search): void {
                     $query->where('name', 'like', $search)
+                        ->orWhere('pda_code', 'like', $search)
                         ->orWhere('state', 'like', $search)
                         ->orWhereHas('company', fn (Builder $query) => $query->where('company_name', 'like', $search))
                         ->orWhereHas('projectMilestones.milestone', fn (Builder $query) => $query
@@ -74,7 +75,7 @@ class PlanificationExport
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Planification');
-        $sheet->freezePane('F3');
+        $sheet->freezePane('G3');
 
         $currency = ($filters['currency'] ?? 'usd') === 'eur' ? 'eur' : 'usd';
         $cellDisplay = in_array(($filters['cellDisplay'] ?? 'combined'), ['combined', 'milestone', 'value'], true)
@@ -82,7 +83,7 @@ class PlanificationExport
             : 'combined';
         $currencySymbol = $currency === 'eur' ? '€' : '$';
 
-        $fixedHeaders = ['AÑO CREACIÓN', 'Planta', 'Nombre', 'Budgeted total', 'Status'];
+        $fixedHeaders = ['Forecast Start Year', 'Plant', 'PDA Code', 'Name', 'Budgeted Total', 'Status'];
         foreach ($fixedHeaders as $index => $header) {
             $column = Coordinate::stringFromColumnIndex($index + 1);
             $sheet->setCellValue("{$column}1", $header);
@@ -90,7 +91,7 @@ class PlanificationExport
         }
 
         $monthLabels = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-        $columnIndex = 6;
+        $columnIndex = 7;
         foreach ($years as $year) {
             $startColumn = Coordinate::stringFromColumnIndex($columnIndex);
             $endColumn = Coordinate::stringFromColumnIndex($columnIndex + 11);
@@ -107,14 +108,15 @@ class PlanificationExport
         $row = 3;
         foreach ($projects as $project) {
             $sheet->fromArray([
-                $project->created_at?->year,
+                $project->forecast_start_date?->year,
                 $project->company?->company_name,
+                $project->pda_code,
                 $project->name,
                 (float) ($currency === 'eur' ? $project->data_budgeted_euros : $project->data_budgeted),
                 $project->state?->value,
             ], null, "A{$row}");
 
-            $sheet->getStyle("D{$row}")
+            $sheet->getStyle("E{$row}")
                 ->getNumberFormat()
                 ->setFormatCode($currency === 'eur' ? '€#,##0.00' : '$#,##0.00');
 
@@ -122,13 +124,13 @@ class PlanificationExport
                 ltrim($project->state?->softColor() ?? '#F1F5F9', '#'),
                 ltrim($project->state?->textColor() ?? '#334155', '#'),
             ];
-            $sheet->getStyle("E{$row}")->applyFromArray([
+            $sheet->getStyle("F{$row}")->applyFromArray([
                 'font' => ['bold' => true, 'color' => ['rgb' => $statusColors[1]]],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $statusColors[0]]],
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
             ]);
 
-            $columnIndex = 6;
+            $columnIndex = 7;
             foreach ($years as $year) {
                 for ($month = 1; $month <= 12; $month++) {
                     $cellMilestones = $project->projectMilestones
@@ -179,7 +181,7 @@ class PlanificationExport
             $row++;
         }
 
-        $lastColumn = Coordinate::stringFromColumnIndex(max(5, $columnIndex - 1));
+        $lastColumn = Coordinate::stringFromColumnIndex(max(6, $columnIndex - 1));
         $sheet->getStyle("A1:{$lastColumn}2")->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2563EB']],
@@ -195,10 +197,11 @@ class PlanificationExport
             ->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('CBD5E1'));
         $sheet->getColumnDimension('A')->setWidth(15);
         $sheet->getColumnDimension('B')->setWidth(25);
-        $sheet->getColumnDimension('C')->setWidth(48);
-        $sheet->getColumnDimension('D')->setWidth(16);
+        $sheet->getColumnDimension('C')->setWidth(20);
+        $sheet->getColumnDimension('D')->setWidth(48);
         $sheet->getColumnDimension('E')->setWidth(16);
-        for ($index = 6; $index <= max(5, $columnIndex - 1); $index++) {
+        $sheet->getColumnDimension('F')->setWidth(16);
+        for ($index = 7; $index <= max(6, $columnIndex - 1); $index++) {
             $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($index))->setWidth(22);
         }
 

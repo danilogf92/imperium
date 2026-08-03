@@ -385,7 +385,10 @@ class TaskTable extends Component
     {
         $selected = array_values(array_intersect(array_keys(self::COLUMN_OPTIONS), $columns));
 
-        return $selected !== [] ? $selected : self::DEFAULT_COLUMNS;
+        $selected = array_values(array_diff($selected, ['actions']));
+        $selected[] = 'actions';
+
+        return count($selected) > 1 ? $selected : self::DEFAULT_COLUMNS;
     }
 
     private function accessibleDataQuery(): Builder

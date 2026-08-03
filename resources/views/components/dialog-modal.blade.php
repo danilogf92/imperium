@@ -1,6 +1,6 @@
-@props(['name', 'maxWidth' => '2xl'])
+@props(['name', 'maxWidth' => '2xl', 'closeMethod' => null])
 
-<x-modal :name="$name" :maxWidth="$maxWidth" {{ $attributes }}>
+<x-modal :name="$name" :maxWidth="$maxWidth" :close-method="$closeMethod" {{ $attributes }}>
     {{-- Encabezado del modal --}}
     <div class="shrink-0 border-b border-gray-200 bg-white px-6 py-4">
         <div class="text-lg font-medium text-gray-900">

@@ -25,7 +25,7 @@
         @endif
     @endif
 
-    <x-dialog-modal :name="$formModalName" maxWidth="3xl">
+    <x-dialog-modal :name="$formModalName" maxWidth="3xl" :close-method="$closeMethod">
         <x-slot name="title">
             <div>
                 <h2 class="text-xl font-bold text-gray-900">
@@ -54,7 +54,7 @@
                         </p>
                     </div>
 
-                    <div class="grid grid-cols-1 gap-6 p-5 lg:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-6 p-5 lg:grid-cols-3">
 
                         {{-- Columna 1 --}}
                         <div>
@@ -88,7 +88,28 @@
 
                         </div>
 
-                        {{-- Columna 2 --}}
+                        <div>
+                            <div class="mb-5">
+                                <label for="project-order{{ $fieldSuffix }}"
+                                    class="mb-2 block text-sm font-medium text-gray-700">
+                                    Order
+                                    <span class="text-red-500">*</span>
+                                </label>
+
+                                <input id="project-order{{ $fieldSuffix }}" type="text" wire:model="form.order"
+                                    inputmode="text" maxlength="20"
+                                    class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    placeholder="Examples: 1, 5a, 100b">
+
+                                <p class="mt-1 text-xs text-gray-500">Must be unique within the selected plant.</p>
+
+                                @error('form.order')
+                                    <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- Columna 3 --}}
                         <div>
                             {{-- Project name --}}
                             <div class="mb-5">

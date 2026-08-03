@@ -98,6 +98,35 @@ class PlanificationTest extends TestCase
             ->assertHasErrors(['percentage']);
     }
 
+    public function test_year_filter_matches_projects_forecast_start_year_and_shows_name_and_pda_code(): void
+    {
+        [$user, $project] = $this->projectContext();
+
+        $otherProject = Project::query()->create([
+            'company_id' => $project->company_id,
+            'created_by' => $user->id,
+            'name' => 'Project from another forecast year',
+            'pda_code' => 'PDA-OTHER-YEAR',
+            'rate' => 1,
+            'state' => 'Planning',
+            'investments' => 'Innovation',
+            'justification' => 'Normal Capex',
+            'classification_of_investments' => 'Buildings',
+            'forecast_start_date' => '2025-01-01',
+            'forecast_end_date' => '2026-12-31',
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(Planification::class)
+            ->set('creationYearFilter', ['2026'])
+            ->assertViewHas('plannedProjects', function ($projects) use ($project, $otherProject): bool {
+                return $projects->getCollection()->contains('id', $project->id)
+                    && ! $projects->getCollection()->contains('id', $otherProject->id);
+            })
+            ->assertSee($project->name)
+            ->assertSee($project->pda_code);
+    }
+
     /** @return array{User, Project} */
     private function projectContext(): array
     {

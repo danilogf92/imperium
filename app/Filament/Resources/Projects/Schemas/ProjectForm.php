@@ -24,6 +24,13 @@ class ProjectForm
                     ->searchable()
                     ->preload()
                     ->required(),
+                TextInput::make('order')
+                    ->label('Order')
+                    ->helperText('Unique within the selected plant. Examples: 1, 5a, 100b.')
+                    ->regex('/^\d+[a-z]*$/i')
+                    ->dehydrateStateUsing(fn (?string $state): string => strtolower(trim((string) $state)))
+                    ->maxLength(20)
+                    ->required(),
                 Select::make('created_by')
                     ->relationship('creator', 'name')
                     ->searchable()

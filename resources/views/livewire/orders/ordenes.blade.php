@@ -1,9 +1,9 @@
 <div class="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
     <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <p class="text-sm font-medium text-blue-600">Orders</p>
+            <p class="text-sm font-medium text-blue-600">{{ __('Orders') }}</p>
             <h1 class="text-2xl font-bold text-slate-900">
-                {{ $project ? $project->name : 'All project orders' }}
+                {{ $project ? $project->name : __('All project orders') }}
             </h1>
             @if ($project)
                 <p class="mt-1 text-sm text-slate-500">PDA: {{ $project->pda_code }}</p>
@@ -19,7 +19,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12.5 15 7.5 10l5-5M8 10h8" />
                     </svg>
-                    Back to orders
+                    {{ __('Back to orders') }}
                 </a>
             </div>
         @endif
@@ -36,14 +36,14 @@
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <h2 class="font-bold text-slate-900">Order filters</h2>
+                        <h2 class="font-bold text-slate-900">{{ __('Order filters') }}</h2>
                         @if (filled($search))
                             <span class="rounded-full bg-blue-600 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white">
                                 Active
                             </span>
                         @endif
                     </div>
-                    <p class="mt-0.5 text-sm text-slate-500">Search and adjust the orders displayed in the table</p>
+                    <p class="mt-0.5 text-sm text-slate-500">{{ __('Search and adjust the orders displayed in the table') }}</p>
                 </div>
             </div>
             <button type="button" x-on:click="open = !open"
@@ -58,7 +58,7 @@
         <div x-show="open" x-collapse>
         <div class="flex flex-col gap-4 border-b border-slate-200 bg-slate-50/70 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-                <label for="orders-search" class="sr-only">Search orders</label>
+                <label for="orders-search" class="sr-only">{{ __('Search orders') }}</label>
                 <div class="relative w-full sm:max-w-lg">
                     <svg class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -66,12 +66,12 @@
                             d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" />
                     </svg>
                     <input id="orders-search" wire:model.live.debounce.400ms="search" data-global-loading type="text"
-                        placeholder="Search order, project or PDA"
+                        placeholder="{{ __('Search order, project or PDA') }}"
                         autocomplete="off"
                         class="block h-11 w-full rounded-lg border border-slate-300 bg-white py-2 pl-11 pr-11 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
                     @if (filled($search))
-                        <button wire:click="clearSearch" data-global-loading type="button" title="Clear search"
-                            aria-label="Clear search"
+                        <button wire:click="clearSearch" data-global-loading type="button" title="{{ __('Clear search') }}"
+                            aria-label="{{ __('Clear search') }}"
                             class="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor"
                                 stroke-width="1.8">

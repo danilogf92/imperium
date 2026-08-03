@@ -25,7 +25,6 @@ class DataUpdateValidation
         'global_price_euros',
         'real_value',
         'real_value_euros',
-        'committed',
         'percentage',
         'executed_dollars',
         'executed_euros',

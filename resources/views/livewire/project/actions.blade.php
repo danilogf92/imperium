@@ -2,13 +2,13 @@
     {{-- Encabezado --}}
     <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700">
         <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">
-            Project Actions
+            {{ __('Project Actions') }}
         </h2>
 
         {{-- Botón colapsar/desplegar --}}
         <button type="button" x-on:click="open = !open"
             class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-600 transition hover:bg-gray-200 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-            x-bind:title="open ? 'Collapse' : 'Expand'">
+            x-bind:title="open ? '{{ __('Collapse') }}' : '{{ __('Expand') }}'">
             {{-- Flecha arriba --}}
             <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor" stroke-width="2">
@@ -30,7 +30,7 @@
 
                 {{-- Buscar y limpiar --}}
                 <div class="min-w-64 flex-1">
-                    <label for="projects-search" class="sr-only">Search projects</label>
+                    <label for="projects-search" class="sr-only">{{ __('Search projects') }}</label>
                     <div class="relative">
                         <svg class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -38,10 +38,10 @@
                                 d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" />
                         </svg>
                         <input id="projects-search" wire:model.live.debounce.400ms="search" data-global-loading type="text"
-                            placeholder="Search project, PDA or plant" autocomplete="off"
+                            placeholder="{{ __('Search project, PDA or plant') }}" autocomplete="off"
                             class="block h-11 w-full rounded-lg border border-slate-300 bg-white py-2 pl-11 pr-11 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
                         @if (filled($search))
-                            <button wire:click="clearSearch" data-global-loading type="button" title="Clear search" aria-label="Clear search"
+                            <button wire:click="clearSearch" data-global-loading type="button" title="{{ __('Clear search') }}" aria-label="{{ __('Clear search') }}"
                                 class="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" d="m5 5 10 10M15 5 5 15" />
@@ -67,8 +67,8 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4Z"></path>
                         </svg>
-                        <span wire:loading.remove wire:target="exportDashboard">Dashboard Excel</span>
-                        <span wire:loading wire:target="exportDashboard">Generating...</span>
+                        <span wire:loading.remove wire:target="exportDashboard">{{ __('Dashboard Excel') }}</span>
+                        <span wire:loading wire:target="exportDashboard">{{ __('Generating...') }}</span>
                     </button>
 
                     <x-excel-export-button method="export" label="Export projects"

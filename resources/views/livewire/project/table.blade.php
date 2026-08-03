@@ -3,6 +3,13 @@
     @php
         $columnKeys = array_keys($columnOptions);
         $columnCount = count($visibleColumns);
+        $physicalColumns = [
+            'id', 'name', 'links', 'pda_code', 'upload_pda', 'rate', 'state', 'investments',
+            'classification', 'justification', 'forecast_start_date', 'forecast_end_date', 'order', 'plant',
+            'creator', 'responsible', 'data_uploaded', 'quartile_date', 'approve_date', 'close_date',
+            'file_name', 'created_at', 'updated_at', 'budgeted_euros', 'real_euros',
+            'budgeted_dollars', 'real_dollars', 'actions',
+        ];
     @endphp
 
     @if ($active)
@@ -45,20 +52,26 @@
                 }
 
                 .project-table>thead>tr>th {
-                    padding: 0.35rem 0.4rem !important;
+                    min-width: 0;
+                    overflow: hidden;
+                    padding: 0.3rem 0.3rem !important;
+                    text-overflow: ellipsis;
                     font-size: 0.68rem !important;
                     line-height: 0.95rem !important;
                 }
 
                 .project-table>tbody>tr:not(.project-empty-row)>th,
                 .project-table>tbody>tr:not(.project-empty-row)>td {
-                    padding: 0.3rem 0.4rem !important;
+                    min-width: 0;
+                    overflow: hidden;
+                    padding: 0.25rem 0.3rem !important;
+                    text-overflow: ellipsis;
                     font-size: 0.75rem !important;
                     line-height: 1rem !important;
                 }
 
                 .project-table>tbody>tr:not(.project-empty-row) {
-                    height: 2.25rem;
+                    min-height: 2.75rem;
                 }
 
                 .project-table>tbody>tr:not(.project-empty-row) .rounded-full {
@@ -67,11 +80,36 @@
                     line-height: 0.9rem !important;
                 }
 
-                @foreach ($columnKeys as $columnIndex => $columnKey)
+                .project-table>tbody>tr:not(.project-empty-row)>td:last-child {
+                    overflow: visible;
+                }
+
+                .project-table {
+                    display: block;
+                    min-width: max(100%, {{ max($columnCount, 1) * 116 }}px);
+                }
+
+                .project-table > thead,
+                .project-table > tbody {
+                    display: block;
+                }
+
+                .project-table > thead > tr,
+                .project-table > tbody > tr:not(.project-empty-row) {
+                    display: grid;
+                    grid-template-columns: repeat({{ max($columnCount, 1) }}, minmax(116px, 1fr));
+                }
+
+                @foreach ($physicalColumns as $physicalIndex => $columnKey)
                     @if (!in_array($columnKey, $visibleColumns, true))
-                        .project-table>thead>tr> :nth-child({{ $columnIndex + 1 }}),
-                        .project-table>tbody>tr:not(.project-empty-row)> :nth-child({{ $columnIndex + 1 }}) {
+                        .project-table>thead>tr> :nth-child({{ $physicalIndex + 1 }}),
+                        .project-table>tbody>tr:not(.project-empty-row)> :nth-child({{ $physicalIndex + 1 }}) {
                             display: none;
+                        }
+                    @else
+                        .project-table>thead>tr> :nth-child({{ $physicalIndex + 1 }}),
+                        .project-table>tbody>tr:not(.project-empty-row)> :nth-child({{ $physicalIndex + 1 }}) {
+                            order: {{ array_search($columnKey, $columnKeys, true) }};
                         }
                     @endif
                 @endforeach
@@ -79,13 +117,17 @@
 
             <div class="unified-table-toolbar">
                 <div>
-                    <p class="text-sm font-semibold text-gray-700">Table columns</p>
-                    <p class="text-xs text-gray-500">{{ count($visibleColumns) }} of {{ count($columnOptions) }} visible
+                    <p class="text-sm font-semibold text-gray-700">{{ __('Table columns') }}</p>
+                    <p class="text-xs text-gray-500">
+                        Showing {{ $projects->firstItem() ?? 0 }}–{{ $projects->lastItem() ?? 0 }} of
+                        {{ number_format($projects->total()) }} projects · {{ count($visibleColumns) }} of
+                        {{ count($columnOptions) }} columns visible
                     </p>
                 </div>
 
                 <div class="flex items-center gap-2">
                     <x-dashboard-filter-dropdown label="Columns" model="visibleColumns" :options="collect($columnOptions)
+                        ->except('actions')
                         ->map(fn($label, $value) => ['value' => $value, 'label' => $label])
                         ->values()"
                         :selected="$visibleColumns" multiple />
@@ -150,9 +192,9 @@
                                 </div>
                             </th>
 
-                            {{-- Archivo --}}
+                            {{-- Upload PDA --}}
                             <th scope="col" class="whitespace-nowrap px-2 py-2">
-                                File
+                                Upload PDA
                             </th>
 
                             {{-- Rate --}}
@@ -229,7 +271,7 @@
                             <th wire:click="setSortBy('forecast_start_date')" scope="col"
                                 class="cursor-pointer whitespace-nowrap px-2 py-2 hover:bg-gray-200">
                                 <div class="flex items-center gap-1">
-                                    Forecast Start Date
+                                    Forecast Start Year
 
                                     @if ($sortBy === 'forecast_start_date')
                                         <span>
@@ -253,6 +295,15 @@
                                 </div>
                             </th>
 
+                            <th wire:click="setSortBy('order')" scope="col"
+                                class="cursor-pointer whitespace-nowrap px-2 py-2 hover:bg-gray-200">
+                                <div class="flex items-center gap-1">
+                                    Order
+                                    @if ($sortBy === 'order')
+                                        <span>{{ $sortDir === 'ASC' ? '↑' : '↓' }}</span>
+                                    @endif
+                                </div>
+                            </th>
                             <th scope="col" class="whitespace-nowrap px-2 py-2">Plant</th>
                             <th scope="col" class="whitespace-nowrap px-2 py-2">Created By</th>
                             <th scope="col" class="whitespace-nowrap px-2 py-2">Responsible</th>
@@ -286,6 +337,23 @@
                                 Updated At
                             </th>
 
+                            <th wire:click="setSortBy('budgeted_euros')" scope="col"
+                                class="cursor-pointer whitespace-nowrap px-2 py-2 text-right hover:bg-gray-200">
+                                Budgeted Euros
+                            </th>
+                            <th wire:click="setSortBy('real_euros')" scope="col"
+                                class="cursor-pointer whitespace-nowrap px-2 py-2 text-right hover:bg-gray-200">
+                                Real Euros
+                            </th>
+                            <th wire:click="setSortBy('budgeted_dollars')" scope="col"
+                                class="cursor-pointer whitespace-nowrap px-2 py-2 text-right hover:bg-gray-200">
+                                Budgeted Dollars
+                            </th>
+                            <th wire:click="setSortBy('real_dollars')" scope="col"
+                                class="cursor-pointer whitespace-nowrap px-2 py-2 text-right hover:bg-gray-200">
+                                Real Dollars
+                            </th>
+
                             {{-- Acciones --}}
                             <th scope="col" class="whitespace-nowrap px-2 py-2 text-center">
                                 Actions
@@ -300,7 +368,13 @@
                             @endphp
 
                             <tr wire:key="project-row-{{ $project->id }}"
-                                class="border-b border-gray-200 bg-white transition hover:bg-gray-50">
+                                @if (in_array((int) $project->company_id, $updateCompanyIds, true))
+                                    x-on:click="if (!$event.target.closest('a, button, input, select, textarea, [role=button]')) $dispatch('open-project-edit', { projectId: {{ $project->id }} })"
+                                @endif
+                                @class([
+                                    'border-b border-gray-200 bg-white transition hover:bg-gray-50',
+                                    'cursor-pointer' => in_array((int) $project->company_id, $updateCompanyIds, true),
+                                ])>
 
                                 {{-- ID --}}
                                 <th scope="row" class="whitespace-nowrap px-2 py-2 font-medium text-gray-900">
@@ -441,12 +515,16 @@
 
                                 {{-- Fecha inicio --}}
                                 <td class="whitespace-nowrap px-2 py-2">
-                                    {{ $project->forecast_start_date?->format('Y-m-d') }}
+                                    {{ $project->forecast_start_date?->format('Y') ?? '—' }}
                                 </td>
 
                                 {{-- Fecha final --}}
                                 <td class="whitespace-nowrap px-2 py-2">
                                     {{ $project->forecast_end_date?->format('Y-m-d') }}
+                                </td>
+
+                                <td class="whitespace-nowrap px-2 py-2 font-semibold text-slate-700">
+                                    {{ $project->order ?? '—' }}
                                 </td>
 
                                 <td class="whitespace-nowrap px-2 py-2">
@@ -492,9 +570,22 @@
                                     {{ $project->updated_at?->format('Y-m-d H:i') }}
                                 </td>
 
+                                <td class="whitespace-nowrap px-2 py-2 text-right font-semibold text-slate-700">
+                                    € {{ number_format((float) $project->budgeted_euros, 2) }}
+                                </td>
+                                <td class="whitespace-nowrap px-2 py-2 text-right font-semibold text-slate-700">
+                                    € {{ number_format((float) $project->real_euros, 2) }}
+                                </td>
+                                <td class="whitespace-nowrap px-2 py-2 text-right font-semibold text-slate-700">
+                                    $ {{ number_format((float) $project->budgeted_dollars, 2) }}
+                                </td>
+                                <td class="whitespace-nowrap px-2 py-2 text-right font-semibold text-slate-700">
+                                    $ {{ number_format((float) $project->real_dollars, 2) }}
+                                </td>
+
                                 {{-- Editar y borrar --}}
                                 <td class="whitespace-nowrap px-2 py-2">
-                                    <div class="flex items-center justify-center gap-2">
+                                    <div class="flex items-center justify-center gap-1">
                                         @if (in_array((int) $project->company_id, $updateCompanyIds, true))
                                             <button wire:click="openDataImportModal({{ $project->id }})"
                                                 data-no-global-loading type="button"
@@ -562,7 +653,7 @@
             @endif
         </div>
 
-        <x-modal name="upload-project-document" maxWidth="lg" focusable>
+        <x-modal name="upload-project-document" maxWidth="lg" close-method="closeDocumentModal" focusable>
             <div class="p-6" x-data="{ uploading: false, progress: 0 }" x-on:livewire-upload-start="uploading = true; progress = 0"
                 x-on:livewire-upload-progress="progress = $event.detail.progress"
                 x-on:livewire-upload-finish="progress = 100; uploading = false"
@@ -641,7 +732,7 @@
             </div>
         </x-modal>
 
-        <x-modal name="import-project-data" maxWidth="lg" focusable>
+        <x-modal name="import-project-data" maxWidth="lg" close-method="closeDataImportModal" focusable>
             <div class="p-6" x-data="{ uploading: false, progress: 0 }"
                 x-on:livewire-upload-start="uploading = true; progress = 0"
                 x-on:livewire-upload-progress="progress = $event.detail.progress"
@@ -765,7 +856,7 @@
             </div>
         </x-modal>
 
-        <x-modal name="delete-project-document" maxWidth="md" focusable>
+        <x-modal name="delete-project-document" maxWidth="md" close-method="closeDeleteDocumentModal" focusable>
             <div class="p-6">
                 <div class="flex items-start gap-4">
                     <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"

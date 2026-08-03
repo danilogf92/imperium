@@ -12,7 +12,7 @@
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Excel templates</h1>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ __('Excel templates') }}</h1>
                     <p class="mt-1 text-sm text-slate-500">
                         Download the approved files before preparing project data or orders.
                     </p>

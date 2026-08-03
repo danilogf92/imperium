@@ -25,6 +25,8 @@ class ProjectImporter extends Importer
                 ->requiredMapping()
                 ->relationship(resolveUsing: 'company_code')
                 ->rules(['required']),
+            ImportColumn::make('order')
+                ->rules(['nullable', 'regex:/^\d+[a-z]*$/i', 'max:20']),
             ImportColumn::make('name')
                 ->requiredMapping()
                 ->rules(['required', 'max:255']),
@@ -75,6 +77,9 @@ class ProjectImporter extends Importer
     {
         $userId = $this->import->user->getAuthIdentifier();
 
+        $this->record->order = filled($this->record->order)
+            ? strtolower(trim((string) $this->record->order))
+            : null;
         $this->record->created_by ??= $userId;
         $this->record->rate ??= ProjectRateSetting::current()->min_rate;
         $this->record->state ??= 'Capex';

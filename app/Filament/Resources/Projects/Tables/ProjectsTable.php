@@ -15,6 +15,10 @@ class ProjectsTable
     {
         return $table
             ->columns([
+                TextColumn::make('order')
+                    ->label('Order')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('company.company_name')
                     ->label('Company')
                     ->searchable(),

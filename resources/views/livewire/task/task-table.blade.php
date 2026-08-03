@@ -5,7 +5,7 @@
             <p class="text-xs font-semibold uppercase tracking-wider text-blue-600">Task management</p>
             <div class="mt-1 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Tasks</h1>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ __('Tasks') }}</h1>
                     <p class="mt-1 text-sm text-slate-500">
                         Track purchasing and financial progress across your accessible projects.
                     </p>
@@ -29,7 +29,7 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h2 class="font-bold text-slate-900">Task filters</h2>
+                            <h2 class="font-bold text-slate-900">{{ __('Task filters') }}</h2>
                             @if ($search !== '' || $yearSearch !== [] || $supplierFilter !== [] || $order_numberFilter !== [] || $pda_codeFilter !== [] || $statusFilter !== [])
                                 <span class="rounded-full bg-blue-600 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white">Active</span>
                             @endif
@@ -55,7 +55,7 @@
                             <circle cx="11" cy="11" r="7" />
                             <path stroke-linecap="round" d="m16 16 4 4" />
                         </svg>
-                        <input wire:model.live.debounce.500ms="search" data-global-loading type="search" placeholder="Search tasks..."
+                        <input wire:model.live.debounce.500ms="search" data-global-loading type="search" placeholder="{{ __('Search tasks...') }}"
                             style="padding-left: 2.75rem;"
                             class="h-11 w-full rounded-lg border-slate-300 bg-white text-sm shadow-sm transition hover:-translate-y-px hover:border-blue-400 hover:bg-blue-50 hover:shadow-md focus:border-blue-500 focus:bg-white focus:ring-blue-500">
                     </div>
@@ -87,14 +87,14 @@
         <section class="unified-table-shell">
             <div class="unified-table-toolbar">
                 <div>
-                    <p class="text-sm font-semibold text-slate-700">Table columns</p>
+                    <p class="text-sm font-semibold text-slate-700">{{ __('Table columns') }}</p>
                     <p class="text-xs text-slate-500">
                         {{ count($visibleColumns) }} of {{ count($columnOptions) }} visible
                     </p>
                 </div>
                 <div class="flex items-center gap-2">
                     <x-dashboard-filter-dropdown label="Columns" model="visibleColumns"
-                        :options="collect($columnOptions)->map(fn ($label, $value) => ['value' => $value, 'label' => $label])->values()"
+                        :options="collect($columnOptions)->except('actions')->map(fn ($label, $value) => ['value' => $value, 'label' => $label])->values()"
                         :selected="$visibleColumns" multiple />
                     <button wire:click="resetColumns" data-global-loading type="button"
                         class="inline-flex h-11 items-center rounded-lg px-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-px hover:brightness-110 hover:shadow-md"
@@ -125,7 +125,7 @@
                                             true,
                                         ),
                                     ])>
-                                    {{ $columnOptions[$column] }}
+                                    {{ __($columnOptions[$column]) }}
                                     @if ($sortBy === $column)
                                         {{ strtoupper($sortDir) === 'ASC' ? '↑' : '↓' }}
                                     @endif
@@ -190,7 +190,7 @@
                             <tr class="unified-empty-row">
                                 <td colspan="{{ max(count($visibleColumns), 1) }}"
                                     class="px-6 py-16 text-center text-sm text-slate-500">
-                                    No tasks match the selected filters.
+                                    {{ __('No tasks match the selected filters.') }}
                                 </td>
                             </tr>
                         @endforelse
@@ -204,10 +204,10 @@
         </section>
     </div>
 
-    <x-dialog-modal name="edit-task-data" maxWidth="3xl">
+    <x-dialog-modal name="edit-task-data" maxWidth="3xl" close-method="closeEditModal">
         <x-slot name="title">
             <div>
-                <h2 class="text-xl font-bold text-gray-900">Update task progress</h2>
+                <h2 class="text-xl font-bold text-gray-900">{{ __('Update task progress') }}</h2>
                 <p class="mt-1 text-sm font-normal text-gray-500">Change the completion percentage for this task.</p>
             </div>
         </x-slot>
@@ -242,7 +242,7 @@
         </x-slot>
     </x-dialog-modal>
 
-    <x-dialog-modal name="delete-task-data" maxWidth="md">
+    <x-dialog-modal name="delete-task-data" maxWidth="md" close-method="closeDeleteModal">
         <x-slot name="title">Delete task</x-slot>
         <x-slot name="content">
             <p class="text-sm text-gray-600">Are you sure you want to delete this task?</p>

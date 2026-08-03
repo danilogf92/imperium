@@ -34,6 +34,6 @@
             d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4Z"></path>
     </svg>
 
-    <span wire:loading.remove wire:target="{{ $method }}">{{ $label }}</span>
-    <span wire:loading wire:target="{{ $method }}">{{ $loadingLabel }}</span>
+    <span wire:loading.remove wire:target="{{ $method }}">{{ __($label) }}</span>
+    <span wire:loading wire:target="{{ $method }}">{{ __($loadingLabel) }}</span>
 </button>

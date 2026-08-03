@@ -24,7 +24,6 @@ class Data extends Model
         'global_price',
         'stage',
         'real_value',
-        'committed',
         'percentage',
         'executed_dollars',
         'executed_euros',
@@ -44,7 +43,6 @@ class Data extends Model
         'unit_price' => 'decimal:2',
         'global_price' => 'decimal:2',
         'real_value' => 'decimal:2',
-        'committed' => 'decimal:2',
         'percentage' => 'decimal:2',
         'executed_dollars' => 'decimal:2',
         'executed_euros' => 'decimal:2',
@@ -54,7 +52,6 @@ class Data extends Model
         'booked_euros' => 'decimal:2',
 
         'real_value_changed_at' => 'datetime',
-        'committed_changed_at' => 'datetime',
         'percentage_changed_at' => 'datetime',
         'executed_changed_at' => 'datetime',
         'booked_changed_at' => 'datetime',
@@ -72,14 +69,6 @@ class Data extends Model
                 'real_value_euros',
             ])) {
                 $data->real_value_changed_at = now();
-            }
-
-            /*
-             * Committed:
-             * actualmente solo existe committed.
-             */
-            if ($data->isDirty('committed')) {
-                $data->committed_changed_at = now();
             }
 
             /*

@@ -10,11 +10,13 @@ use App\Models\User;
 use App\Validation\ProjectCreateValidation;
 use App\Validation\ProjectUpdateValidation;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
 use Livewire\Form;
 
 class ProjectForm extends Form
 {
     public int|string|null $company_id = null;
+    public string $order = '';
     public ?int $project_id = null;
     public string $company_code = '';
     public string $name = '';
@@ -78,6 +80,7 @@ class ProjectForm extends Form
 
         $this->project_id = (int) $project->getKey();
         $this->company_id = (int) $project->company_id;
+        $this->order = (string) ($project->order ?? '');
         $this->company_code = $companyCode;
         $this->name = $project->name;
         $this->pda_code = str_starts_with($project->pda_code, $pdaPrefix)
@@ -174,6 +177,7 @@ class ProjectForm extends Form
         $editablePdaCode = $this->normalizeCode($this->pda_code);
 
         $this->name = trim($this->name);
+        $this->order = strtolower(trim($this->order));
         $this->pda_code = $this->company_code.'_'.$editablePdaCode;
 
         try {
@@ -184,6 +188,21 @@ class ProjectForm extends Form
             $rules = $project
                 ? ProjectUpdateValidation::rules($project)
                 : ProjectCreateValidation::rules();
+
+            $uniqueOrder = Rule::unique('projects', 'order')
+                ->where(fn ($query) => $query->where('company_id', $company->getKey()));
+
+            if ($project) {
+                $uniqueOrder->ignore($project->getKey());
+            }
+
+            $rules['order'] = [
+                'required',
+                'string',
+                'regex:/^\d+[a-z]*$/i',
+                'max:20',
+                $uniqueOrder,
+            ];
 
             return $this->validate(
                 $rules,

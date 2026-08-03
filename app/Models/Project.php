@@ -18,6 +18,7 @@ class Project extends Model
 
     protected $fillable = [
         'company_id',
+        'order',
         'created_by',
         'responsible_id',
         'name',

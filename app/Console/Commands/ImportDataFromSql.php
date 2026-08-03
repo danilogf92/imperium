@@ -177,7 +177,6 @@ class ImportDataFromSql extends Command
                             'unit_price' => $this->decimal($legacy->unit_price),
                             'global_price' => $globalPrice,
                             'real_value' => $realValue,
-                            'committed' => $this->decimal($legacy->committed ?? 0),
                             'executed_dollars' => $executedDollars,
                             'booked' => $booked,
 
@@ -203,7 +202,6 @@ class ImportDataFromSql extends Command
                             'booked_changed_at' => $this->parseLegacyDate(
                                 $legacy->booked_updated_at ?? null
                             ),
-                            'committed_changed_at' => null,
                             'percentage_changed_at' => null,
                             'executed_changed_at' => null,
 
@@ -265,7 +263,6 @@ class ImportDataFromSql extends Command
             'global_price',
             'stage',
             'real_value',
-            'committed',
             'percentage',
             'executed_dollars',
             'executed_euros',
@@ -279,7 +276,6 @@ class ImportDataFromSql extends Command
             'real_value_euros',
             'booked_euros',
             'real_value_changed_at',
-            'committed_changed_at',
             'percentage_changed_at',
             'executed_changed_at',
             'booked_changed_at',

@@ -25,22 +25,27 @@ class Table extends Component
     use WithFileUploads;
     use WithPagination;
 
-    private const COLUMNS_PREFERENCE_KEY = 'projects.table.visible_columns';
+    private const COLUMNS_PREFERENCE_KEY = 'projects.table.visible_columns.v3';
 
     private const COLUMN_OPTIONS = [
         'id' => 'ID',
+        'order' => 'Order',
+        'plant' => 'Plant',
+        'pda_code' => 'PDA code',
+        'forecast_start_date' => 'Forecast Start Year',
+        'investments' => 'Investments',
+        'state' => 'State',
+        'budgeted_euros' => 'Budgeted Euros',
+        'forecast_end_date' => 'Forecast End Date',
+        'real_euros' => 'Real Euros',
+        'rate' => 'Rate',
+        'budgeted_dollars' => 'Budgeted Dollars',
+        'real_dollars' => 'Real Dollars',
+        'upload_pda' => 'Upload PDA',
         'name' => 'Name',
         'links' => 'Links',
-        'pda_code' => 'PDA code',
-        'file' => 'File',
-        'rate' => 'Rate',
-        'state' => 'State',
-        'investments' => 'Investments',
         'classification' => 'Classification',
         'justification' => 'Justification',
-        'forecast_start_date' => 'Forecast Start Date',
-        'forecast_end_date' => 'Forecast End Date',
-        'plant' => 'Plant',
         'creator' => 'Created By',
         'responsible' => 'Responsible',
         'data_uploaded' => 'Data Uploaded',
@@ -55,13 +60,16 @@ class Table extends Component
 
     private const DEFAULT_COLUMNS = [
         'id',
-        'name',
-        'links',
+        'order',
+        'plant',
         'pda_code',
-        'file',
-        'state',
         'forecast_start_date',
+        'investments',
+        'state',
+        'budgeted_euros',
         'forecast_end_date',
+        'real_euros',
+        'rate',
         'actions',
     ];
 
@@ -129,6 +137,7 @@ class Table extends Component
      */
     private array $sortableColumns = [
         'id',
+        'order',
         'name',
         'pda_code',
         'rate',
@@ -145,6 +154,10 @@ class Table extends Component
         'file_name',
         'created_at',
         'updated_at',
+        'budgeted_euros',
+        'real_euros',
+        'budgeted_dollars',
+        'real_dollars',
     ];
 
     #[On('project-created')]
@@ -173,6 +186,7 @@ class Table extends Component
                 ->where('key', self::COLUMNS_PREFERENCE_KEY)
                 ->first()?->value ?? self::DEFAULT_COLUMNS
         );
+        $this->dispatchTableState();
     }
 
     public function updatedVisibleColumns(): void
@@ -182,12 +196,14 @@ class Table extends Component
         );
 
         $this->saveVisibleColumnsPreference();
+        $this->dispatchTableState();
     }
 
     public function resetColumns(): void
     {
         $this->visibleColumns = self::DEFAULT_COLUMNS;
         $this->saveVisibleColumnsPreference();
+        $this->dispatchTableState();
     }
 
     private function saveVisibleColumnsPreference(): void
@@ -210,11 +226,14 @@ class Table extends Component
     private function sanitizeVisibleColumns(mixed $columns): array
     {
         $columns = array_values(array_intersect(
-            (array) $columns,
-            array_keys(self::COLUMN_OPTIONS)
+            array_keys(self::COLUMN_OPTIONS),
+            (array) $columns
         ));
 
-        return $columns !== [] ? $columns : self::DEFAULT_COLUMNS;
+        $columns = array_values(array_diff($columns, ['actions']));
+        $columns[] = 'actions';
+
+        return count($columns) > 1 ? $columns : self::DEFAULT_COLUMNS;
     }
 
     public function openDocumentModal(int $projectId): void
@@ -545,6 +564,7 @@ class Table extends Component
         $this->sortDir = 'DESC';
 
         $this->resetPage();
+        $this->dispatchTableState();
     }
 
     /**
@@ -578,6 +598,17 @@ class Table extends Component
         $this->orderByProject = false;
 
         $this->resetPage();
+        $this->dispatchTableState();
+    }
+
+    private function dispatchTableState(): void
+    {
+        $this->dispatch(
+            'project-table-state-updated',
+            visibleColumns: $this->visibleColumns,
+            sortBy: $this->sortBy,
+            sortDir: $this->sortDir,
+        );
     }
 
     /**
@@ -600,6 +631,10 @@ class Table extends Component
                     ->whereNotNull('order_no')
                     ->where('order_no', '<>', ''),
             ])
+            ->withSum('data as budgeted_euros', 'global_price_euros')
+            ->withSum('data as real_euros', 'real_value_euros')
+            ->withSum('data as budgeted_dollars', 'global_price')
+            ->withSum('data as real_dollars', 'real_value')
             ->whereIn(
                 'company_id',
                 $user->companiesForPermissionQuery(
@@ -616,6 +651,7 @@ class Table extends Component
 
                         $searchQuery
                             ->where('name', 'like', $search)
+                            ->orWhere('order', 'like', $search)
                             ->orWhere('pda_code', 'like', $search)
                             ->orWhere('state', 'like', $search)
                             ->orWhere(
@@ -695,6 +731,8 @@ class Table extends Component
 
         if ($this->orderByProject) {
             $this->applyRestOrder($query);
+        } elseif ($this->sortBy === 'order') {
+            $this->applyNaturalOrder($query, $this->sortDir);
         } else {
             $query->orderBy(
                 $this->sortBy,
@@ -714,6 +752,19 @@ class Table extends Component
                 ProjectPermissionEnum::Delete
             ) ?? [],
         ]);
+    }
+
+    private function applyNaturalOrder(Builder $query, string $direction): void
+    {
+        $direction = strtoupper($direction) === 'ASC' ? 'ASC' : 'DESC';
+        $driver = DB::connection()->getDriverName();
+        $quotedColumn = $driver === 'mysql' ? '`projects`.`order`' : 'projects."order"';
+        $integerType = $driver === 'mysql' ? 'UNSIGNED' : 'INTEGER';
+
+        $query
+            ->orderByRaw("CASE WHEN {$quotedColumn} IS NULL THEN 1 ELSE 0 END")
+            ->orderByRaw("CAST({$quotedColumn} AS {$integerType}) {$direction}")
+            ->orderByRaw("{$quotedColumn} {$direction}");
     }
 
 }

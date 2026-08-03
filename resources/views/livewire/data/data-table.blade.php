@@ -134,8 +134,8 @@
         <div
             class="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-5 py-3">
             <div>
-                <h2 class="text-sm font-bold text-slate-900">Project data actions</h2>
-                <p class="text-xs text-slate-500">Project details and available actions</p>
+                <h2 class="text-sm font-bold text-slate-900">{{ __('Project data actions') }}</h2>
+                <p class="text-xs text-slate-500">{{ __('Project details and available actions') }}</p>
             </div>
             <button type="button" x-on:click="open = !open"
                 class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -170,7 +170,7 @@
                         <span
                             class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                            {{ number_format($data->total()) }} records
+                            {{ __(':count records', ['count' => number_format($data->total())]) }}
                         </span>
                     </div>
                 </div>
@@ -246,16 +246,16 @@
                 </div>
                 <div>
                     <div class="flex flex-wrap items-center gap-2">
-                        <h2 class="text-base font-bold text-slate-900">Data filters</h2>
+                        <h2 class="text-base font-bold text-slate-900">{{ __('Data filters') }}</h2>
                         @if ($hasActiveFilters)
                             <span
                                 class="inline-flex items-center rounded-full bg-blue-600 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white">
-                                Active
+                                {{ __('Active') }}
                             </span>
                         @endif
                     </div>
                     <p class="mt-0.5 text-sm text-slate-500">
-                        Refine the records displayed in this project
+                        {{ __('Refine the records displayed in this project') }}
                     </p>
                 </div>
             </div>
@@ -278,7 +278,7 @@
                         <path stroke-linecap="round" d="m16 16 4 4" />
                     </svg>
                     <input wire:model.live.debounce.400ms="search" data-global-loading type="search"
-                        aria-label="Search project data" placeholder="Search project data..."
+                        aria-label="{{ __('Search project data') }}" placeholder="{{ __('Search project data...') }}"
                         style="padding-left: 2.75rem;"
                         class="h-11 w-full rounded-lg border-slate-300 bg-white pl-9 pr-3 text-sm text-slate-700 shadow-sm transition duration-150 placeholder:text-slate-400 hover:-translate-y-px hover:border-blue-400 hover:bg-blue-50 hover:shadow-md focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/25">
                 </div>
@@ -304,7 +304,7 @@
     <div x-data="{ columnsOpen: true }" class="unified-table-shell">
         <div class="unified-table-toolbar">
             <div>
-                <p class="text-sm font-semibold text-slate-700">Table columns</p>
+                <p class="text-sm font-semibold text-slate-700">{{ __('Table columns') }}</p>
                 <p class="text-xs text-slate-500">
                     {{ count($visibleColumns) }} of {{ count($columnOptions) }} visible
                 </p>
@@ -312,6 +312,7 @@
             <div class="flex items-center gap-2">
                 <div x-show="columnsOpen" x-transition class="flex items-center gap-2">
                     <x-dashboard-filter-dropdown label="Columns" model="visibleColumns" :options="collect($columnOptions)
+                        ->except('actions')
                         ->map(fn($label, $value) => ['value' => $value, 'label' => $label])
                         ->values()"
                         :selected="$visibleColumns" multiple />
@@ -346,7 +347,7 @@
                                     'text-right' => in_array($column, $numericColumns, true),
                                 ])>
                                 <span class="inline-flex items-center gap-1">
-                                    {{ $columnOptions[$column] }}
+                                    {{ __($columnOptions[$column]) }}
                                     @if ($column !== 'actions' && $sortBy === $column)
                                         <span>{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
                                     @endif
@@ -358,7 +359,11 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($data as $item)
                         <tr wire:key="project-data-{{ $item->id }}"
-                            class="bg-white transition hover:bg-blue-50/70">
+                            @if ($canEditData) x-on:click="if (!$event.target.closest('a, button, input, select, textarea, [role=button]')) $wire.openEditModal({{ $item->id }})" @endif
+                            @class([
+                                'bg-white transition hover:bg-blue-50/70',
+                                'cursor-pointer' => $canEditData,
+                            ])>
                             @foreach ($visibleColumns as $column)
                                 @if ($column === 'actions')
                                     <td class="whitespace-nowrap px-3 py-2">
@@ -427,8 +432,6 @@
 
                                             @case('qty')
                                             @case('unit_price')
-
-                                            @case('committed')
                                                 {{ number_format((float) $item->{$column}, 2) }}
                                             @break
 
@@ -478,7 +481,7 @@
             ];
         @endphp
 
-        <x-dialog-modal name="edit-project-data" maxWidth="6xl">
+        <x-dialog-modal name="edit-project-data" maxWidth="6xl" close-method="closeEditModal">
             <x-slot name="title">
                 <div>
                     <div class="flex flex-wrap items-center gap-2">
@@ -510,7 +513,7 @@
 
                         <div class="data-edit-grid p-5">
                             @foreach ($columnOptions as $column => $label)
-                                @continue($column === 'actions')
+                                @continue($column === 'actions' || in_array($column, $linkedCurrencyColumns, true))
                                 <label @class([
                                     'block min-w-0',
                                     'data-edit-grid-wide' => in_array(
@@ -531,11 +534,7 @@
                                         <textarea wire:model="editData.{{ $column }}" rows="2" placeholder="Enter {{ strtolower($label) }}..."
                                             class="w-full resize-y rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"></textarea>
                                     @else
-                                        <input
-                                            @if (in_array($column, $linkedCurrencyColumns, true)) wire:model.live.debounce.200ms="editData.{{ $column }}"
-                                    data-no-global-loading
-                                @else
-                                    wire:model="editData.{{ $column }}" @endif
+                                        <input wire:model="editData.{{ $column }}"
                                             type="{{ in_array($column, $numericColumns, true) ? 'number' : 'text' }}"
                                             @if (in_array($column, $numericColumns, true)) step="0.01" @endif
                                             @readonly(in_array($column, $derivedEuroColumns, true))
@@ -550,6 +549,49 @@
                                     @enderror
                                 </label>
                             @endforeach
+
+                            <section class="data-edit-grid-wide rounded-xl border border-blue-100 bg-blue-50/50 p-4">
+                                <div class="mb-3">
+                                    <h4 class="text-sm font-bold text-slate-800">Financial values</h4>
+                                    <p class="text-xs text-slate-500">
+                                        Enter the dollar value. Its euro equivalent is calculated when you leave the field.
+                                    </p>
+                                </div>
+                                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    @foreach ([
+                                        ['global_price', 'global_price_euros', 'Budgeted'],
+                                        ['real_value', 'real_value_euros', 'Real'],
+                                        ['executed_dollars', 'executed_euros', 'Executed'],
+                                        ['booked', 'booked_euros', 'Booked'],
+                                    ] as [$dollarColumn, $euroColumn, $financialLabel])
+                                        <label class="block min-w-0">
+                                            <span class="mb-1.5 block text-sm font-semibold text-slate-700">
+                                                {{ $financialLabel }} <span class="text-emerald-700">$</span>
+                                            </span>
+                                            <input wire:model.blur="editData.{{ $dollarColumn }}" data-no-global-loading
+                                                type="number" step="0.01" inputmode="decimal"
+                                                class="block h-10 w-full rounded-lg border-gray-300 bg-white px-3 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                            @error("editData.{$dollarColumn}")
+                                                <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>
+                                            @enderror
+                                        </label>
+                                        <label class="block min-w-0">
+                                            <span class="mb-1.5 flex items-center justify-between gap-2 text-sm font-semibold text-slate-700">
+                                                <span>{{ $financialLabel }} <span class="text-blue-700">€</span></span>
+                                                <span class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">
+                                                    Auto-calculated
+                                                </span>
+                                            </span>
+                                            <input wire:model="editData.{{ $euroColumn }}" type="number" step="0.01"
+                                                readonly tabindex="-1"
+                                                class="block h-10 w-full cursor-not-allowed rounded-lg border-gray-300 bg-gray-100 px-3 text-sm text-gray-600 shadow-sm">
+                                            @error("editData.{$euroColumn}")
+                                                <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>
+                                            @enderror
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </section>
                         </div>
                     </section>
 
@@ -563,14 +605,14 @@
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
                             <label class="min-w-0 flex-1">
                                 <span class="mb-1 block text-xs font-medium text-slate-600">Base</span>
-                                <input wire:model.live.debounce.250ms="bookedBase" data-no-global-loading type="number"
+                                <input wire:model.blur="bookedBase" data-no-global-loading type="number"
                                     min="0" step="0.01"
                                     class="block h-9 w-full rounded-md border-slate-300 bg-white px-3 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </label>
                             <span class="hidden pb-2 text-slate-400 sm:block">×</span>
                             <label class="min-w-0 flex-1">
                                 <span class="mb-1 block text-xs font-medium text-slate-600">Multiplier</span>
-                                <input wire:model.live.debounce.250ms="bookedMultiplier" data-no-global-loading
+                                <input wire:model.blur="bookedMultiplier" data-no-global-loading
                                     type="number" min="0" step="0.000001"
                                     class="block h-9 w-full rounded-md border-slate-300 bg-white px-3 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </label>
@@ -622,7 +664,7 @@
             </x-slot>
         </x-dialog-modal>
 
-        <x-modal name="delete-project-data" maxWidth="md" focusable>
+        <x-modal name="delete-project-data" maxWidth="md" close-method="closeDeleteModal" focusable>
             <div class="p-6">
                 <div class="flex items-start gap-4">
                     <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"

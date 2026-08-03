@@ -99,7 +99,6 @@ class Resume extends Component
             function ($chart, array $row) {
                 return $chart
                     ->addSeriesColumn('Booked', (string) $row['year'], $row['booked'])
-                    ->addSeriesColumn('Committed', (string) $row['year'], $row['committed'])
                     ->addSeriesColumn('Available', (string) $row['year'], $row['available']);
             },
             LivewireCharts::multiColumnChartModel()
@@ -164,7 +163,6 @@ class Resume extends Component
             ->withSum('data as original_budget', $budgetColumn)
             ->withSum('data as approved', $approvedColumn)
             ->withSum('data as booked', $bookedColumn)
-            ->withSum('data as committed_value', 'committed')
             ->whereNotNull('forecast_start_date')
             ->orderBy('forecast_start_date')
             ->get()
@@ -173,7 +171,6 @@ class Resume extends Component
                 $original = round((float) $projects->sum('original_budget'), 2);
                 $approved = round((float) $projects->sum('approved'), 2);
                 $booked = round((float) $projects->sum('booked'), 2);
-                $committed = round((float) $projects->sum('committed_value'), 2);
 
                 return [
                     'year' => $year,
@@ -181,8 +178,7 @@ class Resume extends Component
                     'budgeted' => $original,
                     'approved' => $approved,
                     'booked' => $booked,
-                    'committed' => $committed,
-                    'available' => round($approved - $booked - $committed, 2),
+                    'available' => round($approved - $booked, 2),
                 ];
             })
             ->sortKeys()
@@ -304,7 +300,6 @@ class Resume extends Component
                 ['name' => 'Budgeted', 'data' => $rows->pluck('budgeted')->values()->all()],
                 ['name' => 'Approved', 'data' => $rows->pluck('approved')->values()->all()],
                 ['name' => 'Booked', 'data' => $rows->pluck('booked')->values()->all()],
-                ['name' => 'Committed', 'data' => $rows->pluck('committed')->values()->all()],
             ],
             'chart' => ['type' => 'area', 'height' => '100%', 'toolbar' => ['show' => false]],
             'colors' => ['#2563EB', '#8B5CF6', '#F59E0B', '#10B981'],

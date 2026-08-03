@@ -13,6 +13,7 @@ use App\Models\ProjectRateSetting;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Livewire\Attributes\On;
 
 class Edit extends Component
 {
@@ -44,6 +45,14 @@ class Edit extends Component
     {
         $this->form->setProject($this->authorizedProject());
         $this->dispatch('open-modal', $this->modalName());
+    }
+
+    #[On('open-project-edit')]
+    public function openFromTableRow(int $projectId): void
+    {
+        if ($projectId === $this->projectId) {
+            $this->openModal();
+        }
     }
 
     public function closeModal(): void

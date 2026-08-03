@@ -10,9 +10,9 @@
     style="height: {{ $height }};">
     <header class="flex min-h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-100 px-5 py-3.5">
         <div class="min-w-0">
-            <h3 class="truncate text-sm font-bold tracking-tight text-slate-800">{{ $title }}</h3>
+            <h3 class="truncate text-sm font-bold tracking-tight text-slate-800">{{ __($title) }}</h3>
             @if ($subtitle)
-                <p class="mt-0.5 truncate text-xs text-slate-500">{{ $subtitle }}</p>
+                <p class="mt-0.5 truncate text-xs text-slate-500">{{ __($subtitle) }}</p>
             @endif
         </div>
         <x-chart-download-button :filename="$filename" />

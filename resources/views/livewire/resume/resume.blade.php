@@ -3,10 +3,10 @@
         <header class="rounded-xl border border-slate-200 bg-white px-5 py-5 shadow-sm">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">Portfolio analytics</p>
-                    <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">Annual project resume</h1>
+                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">{{ __('Portfolio analytics') }}</p>
+                    <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">{{ __('Annual project resume') }}</h1>
                     <p class="mt-1 text-sm text-slate-500">
-                        Executive financial summary by project forecast start year.
+                        {{ __('Executive financial summary by project forecast start year.') }}
                     </p>
                 </div>
 
@@ -22,7 +22,7 @@
                 class="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-5 py-4">
                 <div>
                     <div class="flex items-center gap-2">
-                        <h2 class="font-semibold text-slate-900">Resume filters</h2>
+                        <h2 class="font-semibold text-slate-900">{{ __('Resume filters') }}</h2>
                         @if ($hasActiveFilters)
                             <span
                                 class="rounded-full bg-blue-600 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white">
@@ -30,7 +30,7 @@
                             </span>
                         @endif
                     </div>
-                    <p class="mt-0.5 text-sm text-slate-500">Filter the projects included in the annual totals.</p>
+                    <p class="mt-0.5 text-sm text-slate-500">{{ __('Filter the projects included in the annual totals.') }}</p>
                 </div>
                 <button type="button" x-on:click="open = !open"
                     class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -50,12 +50,12 @@
                             <path stroke-linecap="round" d="m16 16 4 4" />
                         </svg>
                         <input wire:model.live.debounce.400ms="search" data-global-loading type="text"
-                            placeholder="Search project or PDA code..."
+                            placeholder="{{ __('Search project or PDA code...') }}"
                             class="h-11 w-full rounded-lg border-slate-300 bg-white pl-10 pr-10 text-sm text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/25">
                         @if ($search !== '')
                             <button wire:click="$set('search', '')" data-global-loading type="button"
                                 class="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-200 hover:text-slate-700"
-                                aria-label="Clear search">
+                                aria-label="{{ __('Clear search') }}">
                                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor">
                                     <path stroke-linecap="round" d="m5 5 10 10M15 5 5 15" />
                                 </svg>
@@ -142,7 +142,7 @@
                                     @endif
                                 </svg>
                             </span>
-                            <p class="whitespace-nowrap text-sm font-medium text-slate-500">{{ $metric['label'] }}</p>
+                            <p class="whitespace-nowrap text-sm font-medium text-slate-500">{{ __($metric['label']) }}</p>
                         </div>
                         <p class="mt-2 whitespace-nowrap text-2xl font-bold tracking-tight text-slate-900">
                             {{ $metric['value'] }}
@@ -156,8 +156,8 @@
             <div
                 class="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-5 py-4">
                 <div>
-                    <h2 class="font-semibold text-slate-900">Annual detail</h2>
-                    <p class="mt-0.5 text-sm text-slate-500">Financial values backing the stacked chart.</p>
+                    <h2 class="font-semibold text-slate-900">{{ __('Annual detail') }}</h2>
+                    <p class="mt-0.5 text-sm text-slate-500">{{ __('Financial values backing the stacked chart.') }}</p>
                 </div>
                 <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
                     {{ $rows->count() }} years
@@ -173,7 +173,6 @@
                             <th class="whitespace-nowrap px-4 py-3 text-right">Budgeted {{ $currencySymbol }}</th>
                             <th class="whitespace-nowrap px-4 py-3 text-right">Approved {{ $currencySymbol }}</th>
                             <th class="whitespace-nowrap px-4 py-3 text-right">Booked {{ $currencySymbol }}</th>
-                            <th class="whitespace-nowrap px-4 py-3 text-right">Committed {{ $currencySymbol }}</th>
                             <th class="whitespace-nowrap px-4 py-3 text-right">Available {{ $currencySymbol }}</th>
                         </tr>
                     </thead>
@@ -185,7 +184,7 @@
                                 <td class="whitespace-nowrap px-4 py-3 text-right font-bold text-indigo-700">
                                     {{ number_format($row['project_count']) }}
                                 </td>
-                                @foreach (['budgeted', 'approved', 'booked', 'committed'] as $field)
+                                @foreach (['budgeted', 'approved', 'booked'] as $field)
                                     <td class="whitespace-nowrap px-4 py-3 text-right font-medium text-slate-700">
                                         {{ $currencySymbol }} {{ number_format($row[$field], 2) }}
                                     </td>
@@ -197,8 +196,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-14 text-center">
-                                    <p class="font-semibold text-slate-700">No projects match the selected filters.</p>
+                                <td colspan="6" class="px-6 py-14 text-center">
+                                    <p class="font-semibold text-slate-700">{{ __('No projects match the selected filters.') }}</p>
                                     <p class="mt-1 text-sm text-slate-500">Clear or change the filters to view the
                                         resume.</p>
                                 </td>
@@ -216,7 +215,7 @@
                     filename="annual-stacked-financial-position" height="34rem">
                     <livewire:livewire-column-chart key="{{ $stackedChart->reactiveKey() }}" :column-chart-model="$stackedChart" />
                     <x-slot:footer>
-                        Available = Approved &minus; Booked &minus; Committed.
+                        Available = Approved &minus; Booked.
                     </x-slot:footer>
                 </x-dashboard-chart-card>
 

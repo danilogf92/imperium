@@ -40,6 +40,7 @@ new class extends Component
     public function updateProfileInformation(): void
     {
         $user = Auth::user();
+        $photoWasUpdated = $this->photo !== null;
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -78,6 +79,9 @@ new class extends Component
         $this->reset('photo');
         $this->dispatch('profile-updated', name: $user->name);
         $this->dispatch('profile-photo-updated');
+        if ($photoWasUpdated) {
+            $this->dispatch('profile-photo-saved');
+        }
     }
 
     public function removePhoto(): void
@@ -91,6 +95,8 @@ new class extends Component
         $user->forceFill(['profile_photo_path' => null])->save();
         $this->reset('photo');
         $this->dispatch('profile-photo-updated');
+        $this->dispatch('profile-photo-removed');
+        $this->dispatch('close-modal', 'confirm-profile-photo-removal');
     }
 
     /**
@@ -168,16 +174,55 @@ new class extends Component
                             accept="image/jpeg,image/png,image/webp" class="sr-only">
 
                         @if ($profileFormUser->profile_photo_path)
-                            <button type="button" wire:click="removePhoto" wire:confirm="Remove your profile photo?"
+                            <button type="button" x-data
+                                x-on:click.prevent="$dispatch('open-modal', 'confirm-profile-photo-removal')"
                                 class="inline-flex h-10 items-center rounded-lg border border-red-200 bg-white px-4 text-sm font-semibold text-red-600 shadow-sm transition duration-150 hover:-translate-y-px hover:border-red-300 hover:bg-red-50 hover:shadow-md">
                                 {{ __('Remove') }}
                             </button>
                         @endif
                     </div>
                     <x-input-error class="mt-2" :messages="$errors->get('photo')" />
+                    <div class="mt-3">
+                        <x-action-message on="profile-photo-saved"
+                            class="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 font-medium text-emerald-700">
+                            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-xs text-white">✓</span>
+                            {{ __('Profile photo updated successfully.') }}
+                        </x-action-message>
+                        <x-action-message on="profile-photo-removed"
+                            class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 font-medium text-blue-700">
+                            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs text-white">✓</span>
+                            {{ __('Profile photo removed successfully.') }}
+                        </x-action-message>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <x-modal name="confirm-profile-photo-removal" maxWidth="md" focusable>
+            <div class="p-6">
+                <div class="flex items-start gap-4">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 4.7 2.8 17.5A1.75 1.75 0 0 0 4.3 20h15.4a1.75 1.75 0 0 0 1.5-2.5L13.7 4.7a1.95 1.95 0 0 0-3.4 0Z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">{{ __('Remove profile photo?') }}</h3>
+                        <p class="mt-1 text-sm leading-6 text-slate-600">{{ __('Your current photo will be permanently removed. Your initials will be shown instead.') }}</p>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                    <x-secondary-button type="button" x-on:click="$dispatch('close')">
+                        {{ __('Cancel') }}
+                    </x-secondary-button>
+                    <button type="button" wire:click="removePhoto" wire:loading.attr="disabled" wire:target="removePhoto"
+                        class="inline-flex h-10 items-center justify-center rounded-lg bg-red-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500 disabled:cursor-wait disabled:opacity-60">
+                        <span wire:loading.remove wire:target="removePhoto">{{ __('Remove photo') }}</span>
+                        <span wire:loading wire:target="removePhoto">{{ __('Removing...') }}</span>
+                    </button>
+                </div>
+            </div>
+        </x-modal>
         <div>
             <x-input-label for="name" :value="__('Name')" />
             <x-text-input wire:model="name" id="name" name="name" type="text" class="mt-1 block w-full" required autofocus autocomplete="name" />

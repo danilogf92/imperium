@@ -133,7 +133,7 @@
                     @if ($currency === 'dollar')
                         <label class="flex h-11 items-center gap-2 whitespace-nowrap text-sm text-slate-600">
                             EUR/USD
-                            <input wire:model.live.debounce.500ms="exchangeRate" type="number" min="0.01"
+                            <input wire:model.blur="exchangeRate" type="number" min="0.01"
                                 step="0.01"
                                 class="h-11 w-24 rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
                         </label>

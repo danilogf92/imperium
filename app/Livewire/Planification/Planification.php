@@ -367,7 +367,7 @@ class Planification extends Component
             ->when($this->creationYearFilter !== [], function (Builder $query): void {
                 $query->where(function (Builder $query): void {
                     foreach ($this->creationYearFilter as $year) {
-                        $query->orWhereYear('created_at', $year);
+                        $query->orWhereYear('forecast_start_date', $year);
                     }
                 });
             })
@@ -377,6 +377,7 @@ class Planification extends Component
                 $search = '%' . trim($this->search) . '%';
                 $query->where(function (Builder $query) use ($search): void {
                     $query->where('name', 'like', $search)
+                        ->orWhere('pda_code', 'like', $search)
                         ->orWhere('state', 'like', $search)
                         ->orWhereHas('company', fn(Builder $query) => $query
                             ->where('company_name', 'like', $search))
@@ -404,7 +405,7 @@ class Planification extends Component
 
         $filterProjects = $this->authorizedProjects()
             ->with('company:id,company_name')
-            ->get(['id', 'company_id', 'state', 'created_at']);
+            ->get(['id', 'company_id', 'state', 'forecast_start_date']);
 
         return view('livewire.planification.planification', [
             'plannedProjects' => $plannedProjects,
@@ -433,7 +434,7 @@ class Planification extends Component
                 ->values(),
             'statusOptions' => ProjectStateEnum::values(),
             'creationYearOptions' => $filterProjects
-                ->map(fn(Project $project) => $project->created_at?->year)
+                ->map(fn(Project $project) => $project->forecast_start_date?->year)
                 ->filter()
                 ->unique()
                 ->sortDesc()

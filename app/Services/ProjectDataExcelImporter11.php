@@ -133,7 +133,6 @@ class ProjectDataExcelImporter
             }
 
             $record['project_id'] = $project->id;
-            $record['committed'] = 0;
             $record['global_price_euros'] = round($record['global_price'] / $rate, 2);
             $record['real_value_euros'] = round($record['real_value'] / $rate, 2);
             $record['booked_euros'] = round($record['booked'] / $rate, 2);

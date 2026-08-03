@@ -7,6 +7,7 @@ use App\Enums\InvestmentEnum;
 use App\Enums\ProjectPermissionEnum;
 use App\Enums\ProjectStateEnum;
 use App\Models\Project;
+use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
@@ -14,6 +15,8 @@ use Livewire\Component;
 
 class Filters extends Component
 {
+    public string $search = '';
+
     /**
      * Años disponibles obtenidos de los proyectos.
      *
@@ -154,6 +157,12 @@ class Filters extends Component
         $this->loadYears();
     }
 
+    #[On('project-search-updated')]
+    public function updateSearch(string $search = ''): void
+    {
+        $this->search = trim($search);
+    }
+
     /**
      * Limpia los filtros normales.
      */
@@ -164,6 +173,7 @@ class Filters extends Component
         $this->stateSearch = [];
         $this->typeOfProjectSearch = [];
         $this->investmentFilter = [];
+        $this->search = '';
     }
 
     /**
@@ -234,6 +244,56 @@ class Filters extends Component
             'companies' => auth()->user()?->companiesForPermission(
                 ProjectPermissionEnum::View
             ) ?? collect(),
+            'filteredProjectCount' => $this->filteredProjectCount(),
         ]);
+    }
+
+    private function filteredProjectCount(): int
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return 0;
+        }
+
+        return Project::query()
+            ->whereIn('company_id', $user->companiesForPermissionQuery(ProjectPermissionEnum::View)
+                ->select('companies.id')->reorder())
+            ->when($this->search !== '', function (Builder $query): void {
+                $search = '%'.$this->search.'%';
+                $query->where(fn (Builder $query) => $query
+                    ->where('name', 'like', $search)
+                    ->orWhere('order', 'like', $search)
+                    ->orWhere('pda_code', 'like', $search)
+                    ->orWhere('state', 'like', $search)
+                    ->orWhere('classification_of_investments', 'like', $search)
+                    ->orWhere('investments', 'like', $search)
+                    ->orWhere('justification', 'like', $search));
+            })
+            ->when($this->plantFilter !== [], fn (Builder $query) => $query->whereHas(
+                'company',
+                fn (Builder $query) => $query->whereIn('company_code', $this->plantFilter)
+            ))
+            ->when($this->yearSearch !== [], function (Builder $query): void {
+                $query->where(function (Builder $query): void {
+                    foreach ($this->yearSearch as $year) {
+                        $query->orWhereYear('forecast_start_date', $year);
+                    }
+                });
+            })
+            ->when($this->stateSearch !== [], fn (Builder $query) => $query->whereIn('state', $this->stateSearch))
+            ->when($this->typeOfProjectSearch !== [], fn (Builder $query) => $query->whereIn(
+                'classification_of_investments',
+                $this->typeOfProjectSearch
+            ))
+            ->when($this->investmentFilter !== [], fn (Builder $query) => $query->whereIn(
+                'investments',
+                $this->investmentFilter
+            ))
+            ->when($this->orderByProject, fn (Builder $query) => $query
+                ->where('state', '!=', 'Finished')
+                ->where('data_uploaded', true)
+                ->whereHas('data'))
+            ->count();
     }
 }

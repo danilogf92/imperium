@@ -21,7 +21,7 @@
 
         <section class="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <div class="border-b border-slate-200 px-5 py-4">
-                <h2 class="font-semibold text-slate-900">Dashboard filters</h2>
+                <h2 class="font-semibold text-slate-900">{{ __('Dashboard filters') }}</h2>
             </div>
 
             <div class="overflow-x-auto p-5">
@@ -48,7 +48,7 @@
                         "
                             :class="open ? 'border-blue-500 ring-2 ring-blue-500/25 text-blue-700' : 'border-slate-300'"
                             class="inline-flex h-11 w-32 cursor-pointer items-center justify-between rounded-lg border bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition duration-150 hover:-translate-y-px hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/25">
-                            <span>Years</span>
+                            <span>{{ __('Years') }}</span>
                             <span class="flex items-center gap-2">
                                 @if (count($yearSearch) > 0)
                                     <span
@@ -69,7 +69,7 @@
                             <div x-ref="menu" x-show="open" x-cloak @click.outside="open = false"
                                 class="fixed z-[200] w-52 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
                                 <p class="px-2 pb-2 pt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                    Select years
+                                    {{ __('Select years') }}
                                 </p>
                                 <div class="space-y-1">
                                     @foreach ($years as $year)
@@ -217,7 +217,7 @@
                                 </svg>
                             </span>
                             <p class="whitespace-nowrap text-sm font-medium text-slate-500">
-                                {{ $metric['label'] }}
+                                {{ __($metric['label']) }}
                             </p>
                         </div>
                         <p class="mt-2 whitespace-nowrap text-2xl font-bold tracking-tight text-slate-900">
@@ -310,7 +310,7 @@
                 <section
                     class="flex min-h-64 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
                     <div>
-                        <h2 class="font-semibold text-slate-800">No financial data available</h2>
+                        <h2 class="font-semibold text-slate-800">{{ __('No financial data available') }}</h2>
                         <p class="mt-2 text-sm text-slate-500">
                             Financial charts will appear when project data is uploaded.
                         </p>
@@ -320,7 +320,7 @@
         @else
             <section
                 class="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center text-sm text-slate-500">
-                No projects are available for the selected filters.
+                {{ __('No projects are available for the selected filters.') }}
             </section>
         @endif
 

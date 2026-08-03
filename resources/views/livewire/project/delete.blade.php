@@ -9,7 +9,7 @@
         </svg>
     </button>
 
-    <x-dialog-modal :name="$modalName" maxWidth="md">
+    <x-dialog-modal :name="$modalName" maxWidth="md" close-method="closeModal">
         <x-slot name="title">Delete project</x-slot>
 
         <x-slot name="content">

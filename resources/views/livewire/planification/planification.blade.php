@@ -1,8 +1,8 @@
 <div class="min-h-screen bg-gray-100 py-6">
-    <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto w-full space-y-6 px-4 sm:px-6 lg:px-8">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Project Planification</h1>
-            <p class="mt-1 text-sm text-gray-600">Build each project's timeline with the milestones configured in Admin.
+            <h1 class="text-2xl font-bold text-gray-900">{{ __('Project Planification') }}</h1>
+            <p class="mt-1 text-sm text-gray-600">{{ __("Build each project's timeline with the milestones configured in Admin.") }}
             </p>
         </div>
 
@@ -16,19 +16,19 @@
             <div
                 class="flex flex-col gap-2 border-b border-gray-200 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex min-w-0 flex-1 items-center gap-3">
-                    <label for="planification-search" class="sr-only">Search planification</label>
+                    <label for="planification-search" class="sr-only">{{ __('Search project or milestone') }}</label>
                     <div class="relative w-full sm:max-w-lg">
                         <svg class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
                             fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" />
                         </svg>
-                        <input id="planification-search" type="text" wire:model.live.debounce.400ms="search" data-global-loading
-                            placeholder="Search project or milestone" autocomplete="off"
+                        <input id="planification-search" type="text" wire:model.live.debounce.400ms="search"
+                            data-global-loading placeholder="{{ __('Search project or milestone') }}" autocomplete="off"
                             class="block h-10 w-full rounded-lg border border-slate-300 bg-white py-2 pl-11 pr-11 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
                         @if (filled($search))
-                            <button type="button" wire:click="clearSearch" data-global-loading title="Clear search"
-                                aria-label="Clear search"
+                            <button type="button" wire:click="clearSearch" data-global-loading title="{{ __('Clear search') }}"
+                                aria-label="{{ __('Clear search') }}"
                                 class="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor"
                                     stroke-width="1.8">
@@ -38,7 +38,7 @@
                         @endif
                     </div>
                     <span class="hidden whitespace-nowrap text-sm text-slate-500 lg:inline">
-                        {{ number_format($plannedProjects->total()) }} projects
+                        {{ __(':count projects', ['count' => number_format($plannedProjects->total())]) }}
                     </span>
                 </div>
                 <div class="flex items-center gap-3">
@@ -51,7 +51,7 @@
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        Add milestone
+                        {{ __('Add milestone') }}
                     </button>
                 </div>
             </div>
@@ -70,7 +70,7 @@
                         </div>
                         <div>
                             <div class="flex items-center gap-2">
-                                <h2 class="text-sm font-bold text-slate-900">Planification filters</h2>
+                                <h2 class="text-sm font-bold text-slate-900">{{ __('Planification filters') }}</h2>
                                 @if (count($plantFilter) ||
                                         count($statusFilter) ||
                                         count($creationYearFilter) ||
@@ -79,11 +79,11 @@
                                         $cellDisplay !== 'combined')
                                     <span
                                         class="inline-flex items-center rounded-full bg-blue-600 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white">
-                                        Active
+                                        {{ __('Active') }}
                                     </span>
                                 @endif
                             </div>
-                            <p class="text-xs text-slate-500">Refine the projects displayed in the timeline</p>
+                            <p class="text-xs text-slate-500">{{ __('Refine the projects displayed in the timeline') }}</p>
                         </div>
                     </div>
                     <button type="button" x-on:click="open = !open"
@@ -95,6 +95,7 @@
                     </button>
                 </div>
 
+                {{-- Filtros --}}
                 <div x-show="open" x-collapse>
                     <div class="flex items-center gap-3 overflow-x-auto bg-white px-4 py-4">
                         <x-dashboard-filter-dropdown label="Plants" model="plantFilter" :options="$plantOptions->map(
@@ -107,11 +108,11 @@
                         )"
                             :selected="$statusFilter" multiple />
 
-                        <x-dashboard-filter-dropdown label="Creation Years" model="creationYearFilter" :options="$creationYearOptions->map(fn($year) => ['value' => $year, 'label' => $year])"
+                        <x-dashboard-filter-dropdown label="Years" model="creationYearFilter" :options="$creationYearOptions->map(fn($year) => ['value' => $year, 'label' => $year])"
                             :selected="$creationYearFilter" multiple />
 
                         <label class="shrink-0">
-                            <span class="sr-only">Currency</span>
+                            <span class="sr-only">{{ __('Currency') }}</span>
                             <select wire:model.live="currency" data-global-loading
                                 class="h-11 rounded-lg border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                 <option value="usd">USD ($)</option>
@@ -120,12 +121,12 @@
                         </label>
 
                         <label class="shrink-0">
-                            <span class="sr-only">Cell content</span>
+                            <span class="sr-only">{{ __('Cell content') }}</span>
                             <select wire:model.live="cellDisplay" data-global-loading
                                 class="h-11 rounded-lg border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                <option value="combined">Milestone | Value</option>
-                                <option value="milestone">Milestone only</option>
-                                <option value="value">Value only</option>
+                                <option value="combined">{{ __('Milestone | Value') }}</option>
+                                <option value="milestone">{{ __('Milestone only') }}</option>
+                                <option value="value">{{ __('Value only') }}</option>
                             </select>
                         </label>
 
@@ -143,7 +144,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M7 12h10m-7 5h4" />
                                 @endif
                             </svg>
-                            With milestones
+                            {{ __('With milestones') }}
                         </button>
 
                         <x-clear-filters-button method="clearFilters" :active="$plantFilter !== [] || $statusFilter !== [] || $creationYearFilter !== [] || $onlyWithMilestones || $currency !== 'usd' || $cellDisplay !== 'combined'" />
@@ -153,27 +154,31 @@
 
             <div class="overflow-x-auto">
                 <table class="table-fixed border-separate border-spacing-0"
-                    style="min-width: {{ 768 + $timelineYears->count() * 1728 }}px">
+                    style="min-width: {{ 928 + $timelineYears->count() * 1728 }}px">
                     <thead class="sticky top-0 z-20 shadow-sm">
                         <tr class="bg-indigo-600 text-white">
                             <th rowspan="2"
                                 class="sticky left-0 z-30 w-24 border-r border-indigo-500 bg-indigo-700 px-2 py-2 text-center text-xs font-semibold uppercase tracking-wide">
-                                AÑO CREACIÓN
+                                {{ __('Forecast Start Year') }}
                             </th>
                             <th rowspan="2"
                                 class="sticky left-24 z-30 w-40 border-r border-indigo-500 bg-indigo-700 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide">
-                                Planta
+                                {{ __('Plant') }}
                             </th>
                             <th rowspan="2"
-                                class="sticky left-64 z-30 w-64 border-r border-indigo-500 bg-indigo-700 px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide">
-                                Nombre
+                                class="sticky left-64 z-30 w-40 border-r border-indigo-500 bg-indigo-700 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide">
+                                {{ __('PDA Code') }}
                             </th>
                             <th rowspan="2"
-                                class="sticky left-[32rem] z-30 w-36 border-r border-indigo-500 bg-indigo-700 px-2 py-2 text-right text-xs font-semibold uppercase tracking-wide">
-                                Budgeted total
+                                class="sticky left-[26rem] z-30 w-64 border-r border-indigo-500 bg-indigo-700 px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide">
+                                {{ __('Name') }}
                             </th>
                             <th rowspan="2"
-                                class="sticky left-[41rem] z-30 w-28 border-r-2 border-indigo-400 bg-indigo-700 px-2 py-2 text-center text-xs font-semibold uppercase tracking-wide">
+                                class="sticky left-[42rem] z-30 w-36 border-r border-indigo-500 bg-indigo-700 px-2 py-2 text-right text-xs font-semibold uppercase tracking-wide">
+                                {{ __('Budgeted total') }}
+                            </th>
+                            <th rowspan="2"
+                                class="sticky left-[51rem] z-30 w-28 border-r-2 border-indigo-400 bg-indigo-700 px-2 py-2 text-center text-xs font-semibold uppercase tracking-wide">
                                 Status
                             </th>
                             @foreach ($timelineYears as $year)
@@ -222,7 +227,7 @@
                                 <td
                                     class="sticky left-0 z-10 w-24 border-b border-r border-gray-200 px-2 py-1.5 text-center text-sm font-medium text-slate-700
                             {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-indigo-50">
-                                    {{ $plannedProject->created_at?->year }}
+                                    {{ $plannedProject->forecast_start_date?->year }}
                                 </td>
                                 <td
                                     class="sticky left-24 z-10 w-40 border-b border-r border-gray-200 px-3 py-1.5 text-sm text-slate-700
@@ -232,13 +237,16 @@
                                     </div>
                                 </td>
                                 <td
-                                    class="sticky left-64 z-10 w-64 border-b border-r border-gray-200 px-4 py-1.5 align-middle
+                                    class="sticky left-64 z-10 w-40 border-b border-r border-gray-200 px-3 py-1.5 text-sm font-semibold text-slate-700
+                            {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-indigo-50">
+                                    <div class="truncate" title="{{ $plannedProject->pda_code }}">
+                                        {{ $plannedProject->pda_code ?? '—' }}
+                                    </div>
+                                </td>
+                                <td
+                                    class="sticky left-[26rem] z-10 w-64 border-b border-r border-gray-200 px-4 py-1.5 align-middle
                             {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-indigo-50">
                                     <div class="flex items-center gap-2">
-                                        <span
-                                            class="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-indigo-100 px-1.5 text-xs font-bold text-indigo-700">
-                                            {{ $plannedProject->id }}
-                                        </span>
                                         <div class="line-clamp-1 text-sm font-medium text-gray-900"
                                             title="{{ $plannedProject->name }}">
                                             {{ $plannedProject->name }}
@@ -246,12 +254,12 @@
                                     </div>
                                 </td>
                                 <td
-                                    class="sticky left-[32rem] z-10 w-36 border-b border-r border-gray-200 px-3 py-1.5 text-right text-sm font-bold text-slate-800
+                                    class="sticky left-[42rem] z-10 w-36 border-b border-r border-gray-200 px-3 py-1.5 text-right text-sm font-bold text-slate-800
                             {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-indigo-50">
                                     {{ $currencySymbol }}{{ number_format($projectBudget, 2) }}
                                 </td>
                                 <td
-                                    class="sticky left-[41rem] z-10 w-28 border-b border-r-2 border-gray-200 px-2 py-1.5 text-center
+                                    class="sticky left-[51rem] z-10 w-28 border-b border-r-2 border-gray-200 px-2 py-1.5 text-center
                             {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-indigo-50">
                                     @php
                                         $statusValue = $plannedProject->state?->value ?? '—';
@@ -305,20 +313,23 @@
                                                         class="inline-flex shrink-0 items-center overflow-hidden rounded-md text-white shadow-sm ring-1 ring-black/5 transition hover:-translate-y-px hover:shadow"
                                                         style="background-color: {{ $item->milestone->color }}">
                                                         <button type="button"
-                                                            wire:click="editMilestone({{ $item->id }})" data-no-global-loading
+                                                            wire:click="editMilestone({{ $item->id }})"
+                                                            data-no-global-loading
                                                             class="px-1.5 py-0.5 text-xs font-semibold leading-4 hover:bg-black/10"
                                                             title="Edit {{ $item->milestone->name }}">
                                                             {{ $milestoneText }}
                                                         </button>
                                                         <button type="button"
-                                                            wire:click="requestDeleteMilestone({{ $item->id }})" data-no-global-loading
+                                                            wire:click="requestDeleteMilestone({{ $item->id }})"
+                                                            data-no-global-loading
                                                             class="border-l border-white/30 px-1 py-0.5 text-xs leading-4 hover:bg-black/20"
                                                             title="Remove milestone">×</button>
                                                     </span>
                                                 @endforeach
                                                 @if ($cellCanCreate)
                                                     <button type="button"
-                                                        wire:click="openCreateAt({{ $plannedProject->id }}, {{ $year }}, {{ $monthNumber }})" data-no-global-loading
+                                                        wire:click="openCreateAt({{ $plannedProject->id }}, {{ $year }}, {{ $monthNumber }})"
+                                                        data-no-global-loading
                                                         class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs font-medium text-slate-300 transition hover:bg-indigo-100 hover:text-indigo-600"
                                                         title="Add milestone to {{ $months[$monthNumber] }} {{ $year }}">+</button>
                                                 @endif
@@ -424,8 +435,8 @@
                     <div class="sm:col-span-2">
                         <label class="mb-1 block text-sm font-medium text-gray-700">Project percentage</label>
                         <div class="relative">
-                            <input type="number" wire:model.live.debounce.250ms="percentage" data-no-global-loading min="0"
-                                max="100" step="0.01"
+                            <input type="number" wire:model.blur="percentage" data-no-global-loading
+                                min="0" max="100" step="0.01"
                                 class="block w-full rounded-lg border-gray-300 pr-10 text-sm focus:border-indigo-500 focus:ring-indigo-500">
                             <span
                                 class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm font-semibold text-slate-500">%</span>
@@ -455,7 +466,8 @@
                         onmouseleave="this.style.backgroundColor='#ef4444'">
                         Cancel
                     </button>
-                    <button type="submit" data-global-loading wire:loading.attr="disabled" wire:target="saveMilestone"
+                    <button type="submit" data-global-loading wire:loading.attr="disabled"
+                        wire:target="saveMilestone"
                         class="inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm font-semibold text-white shadow-sm transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60"
                         style="background-color: #2563eb; border-color: #1d4ed8;"
                         onmouseenter="this.style.backgroundColor='#1d4ed8'"
@@ -497,8 +509,8 @@
                         class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
                         Cancel
                     </button>
-                    <button type="button" wire:click="confirmDeleteMilestone" data-global-loading wire:loading.attr="disabled"
-                        wire:target="confirmDeleteMilestone"
+                    <button type="button" wire:click="confirmDeleteMilestone" data-global-loading
+                        wire:loading.attr="disabled" wire:target="confirmDeleteMilestone"
                         class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-60">
                         Remove milestone
                     </button>

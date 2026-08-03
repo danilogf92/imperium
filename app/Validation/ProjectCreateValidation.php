@@ -7,6 +7,7 @@ use App\Enums\InvestmentEnum;
 use App\Enums\ProjectJustificationEnum;
 use App\Enums\ProjectStateEnum;
 use App\Models\ProjectRateSetting;
+use App\Rules\AfterOrEqualWhenPresent;
 use Illuminate\Validation\Rule;
 
 class ProjectCreateValidation
@@ -26,6 +27,13 @@ class ProjectCreateValidation
                 'required',
                 'string',
                 'max:255',
+            ],
+
+            'order' => [
+                'required',
+                'string',
+                'regex:/^\d+[a-z]*$/i',
+                'max:20',
             ],
 
             'pda_code' => self::pdaRules(),
@@ -82,14 +90,13 @@ class ProjectCreateValidation
                 'nullable',
                 'date',
                 'after_or_equal:forecast_start_date',
-                'before_or_equal:close_date',
             ],
 
             'close_date' => [
                 'nullable',
                 'date',
                 'after_or_equal:forecast_start_date',
-                'after_or_equal:approve_date',
+                new AfterOrEqualWhenPresent('approve_date'),
             ],
 
             'data_uploaded' => [
@@ -138,6 +145,15 @@ class ProjectCreateValidation
 
             'name.max' =>
             'The project name may not be greater than 255 characters.',
+
+            'order.required' =>
+            'The project order is required.',
+
+            'order.regex' =>
+            'The project order must start with a number and may end with letters, for example 10, 10a, or 10b.',
+
+            'order.unique' =>
+            'This project order is already in use for the selected plant.',
 
             'pda_code.required' =>
             'The PDA code is required.',
@@ -217,14 +233,11 @@ class ProjectCreateValidation
             'approve_date.after_or_equal' =>
             'The approve date must be after or equal to the start date.',
 
-            'approve_date.before_or_equal' =>
-            'The approve date must be before or equal to the close date.',
-
             'close_date.date' =>
             'The close date must be a valid date.',
 
             'close_date.after_or_equal' =>
-            'The close date must be after or equal to the start and approve dates.',
+            'The close date must be after or equal to the start date.',
 
             'data_uploaded.boolean' =>
             'The data uploaded status must be true or false.',
@@ -236,6 +249,7 @@ class ProjectCreateValidation
         return [
             'company_id' => 'company',
             'name' => 'project name',
+            'order' => 'project order',
             'pda_code' => 'PDA code',
             'rate' => 'rate',
             'state' => 'project state',
