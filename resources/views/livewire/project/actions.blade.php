@@ -37,7 +37,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" />
                         </svg>
-                        <input id="projects-search" wire:model.live.debounce.400ms="search" data-global-loading type="text"
+                        <input id="projects-search" wire:model.live.debounce.400ms="search" data-no-global-loading type="text"
                             placeholder="{{ __('Search project, PDA or plant') }}" autocomplete="off"
                             class="block h-11 w-full rounded-lg border border-slate-300 bg-white py-2 pl-11 pr-11 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
                         @if (filled($search))

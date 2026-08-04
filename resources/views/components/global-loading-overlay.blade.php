@@ -1,5 +1,5 @@
 <div id="global-loading-overlay" aria-live="polite" aria-busy="true"
-    style="display: flex; position: fixed; inset: 0; z-index: 9999;"
+    style="display: none; position: fixed; inset: 0; z-index: 9999;"
     class="items-center justify-center bg-white/70 backdrop-blur-[2px]">
     <div class="flex flex-col items-center gap-3">
         <div class="rounded-full bg-blue-100 p-5 shadow-xl">
@@ -27,6 +27,7 @@
         (() => {
             let pendingRequests = 0;
             let suppressGlobalLoadingUntil = 0;
+            let loadingWatchdog;
 
             const overlay = () => document.getElementById('global-loading-overlay');
             const show = () => {
@@ -34,8 +35,15 @@
                 if (element) {
                     element.style.display = 'flex';
                 }
+
+                clearTimeout(loadingWatchdog);
+                loadingWatchdog = setTimeout(() => {
+                    pendingRequests = 0;
+                    hide();
+                }, 15000);
             };
             const hide = () => {
+                clearTimeout(loadingWatchdog);
                 const element = overlay();
                 if (element) {
                     element.style.display = 'none';
@@ -43,13 +51,25 @@
             };
 
             const trackLoadingIntent = event => {
-                if (event.target.closest('[data-global-loading]')) {
+                const target = event.target instanceof Element ? event.target : null;
+
+                if (!target) {
+                    return;
+                }
+
+                // Focusing or typing in a text field must never cover that field
+                // with the global overlay. Debounced searches remain interactive.
+                if (event.type === 'click' && target.closest('input, textarea, select')) {
+                    return;
+                }
+
+                if (target.closest('[data-global-loading]')) {
                     suppressGlobalLoadingUntil = 0;
                     show();
                     return;
                 }
 
-                if (event.target.closest('[data-no-global-loading]')) {
+                if (target.closest('[data-no-global-loading]')) {
                     suppressGlobalLoadingUntil = Date.now() + 3000;
                 }
             };

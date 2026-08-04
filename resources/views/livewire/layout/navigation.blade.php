@@ -33,7 +33,7 @@ new class extends Component {
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('projects')" :active="request()->routeIs('projects', 'projects.dashboard')" wire:navigate>
+                    <x-nav-link :href="route('projects')" :active="request()->routeIs('projects', 'projects.dashboard')">
                         {{ __('Projects') }}
                     </x-nav-link>
 
@@ -121,7 +121,7 @@ new class extends Component {
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('projects')" :active="request()->routeIs('projects', 'projects.dashboard')" wire:navigate>
+            <x-responsive-nav-link :href="route('projects')" :active="request()->routeIs('projects', 'projects.dashboard')">
                 {{ __('Projects') }}
             </x-responsive-nav-link>
 
