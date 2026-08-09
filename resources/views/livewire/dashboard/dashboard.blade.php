@@ -14,6 +14,10 @@
             @endif
 
             @include('livewire.dashboard.partials.schedule-charts')
+
+            @include('livewire.dashboard.partials.insight-charts')
+
+            @include('livewire.dashboard.partials.operational-charts')
         @else
             @include('livewire.dashboard.partials.no-projects')
         @endif

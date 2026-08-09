@@ -68,6 +68,52 @@ class DashboardQueryService
             ->all();
     }
 
+    public function projectCountByCompany(User $user, DashboardFilters $filters): array
+    {
+        return $this->projectQuery($user, $filters)
+            ->join('companies', 'companies.id', '=', 'projects.company_id')
+            ->selectRaw('companies.company_name AS label, COUNT(*) AS total')
+            ->groupBy('companies.id', 'companies.company_name')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn ($row) => ['label' => (string) $row->label, 'total' => (int) $row->total])
+            ->all();
+    }
+
+    public function dataByCompany(
+        User $user,
+        DashboardFilters $filters,
+        string $valueColumn
+    ): array {
+        return $this->dataQuery($user, $filters)
+            ->join('companies', 'companies.id', '=', 'projects.company_id')
+            ->selectRaw("companies.company_name AS label, COALESCE(SUM(data.{$valueColumn}), 0) AS total")
+            ->groupBy('companies.id', 'companies.company_name')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn ($row) => ['label' => (string) $row->label, 'total' => (float) $row->total])
+            ->all();
+    }
+
+    public function dataBySupplier(
+        User $user,
+        DashboardFilters $filters,
+        string $valueColumn,
+        int $limit = 10
+    ): array {
+        return $this->dataQuery($user, $filters)
+            ->whereNotNull('data.supplier')
+            ->where('data.supplier', '<>', '')
+            ->selectRaw("data.supplier AS label, COALESCE(SUM(data.{$valueColumn}), 0) AS total")
+            ->groupBy('data.supplier')
+            ->havingRaw("SUM(data.{$valueColumn}) <> 0")
+            ->orderByDesc('total')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($row) => ['label' => (string) $row->label, 'total' => (float) $row->total])
+            ->all();
+    }
+
     public function dataByMonth(
         User $user,
         DashboardFilters $filters,

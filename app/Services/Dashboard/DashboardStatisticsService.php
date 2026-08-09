@@ -226,6 +226,26 @@ class DashboardStatisticsService
 
             'budgetByArea' => $budgetByArea,
 
+            'projectsByCompany' => $this->queries->projectCountByCompany($user, $filters),
+
+            'budgetByCompany' => $this->queries->dataByCompany(
+                $user,
+                $filters,
+                $columns['budgeted']
+            ),
+
+            'bookedBySupplier' => $this->queries->dataBySupplier(
+                $user,
+                $filters,
+                $columns['booked']
+            ),
+
+            'executedBySupplier' => $this->queries->dataBySupplier(
+                $user,
+                $filters,
+                $columns['executed']
+            ),
+
             'projectsByCreationMonth' => $projectsByCreationMonth,
 
             'budgetByCreationMonth' => $budgetByCreationMonth,
