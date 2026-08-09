@@ -1,6 +1,6 @@
-<div class="min-h-screen bg-slate-100 px-4 py-6 sm:px-6 lg:px-8">
+<div class="dashboard-page-shell">
     <x-unified-table-theme />
-    <div class="mx-auto flex max-w-screen-2xl flex-col" style="gap: 1.25rem;">
+    <div class="dashboard-page-content flex flex-col" style="gap: 1.25rem;">
         <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-xs font-semibold uppercase tracking-wider text-blue-600">Task management</p>
             <div class="mt-1 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">

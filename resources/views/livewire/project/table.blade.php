@@ -4,7 +4,7 @@
         $columnKeys = array_keys($columnOptions);
         $columnCount = count($visibleColumns);
         $physicalColumns = [
-            'id', 'name', 'links', 'pda_code', 'upload_pda', 'rate', 'state', 'investments',
+            'id', 'name', 'links', 'pda_code', 'upload_pda', 'project_ideas', 'rate', 'state', 'investments',
             'classification', 'justification', 'forecast_start_date', 'forecast_end_date', 'order', 'plant',
             'creator', 'responsible', 'data_uploaded', 'quartile_date', 'approve_date', 'close_date',
             'file_name', 'created_at', 'updated_at', 'budgeted_euros', 'real_euros',
@@ -197,6 +197,10 @@
                                 Upload PDA
                             </th>
 
+                            <th scope="col" class="whitespace-nowrap px-2 py-2">
+                                Project ideas
+                            </th>
+
                             {{-- Rate --}}
                             <th wire:click="setSortBy('rate')" scope="col"
                                 class="cursor-pointer whitespace-nowrap px-2 py-2 hover:bg-gray-200">
@@ -384,7 +388,7 @@
                                 {{-- Nombre --}}
                                 <td class="whitespace-nowrap px-2 py-2 font-bold text-gray-900">
                                     @if ($project->data_uploaded)
-                                        <a href="{{ route('projects.data', ['project' => $project->id]) }}"
+                                        <a href="{{ route('projects.data', ['project' => $project->slug]) }}"
                                             class="text-red-500 hover:text-red-600 hover:underline">
                                             {{ $projectName }}
                                         </a>
@@ -399,7 +403,7 @@
                                 <td class="whitespace-nowrap px-2 py-2">
                                     <div class="flex items-center gap-2">
                                         @if ($project->data_uploaded)
-                                            <a href="{{ route('projects.dashboard', ['project' => $project->id]) }}"
+                                            <a href="{{ route('projects.dashboard', ['project' => $project->slug]) }}"
                                                 wire:navigate class="text-red-500 hover:text-red-600 hover:underline">
                                                 Dashboard
                                             </a>
@@ -420,7 +424,7 @@
                                         @endif
 
                                         @if ($project->data_uploaded)
-                                            <a href="{{ route('projects.data', ['project' => $project->id]) }}"
+                                            <a href="{{ route('projects.data', ['project' => $project->slug]) }}"
                                                 wire:navigate
                                                 class="text-emerald-600 hover:text-emerald-500 hover:underline">
                                                 Data
@@ -477,6 +481,20 @@
                                         @endif
 
                                     </div>
+                                </td>
+
+                                {{-- Project ideas --}}
+                                <td class="whitespace-nowrap px-2 py-2">
+                                    <button wire:click="openProjectIdeaModal({{ $project->id }})" type="button"
+                                        data-no-global-loading
+                                        title="{{ filled($project->project_idea_path) ? 'Manage project ideas' : 'Upload project ideas' }}"
+                                        class="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-px hover:brightness-110"
+                                        style="background-color: {{ filled($project->project_idea_path) ? '#16a34a' : '#d97706' }}">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 3.75h8.25L18 7.5v12.75H6V3.75Zm8.25 0V7.5H18M9 11.25l6 6m0-6-6 6" />
+                                        </svg>
+                                        {{ filled($project->project_idea_path) ? 'Manage' : 'Upload' }}
+                                    </button>
                                 </td>
 
                                 {{-- Rate --}}
@@ -689,7 +707,7 @@
                 <div class="mt-5">
                     <span class="mb-2 block text-sm font-medium text-slate-700">Document</span>
                     <input id="project-document-file" wire:model="document" type="file"
-                        accept=".pdf,.doc,.docx,.xls,.xlsx" data-no-global-loading class="sr-only">
+                        accept=".pdf,application/pdf" data-no-global-loading class="sr-only">
                     <label for="project-document-file"
                         class="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-slate-300 bg-white p-2 text-sm shadow-sm transition hover:border-blue-400 hover:bg-blue-50">
                         <span class="inline-flex h-10 items-center rounded-md bg-blue-600 px-4 font-semibold text-white">
@@ -700,7 +718,7 @@
                         </span>
                     </label>
                 </div>
-                <p class="mt-2 text-xs text-slate-500">PDF, Word, or Excel. Maximum size: 10 MB.</p>
+                <p class="mt-2 text-xs text-slate-500">PDF only. Maximum size: 10 MB.</p>
                 @error('document')
                     <p class="mt-2 text-sm font-medium text-red-600">{{ $message }}</p>
                 @enderror
@@ -728,6 +746,115 @@
                         <span wire:loading.remove wire:target="uploadDocument">Upload document</span>
                         <span wire:loading wire:target="uploadDocument">Uploading...</span>
                     </button>
+                </div>
+            </div>
+        </x-modal>
+
+        <x-modal name="manage-project-ideas" maxWidth="lg" close-method="closeProjectIdeaModal" focusable>
+            <div class="p-6" x-data="{ uploading: false, progress: 0 }"
+                x-on:livewire-upload-start="uploading = true; progress = 0"
+                x-on:livewire-upload-progress="progress = $event.detail.progress"
+                x-on:livewire-upload-finish="progress = 100; uploading = false"
+                x-on:livewire-upload-error="uploading = false; progress = 0"
+                x-on:livewire-upload-cancel="uploading = false; progress = 0">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 3.75h8.25L18 7.5v12.75H6V3.75Zm8.25 0V7.5H18M9 11.25l6 6m0-6-6 6" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-semibold text-slate-900">Project ideas</h2>
+                            <p class="mt-1 text-sm text-slate-500">
+                                {{ $projectIdeaProjectCode }}
+                                @if ($projectIdeaProjectName !== '') · {{ $projectIdeaProjectName }} @endif
+                            </p>
+                        </div>
+                    </div>
+                    <button wire:click="closeProjectIdeaModal" data-no-global-loading type="button"
+                        class="rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" d="m5 5 10 10M15 5 5 15" />
+                        </svg>
+                    </button>
+                </div>
+
+                @if ($currentProjectIdeaFileName)
+                    <div class="mt-5 flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                        <div class="min-w-0">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Current Excel file</p>
+                            <p class="mt-1 truncate text-sm font-semibold text-slate-900">{{ $currentProjectIdeaFileName }}</p>
+                        </div>
+                        <button wire:click="downloadProjectIdea" wire:loading.attr="disabled"
+                            wire:target="downloadProjectIdea" data-no-global-loading type="button"
+                            class="inline-flex h-10 shrink-0 items-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60">
+                            <span wire:loading.remove wire:target="downloadProjectIdea">Download</span>
+                            <span wire:loading wire:target="downloadProjectIdea">Preparing...</span>
+                        </button>
+                    </div>
+                @else
+                    <div class="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                        This project does not have a Project ideas file yet.
+                    </div>
+                @endif
+
+                @if ($projectIdeaCanManage)
+                    <div class="mt-5">
+                        <input id="table-project-ideas-file" wire:model="projectIdeaFile" type="file"
+                            accept=".xlsx,.xls" data-no-global-loading class="sr-only">
+                        <label for="table-project-ideas-file"
+                            class="group flex cursor-pointer items-center gap-4 rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50/50 p-5 transition hover:border-emerald-500 hover:bg-emerald-50">
+                            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white shadow-sm transition group-hover:scale-105">
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" d="M12 16V5m0 0L8 9m4-4 4 4M5 19h14" />
+                                </svg>
+                            </span>
+                            <span class="min-w-0 flex-1">
+                                <span class="block font-semibold text-slate-800">
+                                    {{ $currentProjectIdeaFileName ? 'Replace Excel file' : 'Select Excel file' }}
+                                </span>
+                                <span class="mt-1 block truncate text-xs text-slate-500">
+                                    {{ $projectIdeaFile?->getClientOriginalName() ?? '.xlsx or .xls · maximum 10 MB' }}
+                                </span>
+                            </span>
+                        </label>
+                        @error('projectIdeaFile')
+                            <p class="mt-2 text-sm font-medium text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div x-show="uploading" x-cloak class="mt-4" aria-live="polite">
+                        <div class="mb-2 flex justify-between text-sm font-semibold text-emerald-700">
+                            <span>Uploading Excel...</span><span x-text="`${progress}%`">0%</span>
+                        </div>
+                        <div class="h-3 overflow-hidden rounded-full bg-emerald-100">
+                            <div class="h-full rounded-full bg-emerald-600 transition-all duration-200"
+                                x-bind:style="`width: ${progress}%`"></div>
+                        </div>
+                    </div>
+                @endif
+
+                <div class="mt-6 flex flex-wrap justify-end gap-3">
+                    <button wire:click="closeProjectIdeaModal" data-no-global-loading type="button"
+                        class="upload-document-cancel inline-flex h-10 items-center rounded-lg px-4 text-sm font-semibold">Close</button>
+                    @if ($projectIdeaCanManage && $currentProjectIdeaFileName)
+                        <button wire:click="deleteProjectIdea" wire:loading.attr="disabled"
+                            wire:target="deleteProjectIdea" data-no-global-loading type="button"
+                            class="inline-flex h-10 items-center rounded-lg bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60">
+                            <span wire:loading.remove wire:target="deleteProjectIdea">Delete Excel</span>
+                            <span wire:loading wire:target="deleteProjectIdea">Deleting...</span>
+                        </button>
+                    @endif
+                    @if ($projectIdeaCanManage)
+                        <button wire:click="saveProjectIdea" wire:loading.attr="disabled"
+                            wire:target="saveProjectIdea,projectIdeaFile" data-no-global-loading type="button"
+                            class="inline-flex h-10 items-center rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-wait disabled:opacity-60">
+                            <span wire:loading.remove wire:target="saveProjectIdea">{{ $currentProjectIdeaFileName ? 'Replace Excel' : 'Upload Excel' }}</span>
+                            <span wire:loading wire:target="saveProjectIdea">Saving...</span>
+                        </button>
+                    @endif
                 </div>
             </div>
         </x-modal>

@@ -25,7 +25,7 @@
         @endif
     @endif
 
-    <x-dialog-modal :name="$formModalName" maxWidth="3xl" :close-method="$closeMethod">
+    <x-dialog-modal :name="$formModalName" maxWidth="6xl" :close-method="$closeMethod">
         <x-slot name="title">
             <div>
                 <h2 class="text-xl font-bold text-gray-900">
@@ -199,7 +199,7 @@
                                 <span class="text-red-500">*</span>
                             </label>
 
-                            <select id="state{{ $fieldSuffix }}" wire:model="form.state"
+                            <select id="state{{ $fieldSuffix }}" wire:model.live="form.state" data-no-global-loading
                                 class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
 
                                 @foreach ($stateOptions as $stateOption)
@@ -352,7 +352,13 @@
 
                             <input id="start-date{{ $fieldSuffix }}" type="date"
                                 wire:model="form.forecast_start_date"
-                                class="block w-full rounded-lg border-gray-300 px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                @disabled($form->state === 'Postponed')
+                                @class([
+                                    'block w-full rounded-lg px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500',
+                                    'border-red-300 bg-red-50/40' => $errors->has('form.forecast_start_date'),
+                                    'border-gray-300' => !$errors->has('form.forecast_start_date'),
+                                    'cursor-not-allowed bg-gray-100 text-gray-500' => $form->state === 'Postponed',
+                                ])>
 
                             @error('form.forecast_start_date')
                                 <p class="mt-1.5 text-sm text-red-600">
@@ -369,7 +375,13 @@
 
                             <input id="finish-date{{ $fieldSuffix }}" type="date"
                                 wire:model="form.forecast_end_date"
-                                class="block w-full rounded-lg border-gray-300 px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                @disabled($form->state === 'Postponed')
+                                @class([
+                                    'block w-full rounded-lg px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500',
+                                    'border-red-300 bg-red-50/40' => $errors->has('form.forecast_end_date'),
+                                    'border-gray-300' => !$errors->has('form.forecast_end_date'),
+                                    'cursor-not-allowed bg-gray-100 text-gray-500' => $form->state === 'Postponed',
+                                ])>
 
                             @error('form.forecast_end_date')
                                 <p class="mt-1.5 text-sm text-red-600">
@@ -377,6 +389,12 @@
                                 </p>
                             @enderror
                         </div>
+
+                        @if ($form->state === 'Postponed')
+                            <p class="lg:col-span-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                                Forecast dates are not required while the project is Postponed. Previous values will be restored if another state is selected before saving.
+                            </p>
+                        @endif
 
                         <div>
                             <label for="approve-date{{ $fieldSuffix }}"
@@ -412,6 +430,58 @@
                             @enderror
                         </div>
 
+                        <div class="lg:col-span-2" x-data="{ uploadingIdea: false, ideaProgress: 0 }"
+                            x-on:livewire-upload-start="uploadingIdea = true; ideaProgress = 0"
+                            x-on:livewire-upload-progress="ideaProgress = $event.detail.progress"
+                            x-on:livewire-upload-finish="ideaProgress = 100; uploadingIdea = false"
+                            x-on:livewire-upload-error="uploadingIdea = false; ideaProgress = 0"
+                            x-on:livewire-upload-cancel="uploadingIdea = false; ideaProgress = 0">
+                            <label for="project-ideas{{ $fieldSuffix }}"
+                                class="mb-2 block text-sm font-medium text-gray-700">
+                                Project ideas (Excel)
+                            </label>
+
+                            @if ($editing && filled($currentProjectIdeaName ?? null))
+                                <p class="mb-2 text-sm text-emerald-700">
+                                    Current file: {{ $currentProjectIdeaName }}. Select another file to replace it.
+                                </p>
+                            @endif
+
+                            <input id="project-ideas{{ $fieldSuffix }}" type="file"
+                                wire:model="projectIdea" accept=".xlsx,.xls"
+                                data-no-global-loading class="sr-only">
+                            <label for="project-ideas{{ $fieldSuffix }}"
+                                class="group flex cursor-pointer items-center gap-4 rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50/40 p-5 transition hover:border-emerald-500 hover:bg-emerald-50">
+                                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white shadow-md transition group-hover:scale-105">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" d="M12 16V5m0 0L8 9m4-4 4 4M5 19h14" />
+                                    </svg>
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block text-sm font-semibold text-slate-800">
+                                        {{ $editing && filled($currentProjectIdeaName ?? null) ? 'Replace Project ideas Excel' : 'Upload Project ideas Excel' }}
+                                    </span>
+                                    <span class="mt-1 block truncate text-xs text-slate-500">
+                                        {{ $projectIdea?->getClientOriginalName() ?? 'Click to select an .xlsx or .xls file · maximum 10 MB' }}
+                                    </span>
+                                </span>
+                            </label>
+
+                            <div x-show="uploadingIdea" x-cloak class="mt-3" aria-live="polite">
+                                <div class="mb-1.5 flex justify-between text-xs font-semibold text-emerald-700">
+                                    <span>Uploading Excel...</span><span x-text="`${ideaProgress}%`">0%</span>
+                                </div>
+                                <div class="h-2.5 overflow-hidden rounded-full bg-emerald-100">
+                                    <div class="h-full rounded-full bg-emerald-600 transition-all duration-200"
+                                        x-bind:style="`width: ${ideaProgress}%`"></div>
+                                </div>
+                            </div>
+
+                            @error('projectIdea')
+                                <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
                     </div>
 
                 </section>
@@ -429,7 +499,9 @@
                     {{ __('Cancel') }}
                 </x-secondary-button>
 
-                <x-button wire:click="{{ $saveMethod }}" data-global-loading wire:loading.attr="disabled"
+                <x-button wire:click="{{ $saveMethod }}"
+                    data-no-global-loading
+                    wire:loading.attr="disabled"
                     wire:target="{{ $saveMethod }}"
                     style="background-color: #2563eb; border-color: #1d4ed8; color: #ffffff;"
                     onmouseenter="this.style.backgroundColor='#1d4ed8'"

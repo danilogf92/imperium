@@ -33,7 +33,7 @@
             @endif
 
             <!-- Page Content -->
-            <main>
+            <main class="min-w-0 max-w-full overflow-x-hidden">
                 {{ $slot }}
             </main>
         </div>

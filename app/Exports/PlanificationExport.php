@@ -5,6 +5,7 @@ namespace App\Exports;
 use App\Enums\ProjectPermissionEnum;
 use App\Models\Project;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -18,6 +19,15 @@ class PlanificationExport
 {
     public function download(User $user, array $filters): BinaryFileResponse
     {
+        $selectedWeek = (string) ($filters['activityWeeks'] ?? '');
+        $baseDate = preg_match('/^(\d{4})-W(\d{2})$/', $selectedWeek, $matches)
+            ? CarbonImmutable::now()->setISODate((int) $matches[1], (int) $matches[2])->startOfDay()
+            : CarbonImmutable::now()->startOfWeek();
+        $activityWeeks = collect([0, 1])->map(function (int $offset) use ($baseDate): array {
+            $date = $baseDate->addWeeks($offset);
+            return ['year' => (int) $date->isoWeekYear, 'week' => (int) $date->isoWeek];
+        });
+
         $projects = Project::query()
             ->with([
                 'company:id,company_name',
@@ -26,6 +36,12 @@ class PlanificationExport
                     ->orderBy('cycle_year')
                     ->orderBy('month')
                     ->orderBy('sequence'),
+                'weeklyActivities' => fn ($query) => $query->where(function (Builder $query) use ($activityWeeks): void {
+                    foreach ($activityWeeks as $week) {
+                        $query->orWhere(fn (Builder $query) => $query
+                            ->where('week_year', $week['year'])->where('week_number', $week['week']));
+                    }
+                }),
             ])
             ->withSum('data as data_budgeted', 'global_price')
             ->withSum('data as data_budgeted_euros', 'global_price_euros')
@@ -52,6 +68,7 @@ class PlanificationExport
                         ->orWhere('pda_code', 'like', $search)
                         ->orWhere('state', 'like', $search)
                         ->orWhereHas('company', fn (Builder $query) => $query->where('company_name', 'like', $search))
+                        ->orWhereHas('weeklyActivities', fn (Builder $query) => $query->where('activity', 'like', $search))
                         ->orWhereHas('projectMilestones.milestone', fn (Builder $query) => $query
                             ->where('name', 'like', $search)
                             ->orWhere('code', 'like', $search));
@@ -75,7 +92,7 @@ class PlanificationExport
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Planification');
-        $sheet->freezePane('G3');
+        $sheet->freezePane('I3');
 
         $currency = ($filters['currency'] ?? 'usd') === 'eur' ? 'eur' : 'usd';
         $cellDisplay = in_array(($filters['cellDisplay'] ?? 'combined'), ['combined', 'milestone', 'value'], true)
@@ -83,7 +100,7 @@ class PlanificationExport
             : 'combined';
         $currencySymbol = $currency === 'eur' ? '€' : '$';
 
-        $fixedHeaders = ['Forecast Start Year', 'Plant', 'PDA Code', 'Name', 'Budgeted Total', 'Status'];
+        $fixedHeaders = ['Forecast Start Year', 'Plant', 'PDA Code', 'Name', 'Budgeted Total', 'Status', 'Actual Week', 'Next Week'];
         foreach ($fixedHeaders as $index => $header) {
             $column = Coordinate::stringFromColumnIndex($index + 1);
             $sheet->setCellValue("{$column}1", $header);
@@ -91,7 +108,7 @@ class PlanificationExport
         }
 
         $monthLabels = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-        $columnIndex = 7;
+        $columnIndex = 9;
         foreach ($years as $year) {
             $startColumn = Coordinate::stringFromColumnIndex($columnIndex);
             $endColumn = Coordinate::stringFromColumnIndex($columnIndex + 11);
@@ -114,11 +131,19 @@ class PlanificationExport
                 $project->name,
                 (float) ($currency === 'eur' ? $project->data_budgeted_euros : $project->data_budgeted),
                 $project->state?->value,
+                $project->weeklyActivities->filter(fn ($activity) =>
+                    $activity->week_year === $activityWeeks[0]['year'] && $activity->week_number === $activityWeeks[0]['week'])
+                    ->pluck('activity')->implode("\n"),
+                $project->weeklyActivities->filter(fn ($activity) =>
+                    $activity->week_year === $activityWeeks[1]['year'] && $activity->week_number === $activityWeeks[1]['week'])
+                    ->pluck('activity')->implode("\n"),
             ], null, "A{$row}");
 
             $sheet->getStyle("E{$row}")
                 ->getNumberFormat()
                 ->setFormatCode($currency === 'eur' ? '€#,##0.00' : '$#,##0.00');
+
+            $sheet->getStyle("G{$row}:H{$row}")->getAlignment()->setWrapText(true);
 
             $statusColors = [
                 ltrim($project->state?->softColor() ?? '#F1F5F9', '#'),
@@ -130,7 +155,7 @@ class PlanificationExport
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
             ]);
 
-            $columnIndex = 7;
+            $columnIndex = 9;
             foreach ($years as $year) {
                 for ($month = 1; $month <= 12; $month++) {
                     $cellMilestones = $project->projectMilestones
@@ -201,9 +226,25 @@ class PlanificationExport
         $sheet->getColumnDimension('D')->setWidth(48);
         $sheet->getColumnDimension('E')->setWidth(16);
         $sheet->getColumnDimension('F')->setWidth(16);
-        for ($index = 7; $index <= max(6, $columnIndex - 1); $index++) {
+        $sheet->getColumnDimension('G')->setWidth(35);
+        $sheet->getColumnDimension('H')->setWidth(35);
+        for ($index = 9; $index <= max(8, $columnIndex - 1); $index++) {
             $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($index))->setWidth(22);
         }
+
+        $fixedColumnKeys = [
+            'forecast_year', 'plant', 'pda_code', 'name',
+            'budgeted', 'status', 'actual_week', 'next_week',
+        ];
+        $visibleColumns = (array) ($filters['visibleColumns'] ?? $fixedColumnKeys);
+        foreach (array_reverse($fixedColumnKeys, true) as $index => $key) {
+            if (! in_array($key, $visibleColumns, true)) {
+                $sheet->removeColumn(Coordinate::stringFromColumnIndex($index + 1));
+            }
+        }
+        $sheet->freezePane(Coordinate::stringFromColumnIndex(
+            count(array_intersect($fixedColumnKeys, $visibleColumns)) + 1
+        ).'3');
 
         $directory = storage_path('app/private/exports');
         if (! is_dir($directory)) {

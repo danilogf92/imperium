@@ -15,7 +15,18 @@ class Milestone extends Model
         'name',
         'code',
         'color',
+        'view_color',
     ];
+
+    public function viewTextColor(): string
+    {
+        $color = ltrim($this->view_color ?: $this->color, '#');
+        [$red, $green, $blue] = array_map('hexdec', str_split($color, 2));
+
+        return (($red * 299) + ($green * 587) + ($blue * 114)) / 1000 > 150
+            ? '#0F172A'
+            : '#FFFFFF';
+    }
 
     public function projectMilestones(): HasMany
     {

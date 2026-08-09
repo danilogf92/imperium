@@ -203,10 +203,7 @@ class DashboardProjects extends Component
                     ->where('order_no', '<>', '')
                     ->exists(),
                 'radarChartModel' => $graph,
-                'columnChartModel' => $this->columnDataGraph(
-                    $area,
-                    "Classification for {$this->groupTitle()} - {$this->valueTitle()}"
-                ),
+                'columnChartModel' => $this->classificationBudgetRealGraph(),
                 'resumeGraph' => $this->columnDataGraphTwo($this->createResumeGraph(), $title),
                 'resumePercentageGraph' => $this->columnDataGraphTwo($this->createResumeGraph("%"), "Resume %", true),
                 'pieChartModel' => $this->pieDataGraph($area, $this->rateConvertion),
@@ -619,6 +616,41 @@ class DashboardProjects extends Component
                 )
             ],
         ];
+    }
+
+    public function classificationBudgetRealGraph(): ColumnChartModel
+    {
+        $values = Data::query()
+            ->where('project_id', $this->project->id)
+            ->whereNotNull($this->searchData)
+            ->select($this->searchData)
+            ->selectRaw('SUM(global_price_euros) as budgeted_value')
+            ->selectRaw('SUM(real_value_euros) as real_value')
+            ->groupBy($this->searchData)
+            ->orderBy($this->searchData)
+            ->get();
+
+        return $values->reduce(
+            function (ColumnChartModel $chart, Data $data): ColumnChartModel {
+                $group = (string) $data->{$this->searchData};
+
+                return $chart
+                    ->addSeriesColumn($group, 'Budgeted', $this->convertAndUpdate($data->budgeted_value))
+                    ->addSeriesColumn($group, 'Real Value', $this->convertAndUpdate($data->real_value));
+            },
+            LivewireCharts::multiColumnChartModel()
+                ->setTitle("Budgeted vs Real Value by {$this->groupTitle()}")
+                ->setAnimated($this->firstRun)
+                ->withOnColumnClickEventName('onColumnClick')
+                ->stacked()
+                ->withGrid()
+                ->withDataLabels()
+                ->withLegend()
+                ->legendPositionTop()
+                ->setColors(['#2563eb', '#dc2626'])
+                ->disableShades()
+                ->setJsonConfig($this->moneyChartConfig('yaxis'))
+        );
     }
 
     public function createResumePieGraphTwo()

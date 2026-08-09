@@ -9,28 +9,48 @@ use App\Models\Project;
 use App\Models\User;
 use App\Validation\ProjectCreateValidation;
 use App\Validation\ProjectUpdateValidation;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Form;
 
 class ProjectForm extends Form
 {
     public int|string|null $company_id = null;
-    public string $order = '';
+
+    public ?string $order = null;
+
     public ?int $project_id = null;
+
     public string $company_code = '';
+
     public string $name = '';
+
     public string $pda_code = '';
+
     public string $rate = '';
+
     public string $state = ProjectStateEnum::Planning->value;
+
     public string $investments = '';
+
     public string $justification = '';
+
     public string $classification_of_investments = '';
+
     public ?string $forecast_start_date = null;
+
     public ?string $forecast_end_date = null;
+
+    public ?string $remembered_forecast_start_date = null;
+
+    public ?string $remembered_forecast_end_date = null;
+
     public ?string $approve_date = null;
+
     public ?string $close_date = null;
+
     public ?string $quartile_date = null;
+
     public bool $data_uploaded = false;
 
     public function updateCompanyCode(User $user): void
@@ -57,8 +77,7 @@ class ProjectForm extends Form
 
         if (! $company) {
             throw ValidationException::withMessages([
-                'form.company_id' =>
-                    'You cannot create projects in the selected company.',
+                'form.company_id' => 'You cannot create projects in the selected company.',
             ]);
         }
 
@@ -76,34 +95,52 @@ class ProjectForm extends Form
         $companyCode = $this->normalizeCode(
             $project->company?->company_code ?? ''
         );
+
         $pdaPrefix = $companyCode.'_';
 
         $this->project_id = (int) $project->getKey();
         $this->company_id = (int) $project->company_id;
-        $this->order = (string) ($project->order ?? '');
+        $this->order = $project->order;
         $this->company_code = $companyCode;
         $this->name = $project->name;
+
         $this->pda_code = str_starts_with($project->pda_code, $pdaPrefix)
             ? substr($project->pda_code, strlen($pdaPrefix))
             : $project->pda_code;
+
         $this->rate = (string) $project->rate;
         $this->state = $project->state->value;
         $this->investments = $project->investments->value;
         $this->justification = $project->justification->value;
         $this->classification_of_investments =
             $project->classification_of_investments->value;
-        $this->forecast_start_date = $project->forecast_start_date?->format('Y-m-d');
-        $this->forecast_end_date = $project->forecast_end_date?->format('Y-m-d');
-        $this->approve_date = $project->approve_date?->format('Y-m-d');
-        $this->close_date = $project->close_date?->format('Y-m-d');
-        $this->quartile_date = $project->quartile_date?->format('Y-m-d');
+
+        $this->forecast_start_date =
+            $project->forecast_start_date?->format('Y-m-d');
+
+        $this->forecast_end_date =
+            $project->forecast_end_date?->format('Y-m-d');
+
+        $this->rememberForecastDates();
+
+        $this->approve_date =
+            $project->approve_date?->format('Y-m-d');
+
+        $this->close_date =
+            $project->close_date?->format('Y-m-d');
+
+        $this->quartile_date =
+            $project->quartile_date?->format('Y-m-d');
+
         $this->data_uploaded = (bool) $project->data_uploaded;
+
         $this->resetValidation();
     }
 
     public function update(User $user): Project
     {
         $project = $this->findAvailableProject($user);
+
         $company = $this->findCompanyForPermission(
             $user,
             ProjectPermissionEnum::Update
@@ -111,12 +148,13 @@ class ProjectForm extends Form
 
         if (! $company) {
             throw ValidationException::withMessages([
-                'form.company_id' =>
-                    'You cannot edit projects in the selected company.',
+                'form.company_id' => 'You cannot edit projects in the selected company.',
             ]);
         }
 
-        $project->update($this->validatedData($company, $project));
+        $project->update(
+            $this->validatedData($company, $project)
+        );
 
         return $project;
     }
@@ -128,14 +166,32 @@ class ProjectForm extends Form
         $this->resetValidation();
     }
 
+    public function handleStateChange(): void
+    {
+        if ($this->isPostponed()) {
+            $this->rememberForecastDates();
+            $this->forecast_start_date = null;
+            $this->forecast_end_date = null;
+        } else {
+            $this->forecast_start_date ??= $this->remembered_forecast_start_date;
+            $this->forecast_end_date ??= $this->remembered_forecast_end_date;
+        }
+
+        $this->resetValidation();
+    }
+
     private function findAvailableCompany(User $user): ?Company
     {
         if (! $this->company_id) {
             return null;
         }
 
-        return $user->availableCompaniesQuery()
-            ->select(['companies.id', 'companies.company_code'])
+        return $user
+            ->availableCompaniesQuery()
+            ->select([
+                'companies.id',
+                'companies.company_code',
+            ])
             ->find($this->company_id);
     }
 
@@ -147,8 +203,12 @@ class ProjectForm extends Form
             return null;
         }
 
-        return $user->companiesForPermissionQuery($permission)
-            ->select(['companies.id', 'companies.company_code'])
+        return $user
+            ->companiesForPermissionQuery($permission)
+            ->select([
+                'companies.id',
+                'companies.company_code',
+            ])
             ->find($this->company_id);
     }
 
@@ -157,9 +217,10 @@ class ProjectForm extends Form
         return Project::query()
             ->whereIn(
                 'company_id',
-                $user->companiesForPermissionQuery(
-                    ProjectPermissionEnum::Update
-                )
+                $user
+                    ->companiesForPermissionQuery(
+                        ProjectPermissionEnum::Update
+                    )
                     ->select('companies.id')
                     ->reorder()
             )
@@ -173,15 +234,13 @@ class ProjectForm extends Form
         Company $company,
         ?Project $project = null
     ): array {
-        $this->company_code = $this->normalizeCode($company->company_code);
-        $editablePdaCode = $this->normalizeCode($this->pda_code);
+        $this->prepareDataForValidation($company);
 
-        $this->name = trim($this->name);
-        $this->order = strtolower(trim($this->order));
+        $editablePdaCode = $this->normalizeCode($this->pda_code);
         $this->pda_code = $this->company_code.'_'.$editablePdaCode;
 
         try {
-            $validator = $project
+            $validatorClass = $project
                 ? ProjectUpdateValidation::class
                 : ProjectCreateValidation::class;
 
@@ -189,28 +248,100 @@ class ProjectForm extends Form
                 ? ProjectUpdateValidation::rules($project)
                 : ProjectCreateValidation::rules();
 
-            $uniqueOrder = Rule::unique('projects', 'order')
-                ->where(fn ($query) => $query->where('company_id', $company->getKey()));
+            /*
+             * La validación base de order ya viene
+             * de ProjectCreateValidation / ProjectUpdateValidation.
+             *
+             * Aquí solamente agregamos la unicidad por empresa.
+             */
+            $rules['order'][] = $this->orderUniqueRule(
+                $company,
+                $project
+            );
 
-            if ($project) {
-                $uniqueOrder->ignore($project->getKey());
+            /*
+             * Postponed no requiere fechas de forecast.
+             *
+             * No modificamos las propiedades del formulario.
+             * Por eso el usuario puede cambiar:
+             *
+             * Planning -> Postponed -> Planning
+             *
+             * y las fechas permanecen mientras no guarde.
+             */
+            if ($this->isPostponed()) {
+                $rules['forecast_start_date'] = ['nullable'];
+                $rules['forecast_end_date'] = ['nullable'];
+                $rules['approve_date'] = ['nullable', 'date'];
+                $rules['close_date'] = ['nullable', 'date'];
             }
 
-            $rules['order'] = [
-                'required',
-                'string',
-                'regex:/^\d+[a-z]*$/i',
-                'max:20',
-                $uniqueOrder,
-            ];
-
-            return $this->validate(
+            $validated = $this->validate(
                 $rules,
-                $validator::messages(),
-                $validator::attributes(),
+                $validatorClass::messages(),
+                $validatorClass::attributes(),
             );
+
+            /*
+             * Solo al guardar definitivamente como Postponed
+             * eliminamos las fechas.
+             */
+            if ($this->isPostponed()) {
+                $validated['forecast_start_date'] = null;
+                $validated['forecast_end_date'] = null;
+            }
+
+            return $validated;
         } finally {
             $this->pda_code = $editablePdaCode;
+        }
+    }
+
+    private function prepareDataForValidation(Company $company): void
+    {
+        $this->company_code = $this->normalizeCode(
+            $company->company_code
+        );
+
+        $this->name = trim($this->name);
+
+        $this->order = filled($this->order)
+            ? strtolower(trim($this->order))
+            : null;
+    }
+
+    private function orderUniqueRule(
+        Company $company,
+        ?Project $project = null
+    ) {
+        $rule = Rule::unique('projects', 'order')
+            ->where(
+                fn ($query) => $query->where(
+                    'company_id',
+                    $company->getKey()
+                )
+            );
+
+        if ($project) {
+            $rule->ignore($project->getKey());
+        }
+
+        return $rule;
+    }
+
+    private function isPostponed(): bool
+    {
+        return $this->state === ProjectStateEnum::Postponed->value;
+    }
+
+    private function rememberForecastDates(): void
+    {
+        if (filled($this->forecast_start_date)) {
+            $this->remembered_forecast_start_date = $this->forecast_start_date;
+        }
+
+        if (filled($this->forecast_end_date)) {
+            $this->remembered_forecast_end_date = $this->forecast_end_date;
         }
     }
 
@@ -218,5 +349,4 @@ class ProjectForm extends Form
     {
         return strtoupper(trim($code));
     }
-
 }

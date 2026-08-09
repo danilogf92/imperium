@@ -10,7 +10,7 @@ class ProjectDocumentUploadValidation
             'document' => [
                 'required',
                 'file',
-                'mimes:pdf,doc,docx,xls,xlsx',
+                'mimes:pdf',
                 'max:10240',
             ],
         ];
@@ -21,7 +21,7 @@ class ProjectDocumentUploadValidation
         return [
             'document.required' => 'Select a document to upload.',
             'document.file' => 'The selected item must be a valid file.',
-            'document.mimes' => 'Only PDF, Word, and Excel documents are allowed.',
+            'document.mimes' => 'Only PDF files are allowed.',
             'document.max' => 'The document may not be larger than 10 MB.',
         ];
     }

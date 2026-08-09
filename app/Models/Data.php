@@ -30,6 +30,7 @@ class Data extends Model
         'supplier',
         'code',
         'order_no',
+        'order_year',
         'input_num',
         'observations',
         'booked',
@@ -50,6 +51,7 @@ class Data extends Model
         'global_price_euros' => 'decimal:2',
         'real_value_euros' => 'decimal:2',
         'booked_euros' => 'decimal:2',
+        'order_year' => 'integer',
 
         'real_value_changed_at' => 'datetime',
         'percentage_changed_at' => 'datetime',

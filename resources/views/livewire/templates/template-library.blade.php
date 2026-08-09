@@ -1,4 +1,5 @@
-<div class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+<div class="dashboard-page-shell">
+  <div class="dashboard-page-content">
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-6 py-5">
             <div class="flex items-center gap-4">
@@ -60,4 +61,5 @@
             @endforelse
         </div>
     </section>
+  </div>
 </div>

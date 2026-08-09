@@ -38,6 +38,6 @@ class RedirectToProjectDataController extends Controller
                 ->with('warning', 'No accessible projects are available yet.');
         }
 
-        return to_route('projects.data', ['project' => $project]);
+        return to_route('projects.data', ['project' => $project->slug]);
     }
 }

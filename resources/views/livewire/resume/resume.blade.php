@@ -1,5 +1,6 @@
-<div class="py-6">
-    <div class="mx-auto max-w-screen-2xl space-y-6 px-4 sm:px-6 lg:px-8">
+<div class="dashboard-page-shell">
+    <x-unified-table-theme />
+    <div class="dashboard-page-content space-y-6">
         <header class="rounded-xl border border-slate-200 bg-white px-5 py-5 shadow-sm">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
@@ -165,7 +166,7 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <table class="unified-data-table">
                     <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
                         <tr>
                             <th class="whitespace-nowrap px-4 py-3 text-left">Year</th>

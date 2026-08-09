@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-slate-100 px-4 py-6 sm:px-6 lg:px-8">
+<div class="dashboard-page-shell">
     <style>
         .project-dashboard-action {
             transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
@@ -124,7 +124,7 @@
                             <x-excel-export-button method="exportReport" />
                         @endif
 
-                        <a href="{{ route('projects.data', ['project' => $project->id]) }}" wire:navigate
+                        <a href="{{ route('projects.data', ['project' => $project->slug]) }}" wire:navigate
                             class="project-dashboard-action inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-blue-500 hover:bg-blue-500 hover:text-white hover:shadow-md active:translate-y-0 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor"
                                 stroke-width="1.8">

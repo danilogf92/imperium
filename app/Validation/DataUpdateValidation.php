@@ -49,6 +49,7 @@ class DataUpdateValidation
         }
 
         $rules['editData.percentage'][] = 'between:0,100';
+        $rules['editData.order_year'] = ['nullable', 'integer', 'between:2000,2100', 'required_with:editData.order_no'];
 
         return $rules;
     }
@@ -58,7 +59,7 @@ class DataUpdateValidation
         return collect(array_merge(
             self::TEXT_FIELDS,
             self::NUMERIC_FIELDS,
-            ['description', 'observations']
+            ['description', 'observations', 'order_year']
         ))->mapWithKeys(
             fn (string $field) => [
                 "editData.{$field}" => (string) str($field)->replace('_', ' ')->title(),

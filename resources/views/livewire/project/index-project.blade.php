@@ -1,13 +1,13 @@
-<div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+<div class="dashboard-page-shell">
 
-    <div class="mx-auto w-full px-4 py-2 sm:px-6 lg:px-8">
+    <div class="dashboard-page-content">
 
         @if ($active)
             {{-- Alertas del módulo --}}
             <livewire:project.alerts />
 
             {{-- Contenedor principal del módulo --}}
-            <div class="mx-auto w-full">
+            <div class="mx-auto min-w-0 max-w-full">
 
                 {{-- Acciones --}}
                 <div class="mb-4">
@@ -20,7 +20,7 @@
                 </div>
 
                 {{-- Tabla --}}
-                <div>
+                <div class="min-w-0 max-w-full">
                     <livewire:project.table :active="$active" />
                 </div>
 

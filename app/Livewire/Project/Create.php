@@ -11,10 +11,16 @@ use App\Livewire\Forms\ProjectForm;
 use App\Models\ProjectRateSetting;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
+use Livewire\WithFileUploads;
+use App\Livewire\Project\Concerns\ManagesProjectIdeaUpload;
 
 class Create extends Component
 {
+    use ManagesProjectIdeaUpload;
+    use WithFileUploads;
+
     public ProjectForm $form;
+    public mixed $projectIdea = null;
 
     public function updatedFormCompanyId(): void
     {
@@ -28,6 +34,11 @@ class Create extends Component
         ]);
 
         $this->form->updateCompanyCode($user);
+    }
+
+    public function updatedFormState(): void
+    {
+        $this->form->handleStateChange();
     }
 
     public function openCreateModal(): void
@@ -46,6 +57,8 @@ class Create extends Component
     public function closeCreateModal(): void
     {
         $this->form->resetForm();
+        $this->reset('projectIdea');
+        $this->resetValidation('projectIdea');
         $this->dispatch('close-modal', 'create-project');
     }
 
@@ -54,8 +67,10 @@ class Create extends Component
         $user = auth()->user();
 
         abort_unless($user, 403);
+        $this->validateProjectIdea();
 
         $project = $this->form->store($user);
+        $this->storeProjectIdea($project);
 
         $this->dispatch(
             'project-created',
@@ -64,6 +79,7 @@ class Create extends Component
 
         $this->dispatch('close-modal', 'create-project');
         $this->form->resetForm();
+        $this->reset('projectIdea');
     }
 
     public function render(): View

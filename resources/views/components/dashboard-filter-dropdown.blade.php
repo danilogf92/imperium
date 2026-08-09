@@ -1,4 +1,4 @@
-@props(['label', 'model', 'options' => [], 'selected' => [], 'multiple' => false, 'default' => null])
+@props(['label', 'model', 'options' => [], 'selected' => [], 'multiple' => false, 'default' => null, 'showSelection' => false])
 
 @php
     $optionList = collect($options)->values();
@@ -6,6 +6,9 @@
     $selectedCount = collect($selectedValues)
         ->filter(fn($value) => $value !== null && $value !== '' && $value !== $default)
         ->count();
+    $selectedOptionLabel = $showSelection && !$multiple && $selectedCount
+        ? data_get($optionList->first(fn($option) => (string) data_get($option, 'value') === (string) $selected), 'label')
+        : null;
 @endphp
 
 <div x-data="{ open: false, search: '' }" x-on:scroll.window="open = false" class="shrink-0">
@@ -13,7 +16,7 @@
         @click="open = !open; if (open) { $nextTick(() => { const rect = $refs.trigger.getBoundingClientRect(); $refs.menu.style.left = `${rect.left}px`; $refs.menu.style.top = `${rect.bottom + 8}px`; }); }"
         :class="open ? 'border-blue-500 ring-2 ring-blue-500/25 text-blue-700' : 'border-slate-300'"
         class="inline-flex h-11 min-w-32 cursor-pointer items-center justify-between gap-3 rounded-lg border bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 focus:outline-none">
-        <span>{{ __($label) }}</span>
+        <span>{{ $selectedOptionLabel ? __($selectedOptionLabel) : __($label) }}</span>
         <span class="flex items-center gap-2">
             @if ($selectedCount > 0)
                 <span

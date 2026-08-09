@@ -29,11 +29,17 @@ class MilestoneForm
                     ->helperText('Short unique identifier, for example: PO or WMAT.'),
 
                 ColorPicker::make('color')
-                    ->label('Color')
+                    ->label('Export color')
+                    ->required()
+                    ->default('#2563EB')
+                    ->regex('/^#[0-9A-Fa-f]{6}$/'),
+
+                ColorPicker::make('view_color')
+                    ->label('View color')
                     ->required()
                     ->default('#2563EB')
                     ->regex('/^#[0-9A-Fa-f]{6}$/'),
             ])
-            ->columns(3);
+            ->columns(4);
     }
 }

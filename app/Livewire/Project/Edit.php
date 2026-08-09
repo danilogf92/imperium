@@ -14,10 +14,17 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\WithFileUploads;
+use App\Livewire\Project\Concerns\ManagesProjectIdeaUpload;
 
 class Edit extends Component
 {
+    use ManagesProjectIdeaUpload;
+    use WithFileUploads;
+
     public ProjectForm $form;
+    public mixed $projectIdea = null;
+    public ?string $currentProjectIdeaName = null;
 
     public int $projectId;
 
@@ -25,6 +32,7 @@ class Edit extends Component
     {
         $this->projectId = (int) $project->getKey();
         $this->form->setProject($project);
+        $this->currentProjectIdeaName = $project->project_idea_name;
     }
 
     public function updatedFormCompanyId(): void
@@ -41,9 +49,16 @@ class Edit extends Component
         $this->form->updateCompanyCode($user);
     }
 
+    public function updatedFormState(): void
+    {
+        $this->form->handleStateChange();
+    }
+
     public function openModal(): void
     {
         $this->form->setProject($this->authorizedProject());
+        $this->reset('projectIdea');
+        $this->currentProjectIdeaName = $this->authorizedProject()->project_idea_name;
         $this->dispatch('open-modal', $this->modalName());
     }
 
@@ -58,6 +73,7 @@ class Edit extends Component
     public function closeModal(): void
     {
         $this->resetValidation();
+        $this->reset('projectIdea');
         $this->dispatch('close-modal', $this->modalName());
     }
 
@@ -66,6 +82,7 @@ class Edit extends Component
         $user = auth()->user();
 
         abort_unless($user, 403);
+        $this->validateProjectIdea();
 
         $currentProject = $this->authorizedProject();
         $newRate = (float) $this->form->rate;
@@ -101,6 +118,8 @@ class Edit extends Component
 
             return $project;
         });
+        $this->storeProjectIdea($project);
+        $this->currentProjectIdeaName = $project->fresh()->project_idea_name;
 
         $this->dispatch(
             'project-updated',

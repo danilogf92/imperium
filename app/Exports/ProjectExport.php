@@ -124,7 +124,7 @@ class ProjectExport
     private function value(Project $project, string $column): mixed
     {
         return match ($column) {
-            'links' => route('projects.data', $project),
+            'links' => route('projects.data', ['project' => $project->slug]),
             'upload_pda' => filled($project->upload_pda) ? 'Yes' : 'No',
             'state', 'investments', 'justification' => $project->{$column}?->value,
             'classification' => $project->classification_of_investments?->value,

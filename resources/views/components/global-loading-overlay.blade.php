@@ -26,7 +26,7 @@
     <script>
         (() => {
             let pendingRequests = 0;
-            let suppressGlobalLoadingUntil = 0;
+            let globalLoadingIntentUntil = 0;
             let loadingWatchdog;
 
             const overlay = () => document.getElementById('global-loading-overlay');
@@ -64,13 +64,14 @@
                 }
 
                 if (target.closest('[data-global-loading]')) {
-                    suppressGlobalLoadingUntil = 0;
+                    globalLoadingIntentUntil = Date.now() + 3000;
                     show();
                     return;
                 }
 
                 if (target.closest('[data-no-global-loading]')) {
-                    suppressGlobalLoadingUntil = Date.now() + 3000;
+                    globalLoadingIntentUntil = 0;
+                    hide();
                 }
             };
 
@@ -78,39 +79,16 @@
             document.addEventListener('change', trackLoadingIntent, true);
             document.addEventListener('input', trackLoadingIntent, true);
             document.addEventListener('submit', () => {
-                // A Livewire form submission persists data, including submissions made with Enter.
-                suppressGlobalLoadingUntil = 0;
+                // Loading is opt-in through data-global-loading, including form submissions.
             }, true);
 
             document.addEventListener('livewire:init', () => {
                 Livewire.hook('request', ({ payload, succeed, fail }) => {
-                    if (Date.now() < suppressGlobalLoadingUntil) {
+                    if (Date.now() > globalLoadingIntentUntil) {
                         return;
                     }
 
-                    const calls = (payload?.components ?? [])
-                        .flatMap(component => component.calls ?? []);
-                    const ignoredMethods = [
-                        'openDocumentModal',
-                        'openDeleteDocumentModal',
-                        'closeDocumentModal',
-                        'closeDeleteDocumentModal',
-                        'uploadDocument',
-                        'deleteDocument',
-                        '_startUpload',
-                        '_finishUpload',
-                        '_uploadErrored',
-                        '_removeUpload',
-                    ];
-                    const isUiOnlyMethod = method => ignoredMethods.includes(method)
-                        || /^(open|close|editMilestone|requestDelete|cancelDelete)/.test(method);
-                    const onlyUpdatesUiState = calls.length > 0
-                        && calls.every(call => isUiOnlyMethod(call.method));
-
-                    if (onlyUpdatesUiState) {
-                        return;
-                    }
-
+                    globalLoadingIntentUntil = 0;
                     pendingRequests++;
                     show();
 

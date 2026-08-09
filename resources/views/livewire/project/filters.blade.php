@@ -106,10 +106,17 @@
                     ])"
                     :selected="$investmentFilter" multiple />
 
+                <x-dashboard-filter-dropdown label="Project ideas" model="projectIdeaFilter"
+                    :options="collect([
+                        ['value' => 'with', 'label' => 'With project ideas'],
+                        ['value' => 'without', 'label' => 'Without project ideas'],
+                    ])"
+                    :selected="$projectIdeaFilter" multiple />
+
                 {{-- Limpiar todos los filtros --}}
                 <div class="shrink-0">
                     <x-clear-filters-button method="resetAll"
-                        :active="$plantFilter !== [] || $yearSearch !== [] || $stateSearch !== [] || $typeOfProjectSearch !== [] || $investmentFilter !== [] || $orderByProject" />
+                        :active="$plantFilter !== [] || $yearSearch !== [] || $stateSearch !== [] || $typeOfProjectSearch !== [] || $investmentFilter !== [] || $projectIdeaFilter !== [] || $orderByProject" />
                 </div>
             </div>
 

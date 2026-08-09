@@ -25,15 +25,45 @@
     $maxWidthClass = $maxWidthClasses[$maxWidth] ?? $maxWidthClasses['2xl'];
 @endphp
 
+@once
+    <style>
+        .app-modal button:not(:disabled),
+        .app-modal a[href],
+        .app-modal label[for],
+        .app-modal select:not(:disabled),
+        .app-modal input[type='checkbox']:not(:disabled),
+        .app-modal input[type='radio']:not(:disabled),
+        .app-modal [role='button']:not([aria-disabled='true']) {
+            cursor: pointer;
+        }
+
+        .app-modal button:disabled,
+        .app-modal [aria-disabled='true'] {
+            cursor: not-allowed;
+        }
+    </style>
+@endonce
+
 <div x-data="{
     show: @js($show),
     closeMethod: @js($closeMethod),
+    isDismissing: false,
 
-    dismiss() {
+    dismiss(event = null) {
+        event?.stopPropagation();
+
+        if (!this.show || this.isDismissing) {
+            return;
+        }
+
+        this.isDismissing = true;
         this.show = false;
 
         if (this.closeMethod) {
-            this.$wire.call(this.closeMethod);
+            Promise.resolve(this.$wire.call(this.closeMethod))
+                .finally(() => this.isDismissing = false);
+        } else {
+            this.isDismissing = false;
         }
     },
 
@@ -84,14 +114,16 @@
     }
 })"
     x-on:open-modal.window="
-        $event.detail == '{{ $name }}'
-            ? show = true
-            : null
+        if ($event.detail == '{{ $name }}') {
+            isDismissing = false;
+            show = true;
+        }
     "
     x-on:close-modal.window="
-        $event.detail == '{{ $name }}'
-            ? show = false
-            : null
+        if ($event.detail == '{{ $name }}') {
+            show = false;
+            isDismissing = false;
+        }
     "
     x-on:close.stop="dismiss()" x-on:keydown.escape.window="if (show) dismiss()"
     x-on:keydown.tab.prevent="
@@ -100,9 +132,9 @@
     x-on:keydown.shift.tab.prevent="
         prevFocusable().focus()
     " x-show="show"
-    class="fixed inset-0 z-50 overflow-y-auto px-4 py-6 sm:px-6" style="display: {{ $show ? 'block' : 'none' }};">
+    class="app-modal fixed inset-0 z-50 overflow-y-auto px-4 py-6 sm:px-6" style="display: {{ $show ? 'block' : 'none' }};">
     {{-- Fondo oscuro --}}
-    <div x-show="show" class="fixed inset-0 transform transition-all" x-on:click="dismiss()"
+    <div x-show="show" class="fixed inset-0 cursor-pointer transform transition-all"
         x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
@@ -110,11 +142,12 @@
     </div>
 
     {{-- Contenedor para centrar el modal --}}
-    <div class="relative flex min-h-full items-center justify-center" x-on:click.self="dismiss()">
+    <div class="relative flex min-h-full cursor-pointer items-center justify-center" x-on:click.self="dismiss($event)">
 
         {{-- Caja principal del modal --}}
         <div x-show="show"
-            class="relative flex max-h-[calc(100vh-3rem)] w-full flex-col overflow-hidden rounded-lg bg-white shadow-xl transform transition-all {{ $maxWidthClass }}"
+            x-on:click.stop
+            class="relative flex max-h-[calc(100vh-3rem)] w-full cursor-default flex-col overflow-hidden rounded-lg bg-white shadow-xl transform transition-all {{ $maxWidthClass }}"
             x-transition:enter="ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200"

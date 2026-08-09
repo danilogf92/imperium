@@ -67,16 +67,14 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/', IndexProject::class)
             ->name('projects');
 
-        Route::prefix('{project}')->name('projects.')->group(function (): void {
-            Route::get('/dashboard', DashboardProjects::class)
-                ->name('dashboard');
+        Route::get('/{project:slug}/dashboard', DashboardProjects::class)
+            ->name('projects.dashboard');
 
-            Route::get('/data', IndexData::class)
-                ->name('data');
+        Route::get('/{project:slug}/data', IndexData::class)
+            ->name('projects.data');
 
-            Route::get('/orders', Ordenes::class)
-                ->name('orders');
-        });
+        Route::get('/{project}/orders', Ordenes::class)
+            ->name('projects.orders');
     });
 });
 

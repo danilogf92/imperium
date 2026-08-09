@@ -27,7 +27,11 @@ class MilestonesTable
                     ->sortable(),
 
                 ColorColumn::make('color')
-                    ->label('Color')
+                    ->label('Export color')
+                    ->copyable(),
+
+                ColorColumn::make('view_color')
+                    ->label('View color')
                     ->copyable(),
 
                 TextColumn::make('created_at')

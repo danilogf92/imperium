@@ -72,6 +72,8 @@ class ProjectDataExcelImporter
         'order no' => 'order_no',
         'order no.' => 'order_no',
         'order number' => 'order_no',
+        'order year' => 'order_year',
+        'year' => 'order_year',
 
         'input num' => 'input_num',
         'input no' => 'input_num',
@@ -129,6 +131,7 @@ class ProjectDataExcelImporter
         'percentage',
         'executed_dollars',
         'executed_euros',
+        'order_year',
     ];
 
     public function import(Project $project, string $path): int
@@ -226,6 +229,10 @@ class ProjectDataExcelImporter
                 $errors[] = "Row {$excelRow}: percentage must be between 0 and 100.";
             }
 
+            if ($record['order_year'] && ($record['order_year'] < 2000 || $record['order_year'] > 2100)) {
+                $errors[] = "Row {$excelRow}: order year must be between 2000 and 2100.";
+            }
+
             foreach (
                 [
                     'area',
@@ -256,6 +263,9 @@ class ProjectDataExcelImporter
             }
 
             $record['project_id'] = $project->id;
+            $record['order_year'] = filled($record['order_no'])
+                ? ((int) ($record['order_year'] ?: $project->forecast_start_date?->format('Y') ?: now()->year))
+                : null;
 
             $this->calculateCurrencyValues($record, $rate);
 
@@ -321,6 +331,7 @@ class ProjectDataExcelImporter
             'supplier' => null,
             'code' => null,
             'order_no' => null,
+            'order_year' => null,
             'input_num' => null,
             'observations' => null,
             'booked' => 0,

@@ -5,6 +5,7 @@ namespace App\Livewire\Project;
 use App\Enums\ProjectPermissionEnum;
 use App\Exports\ProjectDashboardExport;
 use App\Exports\ProjectExport;
+use App\Livewire\Concerns\InteractsWithPerPagePreference;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -12,6 +13,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class Actions extends Component
 {
+    use InteractsWithPerPagePreference;
+
     /**
      * Texto utilizado para buscar proyectos.
      */
@@ -31,6 +34,11 @@ class Actions extends Component
     public string $sortBy = 'id';
     public string $sortDir = 'DESC';
     public bool $orderByProject = false;
+
+    public function mount(): void
+    {
+        $this->loadPerPagePreference();
+    }
 
     #[On('project-filters-updated')]
     public function syncFilters(
@@ -70,15 +78,7 @@ class Actions extends Component
      */
     public function updatedPerPage(int|string $value): void
     {
-        $allowedValues = [5, 10, 20, 50, 100];
-
-        $perPage = (int) $value;
-
-        if (!in_array($perPage, $allowedValues, true)) {
-            $perPage = 10;
-        }
-
-        $this->perPage = $perPage;
+        $this->savePerPagePreference($value);
 
         $this->dispatch(
             'project-per-page-updated',
@@ -92,7 +92,6 @@ class Actions extends Component
     public function resetAll(): void
     {
         $this->search = '';
-        $this->perPage = 10;
         $this->plantFilter = [];
         $this->yearSearch = [];
         $this->stateSearch = [];

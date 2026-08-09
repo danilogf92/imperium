@@ -24,7 +24,7 @@ class ProjectDataExport
         'percentage' => 'Percentage',
         'executed_dollars' => 'Executed $', 'executed_euros' => 'Executed €',
         'booked' => 'Booked $', 'booked_euros' => 'Booked €', 'supplier' => 'Supplier',
-        'code' => 'Code', 'order_no' => 'Order no.', 'input_num' => 'Input no.',
+        'code' => 'Code', 'order_no' => 'Order no.', 'order_year' => 'Order year', 'input_num' => 'Input no.',
         'observations' => 'Observations',
     ];
 

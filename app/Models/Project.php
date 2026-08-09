@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Project extends Model
 {
@@ -22,6 +23,7 @@ class Project extends Model
         'created_by',
         'responsible_id',
         'name',
+        'slug',
         'pda_code',
         'rate',
         'state',
@@ -34,6 +36,8 @@ class Project extends Model
         'forecast_end_date',
         'file_name',
         'upload_pda',
+        'project_idea_path',
+        'project_idea_name',
         'approve_date',
         'close_date',
     ];
@@ -51,6 +55,27 @@ class Project extends Model
         'approve_date' => 'date',
         'close_date' => 'date',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (Project $project): void {
+            if (! $project->isDirty('name') && filled($project->slug)) {
+                return;
+            }
+
+            $baseSlug = Str::slug($project->name) ?: 'project';
+            $slug = $baseSlug;
+            $suffix = 2;
+
+            while (static::query()->where('slug', $slug)
+                ->when($project->exists, fn ($query) => $query->whereKeyNot($project->getKey()))
+                ->exists()) {
+                $slug = $baseSlug.'-'.$suffix++;
+            }
+
+            $project->slug = $slug;
+        });
+    }
 
     public function company(): BelongsTo
     {
@@ -75,5 +100,10 @@ class Project extends Model
     public function projectMilestones(): HasMany
     {
         return $this->hasMany(ProjectMilestone::class);
+    }
+
+    public function weeklyActivities(): HasMany
+    {
+        return $this->hasMany(ProjectWeeklyActivity::class);
     }
 }

@@ -50,6 +50,7 @@ class Filters extends Component
      * Tipo de inversión seleccionado.
      */
     public array $investmentFilter = [];
+    public array $projectIdeaFilter = [];
 
     /**
      * Indica si se utiliza el ordenamiento especial.
@@ -108,6 +109,7 @@ class Filters extends Component
                 'stateSearch',
                 'typeOfProjectSearch',
                 'investmentFilter',
+                'projectIdeaFilter',
             ])->contains(
                 fn(string $filter): bool => $property === $filter
                     || str_starts_with($property, $filter . '.')
@@ -173,6 +175,7 @@ class Filters extends Component
         $this->stateSearch = [];
         $this->typeOfProjectSearch = [];
         $this->investmentFilter = [];
+        $this->projectIdeaFilter = [];
         $this->search = '';
     }
 
@@ -188,6 +191,7 @@ class Filters extends Component
             stateSearch: $this->stateSearch,
             typeOfProjectSearch: $this->typeOfProjectSearch,
             investmentFilter: $this->investmentFilter,
+            projectIdeaFilter: $this->projectIdeaFilter,
             orderByProject: $this->orderByProject,
         );
     }
@@ -290,6 +294,10 @@ class Filters extends Component
                 'investments',
                 $this->investmentFilter
             ))
+            ->when(count($this->projectIdeaFilter) === 1, fn (Builder $query) =>
+                $this->projectIdeaFilter[0] === 'with'
+                    ? $query->whereNotNull('project_idea_path')
+                    : $query->whereNull('project_idea_path'))
             ->when($this->orderByProject, fn (Builder $query) => $query
                 ->where('state', '!=', 'Finished')
                 ->where('data_uploaded', true)
