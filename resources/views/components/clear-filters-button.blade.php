@@ -1,10 +1,11 @@
 @props([
     'method',
     'active' => false,
+    'globalLoading' => true,
 ])
 
 <button type="button"
-    data-global-loading
+    @if ($globalLoading) data-global-loading @else data-no-global-loading @endif
     wire:click="{{ $method }}"
     wire:loading.attr="disabled"
     wire:target="{{ $method }}"

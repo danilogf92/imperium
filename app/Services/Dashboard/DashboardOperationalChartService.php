@@ -2,14 +2,15 @@
 
 namespace App\Services\Dashboard;
 
+use App\Support\ChartValueFormatter;
 use App\Support\Dashboard\DashboardCurrency;
 use Asantibanez\LivewireCharts\Models\ColumnChartModel;
 
 final class DashboardOperationalChartService
 {
     private const COLORS = [
-        '#2563eb', '#0ea5e9', '#14b8a6', '#22c55e', '#84cc16',
-        '#eab308', '#f59e0b', '#f97316', '#ef4444', '#8b5cf6',
+        '#2563EB', '#DC2626', '#16A34A', '#D97706', '#7C3AED',
+        '#DB2777', '#0891B2', '#4D7C0F', '#EA580C', '#475569',
     ];
 
     public function build(array $statistics, string $currency): array
@@ -50,6 +51,9 @@ final class DashboardOperationalChartService
             ->setTitle($title)
             ->setAnimated(true)
             ->setHorizontal(true)
+            ->setOpacity(1)
+            ->setColors(self::COLORS)
+            ->disableShades()
             ->withDataLabels()
             ->withGrid();
 
@@ -80,8 +84,6 @@ final class DashboardOperationalChartService
 
     private function moneyFormatter(string $currency): string
     {
-        $symbol = json_encode(DashboardCurrency::symbol($currency), JSON_THROW_ON_ERROR);
-
-        return "function(value) { return {$symbol} + ' ' + Number(value).toLocaleString(undefined, {maximumFractionDigits: 2}); }";
+        return ChartValueFormatter::compactMoney(DashboardCurrency::symbol($currency));
     }
 }

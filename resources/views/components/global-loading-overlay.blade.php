@@ -63,15 +63,16 @@
                     return;
                 }
 
-                if (target.closest('[data-global-loading]')) {
-                    globalLoadingIntentUntil = Date.now() + 3000;
-                    show();
-                    return;
-                }
-
                 if (target.closest('[data-no-global-loading]')) {
                     globalLoadingIntentUntil = 0;
                     hide();
+                    return;
+                }
+
+                if (target.closest('[data-global-loading]')) {
+                    // Wait until Livewire actually starts a request. A visual click
+                    // must never leave the overlay open by itself.
+                    globalLoadingIntentUntil = Date.now() + 3000;
                 }
             };
 

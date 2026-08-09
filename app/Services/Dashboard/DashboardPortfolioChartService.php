@@ -2,6 +2,7 @@
 
 namespace App\Services\Dashboard;
 
+use App\Support\ChartValueFormatter;
 use App\Support\Dashboard\DashboardCurrency;
 use Asantibanez\LivewireCharts\Models\ColumnChartModel;
 use Asantibanez\LivewireCharts\Models\PieChartModel;
@@ -70,6 +71,8 @@ class DashboardPortfolioChartService
             ->setTitle('Projects by investment')
             ->setAnimated(true)
             ->setHorizontal(true)
+            ->setOpacity(1)
+            ->disableShades()
             ->withDataLabels()
             ->withGrid();
 
@@ -90,6 +93,8 @@ class DashboardPortfolioChartService
         $chart = (new PieChartModel)
             ->setTitle('Projects by state')
             ->setAnimated(true)
+            ->setOpacity(1)
+            ->disableShades()
             ->setType('donut')
             ->withDataLabels()
             ->withLegend()
@@ -138,6 +143,8 @@ class DashboardPortfolioChartService
             ->setTitle('Budget by investment')
             ->setAnimated(true)
             ->setHorizontal(true)
+            ->setOpacity(1)
+            ->disableShades()
             ->withDataLabels()
             ->withGrid()
             ->setJsonConfig($this->moneyChartConfig('xaxis', $currency));
@@ -161,6 +168,8 @@ class DashboardPortfolioChartService
         $chart = (new PieChartModel)
             ->setTitle('Budget by state')
             ->setAnimated(true)
+            ->setOpacity(1)
+            ->disableShades()
             ->setType('donut')
             ->withDataLabels()
             ->withLegend()
@@ -257,12 +266,7 @@ class DashboardPortfolioChartService
 
     private function moneyFormatter(string $currency): string
     {
-        $symbol = json_encode(
-            DashboardCurrency::symbol($currency),
-            JSON_THROW_ON_ERROR
-        );
-
-        return "function(value) { return {$symbol} + ' ' + Number(value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); }";
+        return ChartValueFormatter::compactMoney(DashboardCurrency::symbol($currency));
     }
 
     private function percentFormatter(): string

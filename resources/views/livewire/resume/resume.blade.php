@@ -43,18 +43,18 @@
             </div>
 
             <div x-show="open" x-collapse>
-                <div class="flex flex-wrap items-end gap-3 px-4 py-4 sm:px-5 sm:py-5">
-                    <div class="relative" style="min-width: 25.5rem; flex: 0 1 48%;">
+                <div class="flex flex-wrap items-center gap-2 px-4 py-4 sm:px-5 sm:py-5 xl:flex-nowrap">
+                    <div class="relative w-full shrink-0 sm:w-52">
                         <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                             <circle cx="11" cy="11" r="7" />
                             <path stroke-linecap="round" d="m16 16 4 4" />
                         </svg>
-                        <input wire:model.live.debounce.400ms="search" data-global-loading type="text"
+                        <input wire:model.live.debounce.400ms="search" data-no-global-loading type="text"
                             placeholder="{{ __('Search project or PDA code...') }}"
                             class="h-11 w-full rounded-lg border-slate-300 bg-white pl-10 pr-10 text-sm text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/25">
                         @if ($search !== '')
-                            <button wire:click="$set('search', '')" data-global-loading type="button"
+                            <button wire:click="$set('search', '')" data-no-global-loading type="button"
                                 class="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-200 hover:text-slate-700"
                                 aria-label="{{ __('Clear search') }}">
                                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor">
@@ -70,10 +70,10 @@
                             'label' => $company->company_name,
                         ],
                     )" :selected="$plantFilter"
-                        multiple />
+                        multiple compact :global-loading="false" />
 
                     <x-dashboard-filter-dropdown label="Years" model="yearFilter" :options="$years->map(fn($year) => ['value' => $year, 'label' => $year])" :selected="$yearFilter"
-                        multiple />
+                        multiple compact :global-loading="false" />
 
                     <x-dashboard-filter-dropdown label="Status" model="stateFilter" :options="collect($stateOptions)->map(
                         fn($state) => [
@@ -81,7 +81,7 @@
                             'label' => $state->value,
                         ],
                     )" :selected="$stateFilter"
-                        multiple />
+                        multiple compact :global-loading="false" />
 
                     <x-dashboard-filter-dropdown label="Investments" model="investmentFilter" :options="collect($investmentOptions)->map(
                         fn($investment) => [
@@ -89,7 +89,7 @@
                             'label' => $investment->value,
                         ],
                     )"
-                        :selected="$investmentFilter" multiple />
+                        :selected="$investmentFilter" multiple compact :global-loading="false" />
 
                     <x-dashboard-filter-dropdown label="Classifications" model="classificationFilter" :options="collect($classificationOptions)->map(
                         fn($classification) => [
@@ -97,19 +97,19 @@
                             'label' => $classification->value,
                         ],
                     )"
-                        :selected="$classificationFilter" multiple />
+                        :selected="$classificationFilter" multiple compact :global-loading="false" />
 
-                    <div class="min-w-36">
-                        <label
-                            class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Currency</label>
-                        <select wire:model.live="currency" data-global-loading
+                    <div class="w-24 shrink-0">
+                        <label for="resume-currency" class="sr-only">Currency</label>
+                        <select id="resume-currency" wire:model.live="currency" data-no-global-loading
                             class="h-11 w-full cursor-pointer rounded-lg border-slate-300 bg-white text-sm font-medium text-slate-700 shadow-sm hover:border-blue-400 focus:border-blue-500 focus:ring-blue-500">
-                            <option value="euro">EUR (&euro;)</option>
-                            <option value="dollar">USD ($)</option>
+                            <option value="euro">EUR</option>
+                            <option value="dollar">USD</option>
                         </select>
                     </div>
 
-                    <x-clear-filters-button method="clearFilters" :active="$hasActiveFilters" />
+                    <x-clear-filters-button method="clearFilters" :active="$hasActiveFilters"
+                        :global-loading="false" />
                 </div>
             </div>
         </section>
@@ -126,7 +126,7 @@
         <section class="overflow-x-auto pb-1">
             <div class="gap-4"
                 style="display: grid; grid-template-columns: repeat(4, minmax(210px, 1fr)); min-width: 840px;">
-                @foreach ([['label' => 'Projects', 'value' => number_format($totals['projects']), 'accent' => 'bg-indigo-500', 'text' => 'text-indigo-600'], ['label' => 'Approved', 'value' => $currencySymbol . ' ' . number_format($totals['approved'], 2), 'accent' => 'bg-blue-500', 'text' => 'text-blue-600'], ['label' => 'Booked', 'value' => $currencySymbol . ' ' . number_format($totals['booked'], 2), 'accent' => 'bg-amber-500', 'text' => 'text-amber-600'], ['label' => 'Available', 'value' => $currencySymbol . ' ' . number_format($totals['available'], 2), 'accent' => $totals['available'] < 0 ? 'bg-red-500' : 'bg-emerald-500', 'text' => $totals['available'] < 0 ? 'text-red-600' : 'text-emerald-600']] as $metric)
+                @foreach ([['label' => 'Projects', 'value' => $totals['projects'], 'money' => false, 'accent' => 'bg-indigo-500', 'text' => 'text-indigo-600'], ['label' => 'Approved', 'value' => $totals['approved'], 'money' => true, 'accent' => 'bg-blue-500', 'text' => 'text-blue-600'], ['label' => 'Booked', 'value' => $totals['booked'], 'money' => true, 'accent' => 'bg-amber-500', 'text' => 'text-amber-600'], ['label' => 'Available', 'value' => $totals['available'], 'money' => true, 'accent' => $totals['available'] < 0 ? 'bg-red-500' : 'bg-emerald-500', 'text' => $totals['available'] < 0 ? 'text-red-600' : 'text-emerald-600']] as $metric)
                     <article class="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                         <span class="absolute inset-y-0 left-0 w-1 {{ $metric['accent'] }}"></span>
                         <div class="flex items-center gap-3">
@@ -146,7 +146,11 @@
                             <p class="whitespace-nowrap text-sm font-medium text-slate-500">{{ __($metric['label']) }}</p>
                         </div>
                         <p class="mt-2 whitespace-nowrap text-2xl font-bold tracking-tight text-slate-900">
-                            {{ $metric['value'] }}
+                            @if ($metric['money'])
+                                <x-compact-money :value="$metric['value']" :symbol="$currencySymbol" />
+                            @else
+                                {{ number_format($metric['value']) }}
+                            @endif
                         </p>
                     </article>
                 @endforeach
@@ -187,12 +191,12 @@
                                 </td>
                                 @foreach (['budgeted', 'approved', 'booked'] as $field)
                                     <td class="whitespace-nowrap px-4 py-3 text-right font-medium text-slate-700">
-                                        {{ $currencySymbol }} {{ number_format($row[$field], 2) }}
+                                        <x-compact-money :value="$row[$field]" :symbol="$currencySymbol" />
                                     </td>
                                 @endforeach
                                 <td class="whitespace-nowrap px-4 py-3 text-right font-bold"
                                     style="color: {{ $row['available'] < 0 ? '#dc2626' : '#7c3aed' }}">
-                                    {{ $currencySymbol }} {{ number_format($row['available'], 2) }}
+                                    <x-compact-money :value="$row['available']" :symbol="$currencySymbol" />
                                 </td>
                             </tr>
                         @empty
@@ -238,6 +242,23 @@
                     subtitle="Available, booked, budgeted and approved values by year"
                     filename="annual-available-trend" height="34rem">
                     <livewire:livewire-line-chart key="{{ $availableChart->reactiveKey() }}" :line-chart-model="$availableChart" />
+                </x-dashboard-chart-card>
+
+                <x-dashboard-chart-card title="Financial coverage ratios"
+                    subtitle="Approved and booked coverage percentages by year"
+                    filename="annual-financial-coverage" height="34rem">
+                    <x-dashboard-apex-chart :options="$coverageChartOptions"
+                        chart-key="resume-coverage-{{ md5(json_encode($coverageChartOptions)) }}" />
+                    <x-slot:footer>
+                        Approved / Budgeted measures realized value against budget; Booked / Approved measures commitments against realized value.
+                    </x-slot:footer>
+                </x-dashboard-chart-card>
+
+                <x-dashboard-chart-card title="Average value per project"
+                    subtitle="Average budgeted, approved and booked value for each project"
+                    filename="annual-average-project-value" height="34rem">
+                    <x-dashboard-apex-chart :options="$averageChartOptions"
+                        chart-key="resume-average-{{ md5(json_encode($averageChartOptions)) }}" />
                 </x-dashboard-chart-card>
             </section>
         @endif

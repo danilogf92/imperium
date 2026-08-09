@@ -15,7 +15,10 @@
                 <p class="mt-0.5 truncate text-xs text-slate-500">{{ __($subtitle) }}</p>
             @endif
         </div>
-        <x-chart-download-button :filename="$filename" />
+        <div class="flex shrink-0 items-center gap-2">
+            <x-chart-download-button :filename="$filename" />
+            <x-chart-excel-button :filename="$filename" :title="$title" />
+        </div>
     </header>
 
     <div class="min-h-0 flex-1 p-4">

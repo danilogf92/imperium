@@ -69,7 +69,7 @@
                         Dashboard
                     </a>
                     @if ($hasOrders)
-                        <a href="{{ route('projects.orders', ['project' => $project]) }}" wire:navigate
+                        <a href="{{ route('projects.orders', ['project' => $project->slug]) }}" wire:navigate
                             title="View project orders"
                             class="data-action-button data-back-to-projects inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2">
                             <svg class="mr-2 h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor"

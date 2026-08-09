@@ -8,36 +8,30 @@ use App\Enums\ProjectPermissionEnum;
 use App\Enums\ProjectStateEnum;
 use App\Exports\ProjectResumeExport;
 use App\Models\Project;
+use App\Services\Resume\ResumeChartService;
+use App\Support\ChartValueFormatter;
 use Asantibanez\LivewireCharts\Facades\LivewireCharts;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Renderless;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class Resume extends Component
 {
-    #[Url(as: 'q', except: '')]
     public string $search = '';
 
-    #[Url(as: 'plant', except: [])]
     public array $plantFilter = [];
 
-    #[Url(as: 'year', except: [])]
     public array $yearFilter = [];
 
-    #[Url(as: 'state', except: [])]
     public array $stateFilter = [];
 
-    #[Url(as: 'investment', except: [])]
     public array $investmentFilter = [];
 
-    #[Url(as: 'classification', except: [])]
     public array $classificationFilter = [];
 
-    #[Url(except: 'euro')]
     public string $currency = 'euro';
 
     public function mount(): void
@@ -81,7 +75,7 @@ class Resume extends Component
         );
     }
 
-    public function render(): View
+    public function render(ResumeChartService $chartService): View
     {
         $rows = $this->summaryRows(ProjectPermissionEnum::View);
         $companies = auth()->user()
@@ -133,6 +127,8 @@ class Resume extends Component
                 ->setJsonConfig($this->moneyChartConfig())
         );
 
+        $currencySymbol = $this->currency === 'dollar' ? '$' : "\u{20AC}";
+
         return view('livewire.resume.resume', [
             'rows' => $rows,
             'stackedChart' => $stackedChart,
@@ -148,20 +144,19 @@ class Resume extends Component
                 ?->companiesForPermissionQuery(ProjectPermissionEnum::Export)
                 ->exists() ?? false,
             'hasActiveFilters' => $this->hasActiveFilters(),
-            'currencySymbol' => $this->currency === 'dollar' ? '$' : "\u{20AC}",
+            'currencySymbol' => $currencySymbol,
+            ...$chartService->additionalCharts($rows, $currencySymbol),
         ])->layout('layouts.app');
     }
 
     private function summaryRows(ProjectPermissionEnum $permission): Collection
     {
         $budgetColumn = $this->currency === 'dollar' ? 'global_price' : 'global_price_euros';
-        $approvedColumn = $this->currency === 'dollar' ? 'real_value' : 'real_value_euros';
         $bookedColumn = $this->currency === 'dollar' ? 'booked' : 'booked_euros';
 
         return $this->filteredProjectQuery($permission)
             ->with('company:id,company_name')
             ->withSum('data as original_budget', $budgetColumn)
-            ->withSum('data as approved', $approvedColumn)
             ->withSum('data as booked', $bookedColumn)
             ->whereNotNull('forecast_start_date')
             ->orderBy('forecast_start_date')
@@ -169,7 +164,13 @@ class Resume extends Component
             ->groupBy(fn (Project $project): int => (int) $project->forecast_start_date?->year)
             ->map(function (Collection $projects, int $year): array {
                 $original = round((float) $projects->sum('original_budget'), 2);
-                $approved = round((float) $projects->sum('approved'), 2);
+                $approved = round((float) $projects->sum(
+                    fn (Project $project): float => in_array(
+                        $project->state?->value,
+                        [ProjectStateEnum::Execution->value, ProjectStateEnum::Finished->value],
+                        true
+                    ) ? (float) $project->original_budget : 0
+                ), 2);
                 $booked = round((float) $projects->sum('booked'), 2);
 
                 return [
@@ -253,9 +254,9 @@ class Resume extends Component
 
     private function moneyChartConfig(): array
     {
-        $symbol = $this->currency === 'dollar' ? '$' : "\u{20AC}";
-        $formatter = "function(value) { return '{$symbol} ' + Number(value).toLocaleString(undefined, "
-            . "{minimumFractionDigits: 0, maximumFractionDigits: 2}); }";
+        $formatter = ChartValueFormatter::compactMoney(
+            $this->currency === 'dollar' ? '$' : "\u{20AC}"
+        );
 
         return [
             'yaxis.labels.formatter' => $formatter,
@@ -267,6 +268,7 @@ class Resume extends Component
     private function projectsChartOptions(Collection $rows): array
     {
         $symbol = $this->currency === 'dollar' ? '$' : "\u{20AC}";
+        $moneyFormatter = ChartValueFormatter::compactMoney($symbol);
 
         return [
             'series' => [
@@ -286,8 +288,10 @@ class Resume extends Component
                     'seriesName' => ['Budgeted', 'Booked'],
                     'opposite' => true,
                     'title' => ['text' => "Financial value ({$symbol})"],
+                    'labels' => ['formatter' => $moneyFormatter, 'minWidth' => 70, 'maxWidth' => 110],
                 ],
             ],
+            'tooltip' => ['y' => ['formatter' => "function(value, context) { if (context.seriesIndex === 0) return Number(value).toLocaleString() + ' projects'; return ({$moneyFormatter})(value); }"]],
             'legend' => ['show' => true, 'position' => 'top'],
             'grid' => ['show' => true, 'borderColor' => '#E2E8F0'],
         ];
@@ -295,6 +299,9 @@ class Resume extends Component
 
     private function comparisonChartOptions(Collection $rows): array
     {
+        $symbol = $this->currency === 'dollar' ? '$' : "\u{20AC}";
+        $formatter = ChartValueFormatter::compactMoney($symbol);
+
         return [
             'series' => [
                 ['name' => 'Budgeted', 'data' => $rows->pluck('budgeted')->values()->all()],
@@ -310,8 +317,15 @@ class Resume extends Component
             ],
             'dataLabels' => ['enabled' => false],
             'xaxis' => ['categories' => $rows->pluck('year')->map(fn ($year) => (string) $year)->values()->all()],
+            'yaxis' => [
+                'labels' => ['show' => true, 'formatter' => $formatter, 'minWidth' => 80, 'maxWidth' => 130],
+                'title' => ['text' => "Financial value ({$symbol})"],
+                'forceNiceScale' => true,
+            ],
+            'tooltip' => ['y' => ['formatter' => $formatter]],
             'legend' => ['show' => true, 'position' => 'top'],
             'grid' => ['show' => true, 'borderColor' => '#E2E8F0'],
         ];
     }
+
 }

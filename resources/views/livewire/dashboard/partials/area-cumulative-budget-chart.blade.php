@@ -18,14 +18,15 @@
                     const currencySymbol = @js($areaCumulativeChart['currencySymbol']);
 
                     const money = (value) => {
-                        return currencySymbol + ' ' +
-                            Number(value).toLocaleString(
-                                undefined,
-                                {
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0
-                                }
-                            );
+                        const number = Number(value) || 0;
+                        const absolute = Math.abs(number);
+                        const divisor = absolute >= 1000000 ? 1000000 : (absolute >= 1000 ? 1000 : 1);
+                        const suffix = divisor === 1000000 ? ' M' : (divisor === 1000 ? ' K' : '');
+
+                        return currencySymbol + ' ' + (number / divisor).toLocaleString(undefined, {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 2
+                        }) + suffix;
                     };
 
                     const options = {

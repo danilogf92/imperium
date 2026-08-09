@@ -412,7 +412,7 @@
                                         @endif
 
                                         @if ($project->has_orders)
-                                            <a href="{{ route('projects.orders', ['project' => $project->id]) }}"
+                                            <a href="{{ route('projects.orders', ['project' => $project->slug]) }}"
                                                 wire:navigate
                                                 class="font-semibold text-blue-600 hover:text-blue-500 hover:underline">
                                                 Orders

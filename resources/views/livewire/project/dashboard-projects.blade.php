@@ -135,7 +135,7 @@
                         </a>
 
                         @if ($hasOrders)
-                            <a href="{{ route('projects.orders', ['project' => $project->id]) }}" wire:navigate
+                            <a href="{{ route('projects.orders', ['project' => $project->slug]) }}" wire:navigate
                                 title="View project orders"
                                 class="project-dashboard-action back-to-projects-action inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2">
                                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none"
@@ -230,18 +230,22 @@
 
         @php
             $currencySymbol = $dollarOrEuro === 'dollar' ? '$' : '€';
+            $approved = in_array($project->state?->value, ['Execution', 'Finished'], true) ? $budgeted : 0;
+            $available = $budgeted - $approved;
             $metrics = [
                 ['label' => 'Budgeted', 'value' => $currencySymbol . ' ' . number_format($budgeted, 2), 'color' => 'blue'],
+                ['label' => 'Approved', 'value' => $currencySymbol . ' ' . number_format($approved, 2), 'color' => 'slate'],
                 ['label' => 'Booked', 'value' => $currencySymbol . ' ' . number_format($booked, 2), 'color' => 'amber'],
-                ['label' => 'Progress', 'value' => number_format($percentage, 2) . '%', 'color' => 'cyan'],
                 ['label' => 'Executed', 'value' => $currencySymbol . ' ' . number_format($executed, 2), 'color' => 'emerald'],
                 ['label' => 'Real (SAP)', 'value' => $currencySymbol . ' ' . number_format($real_value, 2), 'color' => 'violet'],
+                ['label' => 'Available', 'value' => $currencySymbol . ' ' . number_format($available, 2), 'color' => 'cyan'],
+                ['label' => 'Progress', 'value' => number_format($percentage, 2) . '%', 'color' => 'rose'],
             ];
         @endphp
 
         <section class="overflow-x-auto pb-1">
             <div class="gap-4"
-                style="display: grid; grid-template-columns: repeat(5, minmax(190px, 1fr)); min-width: 950px;">
+                style="display: grid; grid-template-columns: repeat({{ count($metrics) }}, minmax(190px, 1fr)); min-width: {{ count($metrics) * 190 }}px;">
                 @foreach ($metrics as $metric)
                     <article class="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                         <span @class([
@@ -251,6 +255,8 @@
                             'bg-cyan-500' => $metric['color'] === 'cyan',
                             'bg-emerald-500' => $metric['color'] === 'emerald',
                             'bg-violet-500' => $metric['color'] === 'violet',
+                            'bg-slate-500' => $metric['color'] === 'slate',
+                            'bg-rose-500' => $metric['color'] === 'rose',
                         ])></span>
                         <div class="flex items-center gap-3">
                             <span @class([
@@ -260,6 +266,8 @@
                                 'text-cyan-600' => $metric['color'] === 'cyan',
                                 'text-emerald-600' => $metric['color'] === 'emerald',
                                 'text-violet-600' => $metric['color'] === 'violet',
+                                'text-slate-600' => $metric['color'] === 'slate',
+                                'text-rose-600' => $metric['color'] === 'rose',
                             ])>
                                 <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="1.8">
@@ -283,6 +291,8 @@
                 @endforeach
             </div>
         </section>
+
+        @include('livewire.project.partials.executive-insights')
 
         <section class="grid gap-6 lg:grid-cols-2">
             @php
@@ -318,5 +328,7 @@
                 </x-dashboard-chart-card>
             @endforeach
         </section>
+
+        @include('livewire.project.partials.supplier-charts')
     </div>
 </div>

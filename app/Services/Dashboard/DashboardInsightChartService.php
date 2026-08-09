@@ -2,6 +2,7 @@
 
 namespace App\Services\Dashboard;
 
+use App\Support\ChartValueFormatter;
 use App\Support\Dashboard\DashboardCurrency;
 use Asantibanez\LivewireCharts\Models\ColumnChartModel;
 use Asantibanez\LivewireCharts\Models\PieChartModel;
@@ -29,6 +30,9 @@ final class DashboardInsightChartService
         $chart = (new ColumnChartModel)
             ->setTitle('Financial flow')
             ->setAnimated(true)
+            ->setOpacity(1)
+            ->setColors(['#2563EB', '#D97706', '#DC2626', '#16A34A'])
+            ->disableShades()
             ->withDataLabels()
             ->withGrid()
             ->setJsonConfig($this->moneyConfig($currency));
@@ -54,6 +58,8 @@ final class DashboardInsightChartService
             ->setTitle('Committed vs available budget')
             ->setAnimated(true)
             ->setType('donut')
+            ->setColors(['#D97706', '#16A34A'])
+            ->disableShades()
             ->withDataLabels()
             ->withLegend()
             ->addSlice('Committed', round($committed, 2), '#f59e0b')
@@ -70,6 +76,8 @@ final class DashboardInsightChartService
             ->setTitle('Project data coverage')
             ->setAnimated(true)
             ->setType('donut')
+            ->setColors(['#2563EB', '#94A3B8'])
+            ->disableShades()
             ->withDataLabels()
             ->withLegend()
             ->addSlice('With financial data', $projectsWithData, '#2563eb')
@@ -94,6 +102,8 @@ final class DashboardInsightChartService
             ->setTitle('Portfolio stage')
             ->setAnimated(true)
             ->setType('donut')
+            ->setColors(['#7C3AED', '#0891B2', '#16A34A', '#DC2626'])
+            ->disableShades()
             ->withDataLabels()
             ->withLegend()
             ->setJsonConfig([
@@ -121,9 +131,7 @@ final class DashboardInsightChartService
 
     private function moneyFormatter(string $currency): string
     {
-        $symbol = json_encode(DashboardCurrency::symbol($currency), JSON_THROW_ON_ERROR);
-
-        return "function(value) { return {$symbol} + ' ' + Number(value).toLocaleString(undefined, {maximumFractionDigits: 2}); }";
+        return ChartValueFormatter::compactMoney(DashboardCurrency::symbol($currency));
     }
 
     private function percentFormatter(): string

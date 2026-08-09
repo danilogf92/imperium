@@ -7,6 +7,9 @@ use App\Exports\ProjectDetailDashboardExport;
 use App\Models\Data;
 use App\Models\Project;
 use App\Models\UserPreference;
+use App\Support\ChartValueFormatter;
+use App\Services\Project\ProjectSupplierChartService;
+use App\Services\Project\ProjectExecutiveInsightService;
 use Asantibanez\LivewireCharts\Facades\LivewireCharts;
 use Asantibanez\LivewireCharts\Models\ColumnChartModel;
 use Asantibanez\LivewireCharts\Models\PieChartModel;
@@ -93,6 +96,13 @@ class DashboardProjects extends Component
         'executed_euros',
     ];
 
+    private const CHART_CATEGORY_COLORS = [
+        '#1D4ED8', '#DC2626', '#059669', '#D97706', '#7C3AED',
+        '#DB2777', '#0891B2', '#65A30D', '#EA580C', '#475569',
+        '#0F766E', '#9333EA', '#BE123C', '#4D7C0F', '#0369A1',
+        '#B45309', '#4338CA', '#15803D', '#A21CAF', '#334155',
+    ];
+
     public function mount(Project $project)
     {
         $user = auth()->user();
@@ -169,7 +179,10 @@ class DashboardProjects extends Component
         }
     }
 
-    public function render()
+    public function render(
+        ProjectSupplierChartService $supplierCharts,
+        ProjectExecutiveInsightService $executiveInsights
+    )
     {
         $area = Data::query()
             ->where('project_id', $this->project->id)
@@ -210,6 +223,16 @@ class DashboardProjects extends Component
                 'pieChartModelResume' => $this->pieDataGraphTwo($this->createResumePieGraph(), $this->rateConvertion, "Account Balance With Real Value"),
                 'pieChartModelResumeTwo' => $this->pieDataGraphTwo($this->createResumePieGraphTwo(), $this->rateConvertion, "Account Balance With Booked"),
                 'multiColumnChartModel' => $this->multicolumnDataGraph(),
+                ...$supplierCharts->build(
+                    $this->project->id,
+                    (float) $this->rateConvertion,
+                    $this->dollarOrEuro
+                ),
+                ...$executiveInsights->build(
+                    $this->project,
+                    (float) $this->rateConvertion,
+                    $this->dollarOrEuro
+                ),
             ])
             ->layout('layouts.app');
     }
@@ -339,6 +362,9 @@ class DashboardProjects extends Component
                     ->withDataLabels()
                     ->withLegend()
                     ->legendPositionTop()
+                    ->setOpacity(1)
+                    ->setColors(self::CHART_CATEGORY_COLORS)
+                    ->disableShades()
                     ->setJsonConfig($this->moneyChartConfig('yaxis'))
             );
 
@@ -482,6 +508,8 @@ class DashboardProjects extends Component
             ->setTitle($this->textTransform($title))
             ->setAnimated($this->firstRun)
             ->setLegendVisibility(true)
+            ->setOpacity(1)
+            ->disableShades()
             ->withGrid()
             ->withDataLabels()
             ->withLegend()
@@ -506,6 +534,8 @@ class DashboardProjects extends Component
             ->setTitle($this->textTransform($title))
             ->setAnimated($this->firstRun)
             ->setLegendVisibility(true)
+            ->setOpacity(1)
+            ->disableShades()
             ->withGrid()
             ->withDataLabels()
             ->withLegend()
@@ -647,7 +677,7 @@ class DashboardProjects extends Component
                 ->withDataLabels()
                 ->withLegend()
                 ->legendPositionTop()
-                ->setColors(['#2563eb', '#dc2626'])
+                ->setColors(self::CHART_CATEGORY_COLORS)
                 ->disableShades()
                 ->setJsonConfig($this->moneyChartConfig('yaxis'))
         );
@@ -755,14 +785,9 @@ class DashboardProjects extends Component
 
     private function moneyFormatter(): string
     {
-        $symbol = json_encode(
-            $this->dollarOrEuro === 'dollar' ? '$' : '€',
-            JSON_THROW_ON_ERROR
+        return ChartValueFormatter::compactMoney(
+            $this->dollarOrEuro === 'dollar' ? '$' : '€'
         );
-
-        return "function(value) { return {$symbol} + ' ' + "
-            . "Number(value).toLocaleString(undefined, "
-            . "{minimumFractionDigits: 2, maximumFractionDigits: 2}); }";
     }
 
     private function percentFormatter(): string

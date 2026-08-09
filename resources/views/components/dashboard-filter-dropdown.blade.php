@@ -1,4 +1,4 @@
-@props(['label', 'model', 'options' => [], 'selected' => [], 'multiple' => false, 'default' => null, 'showSelection' => false])
+@props(['label', 'model', 'options' => [], 'selected' => [], 'multiple' => false, 'default' => null, 'showSelection' => false, 'compact' => false, 'globalLoading' => true])
 
 @php
     $optionList = collect($options)->values();
@@ -15,8 +15,12 @@
     <button x-ref="trigger" type="button"
         @click="open = !open; if (open) { $nextTick(() => { const rect = $refs.trigger.getBoundingClientRect(); const width = Math.min(288, window.innerWidth - 16); $refs.menu.style.width = `${width}px`; $refs.menu.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - width - 8))}px`; $refs.menu.style.top = `${rect.bottom + 8}px`; }); }"
         :class="open ? 'border-blue-500 ring-2 ring-blue-500/25 text-blue-700' : 'border-slate-300'"
-        class="inline-flex h-11 min-w-32 cursor-pointer items-center justify-between gap-3 rounded-lg border bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 focus:outline-none">
-        <span>{{ $selectedOptionLabel ? __($selectedOptionLabel) : __($label) }}</span>
+        @class([
+            'inline-flex h-11 cursor-pointer items-center justify-between rounded-lg border bg-white text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 focus:outline-none',
+            'min-w-32 gap-3 px-3' => ! $compact,
+            'w-28 gap-1.5 px-2.5' => $compact,
+        ])>
+        <span @class(['truncate' => $compact])>{{ $selectedOptionLabel ? __($selectedOptionLabel) : __($label) }}</span>
         <span class="flex items-center gap-2">
             @if ($selectedCount > 0)
                 <span
@@ -58,10 +62,14 @@
                     <label x-show="search === '' || @js(mb_strtolower($translatedOptionLabel)).includes(search.toLowerCase())"
                         class="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-sm text-slate-700 transition hover:bg-blue-50">
                         @if ($multiple)
-                            <input wire:model.live="{{ $model }}" data-global-loading type="checkbox" value="{{ $value }}"
+                            <input wire:model.live="{{ $model }}"
+                                @if ($globalLoading) data-global-loading @else data-no-global-loading @endif
+                                type="checkbox" value="{{ $value }}"
                                 class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
                         @else
-                            <input wire:model.live="{{ $model }}" data-global-loading type="radio" value="{{ $value }}"
+                            <input wire:model.live="{{ $model }}"
+                                @if ($globalLoading) data-global-loading @else data-no-global-loading @endif
+                                type="radio" value="{{ $value }}"
                                 @change="open = false"
                                 class="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500">
                         @endif

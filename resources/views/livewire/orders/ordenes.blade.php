@@ -1,4 +1,21 @@
 <div class="dashboard-page-shell space-y-6">
+    <style>
+        .orders-back-button {
+            background-color: #eab308 !important;
+            border-color: #ca8a04 !important;
+            color: #422006 !important;
+        }
+
+        .orders-back-button:hover {
+            background-color: #facc15 !important;
+            border-color: #eab308 !important;
+            color: #422006 !important;
+        }
+
+        .orders-back-button:active {
+            background-color: #ca8a04 !important;
+        }
+    </style>
     <x-unified-table-theme />
     <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -12,9 +29,25 @@
         </div>
 
         @if ($project)
-            <div class="flex gap-2">
-                <a href="{{ route('orders') }}" wire:navigate
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('projects.dashboard', ['project' => $project->slug]) }}" wire:navigate
                     class="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-px hover:bg-blue-500 hover:shadow-md">
+                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.5 16.5h13M5.5 14V9.5m4.5 4.5V5.5m4.5 8.5V7.5" />
+                    </svg>
+                    {{ __('Dashboard') }}
+                </a>
+                <a href="{{ route('projects.data', ['project' => $project->slug]) }}" wire:navigate
+                    class="inline-flex h-10 items-center gap-2 rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-px hover:bg-emerald-500 hover:shadow-md">
+                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M10 3.5c3.59 0 6.5 1.12 6.5 2.5s-2.91 2.5-6.5 2.5S3.5 7.38 3.5 6 6.41 3.5 10 3.5Zm6.5 2.5v4.25c0 1.38-2.91 2.5-6.5 2.5s-6.5-1.12-6.5-2.5V6m13 4.25V14c0 1.38-2.91 2.5-6.5 2.5S3.5 15.38 3.5 14v-3.75" />
+                    </svg>
+                    {{ __('Data') }}
+                </a>
+                <a href="{{ route('orders') }}" wire:navigate
+                    class="orders-back-button inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm font-semibold shadow-sm transition hover:-translate-y-px hover:shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2">
                     <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12.5 15 7.5 10l5-5M8 10h8" />
                     </svg>
@@ -139,7 +172,7 @@
                                 </button>
                             </td>
                             <td class="max-w-sm px-4 py-3">
-                                <a href="{{ route('projects.orders', ['project' => $order->project_id]) }}"
+                                <a href="{{ route('projects.orders', ['project' => $order->project_slug]) }}"
                                     wire:navigate class="font-semibold text-slate-900 hover:text-blue-600">
                                     {{ $order->project_name }}
                                 </a>
@@ -182,7 +215,7 @@
                                         </svg>
                                     </a>
                                     @if (!$project)
-                                        <a href="{{ route('projects.orders', ['project' => $order->project_id]) }}"
+                                        <a href="{{ route('projects.orders', ['project' => $order->project_slug]) }}"
                                             wire:navigate title="View project orders" aria-label="View project orders"
                                             class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-blue-700 bg-blue-600 text-white shadow-sm transition hover:-translate-y-px hover:bg-blue-500 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1">
                                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
