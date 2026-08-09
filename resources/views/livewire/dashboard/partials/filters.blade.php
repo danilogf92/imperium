@@ -5,8 +5,8 @@
         </h2>
     </div>
 
-    <div class="overflow-x-auto p-5">
-        <div class="flex min-w-max items-center gap-3">
+    <div class="p-4 sm:p-5">
+        <div class="flex flex-wrap items-center gap-3">
             <x-dashboard-filter-dropdown
                 label="Companies"
                 model="companyFilter"

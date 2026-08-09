@@ -20,7 +20,7 @@
 
         <section x-data="{ open: true }" class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <div
-                class="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-5 py-4">
+                class="flex flex-col items-start gap-3 border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                 <div>
                     <div class="flex items-center gap-2">
                         <h2 class="font-semibold text-slate-900">{{ __('Resume filters') }}</h2>
@@ -43,7 +43,7 @@
             </div>
 
             <div x-show="open" x-collapse>
-                <div class="flex items-end gap-3 overflow-x-auto px-5 py-5">
+                <div class="flex flex-wrap items-end gap-3 px-4 py-4 sm:px-5 sm:py-5">
                     <div class="relative" style="min-width: 25.5rem; flex: 0 1 48%;">
                         <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">

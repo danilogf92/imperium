@@ -13,7 +13,7 @@
 
 <div x-data="{ open: false, search: '' }" x-on:scroll.window="open = false" class="shrink-0">
     <button x-ref="trigger" type="button"
-        @click="open = !open; if (open) { $nextTick(() => { const rect = $refs.trigger.getBoundingClientRect(); $refs.menu.style.left = `${rect.left}px`; $refs.menu.style.top = `${rect.bottom + 8}px`; }); }"
+        @click="open = !open; if (open) { $nextTick(() => { const rect = $refs.trigger.getBoundingClientRect(); const width = Math.min(288, window.innerWidth - 16); $refs.menu.style.width = `${width}px`; $refs.menu.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - width - 8))}px`; $refs.menu.style.top = `${rect.bottom + 8}px`; }); }"
         :class="open ? 'border-blue-500 ring-2 ring-blue-500/25 text-blue-700' : 'border-slate-300'"
         class="inline-flex h-11 min-w-32 cursor-pointer items-center justify-between gap-3 rounded-lg border bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 focus:outline-none">
         <span>{{ $selectedOptionLabel ? __($selectedOptionLabel) : __($label) }}</span>
@@ -33,7 +33,7 @@
 
     <template x-teleport="body">
         <div x-ref="menu" x-show="open" x-cloak @click.outside="open = false"
-            class="fixed z-[200] max-h-80 w-72 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+            class="fixed z-[200] max-h-80 max-w-[calc(100vw-1rem)] overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
             <p class="px-2 pb-2 pt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __($label) }}
             </p>
 

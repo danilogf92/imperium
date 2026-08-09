@@ -1,7 +1,7 @@
 <div class="dashboard-page-shell">
   <div class="dashboard-page-content">
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div class="border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-6 py-5">
+        <div class="border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-4 py-4 sm:px-6 sm:py-5">
             <div class="flex items-center gap-4">
                 <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
                     <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -21,7 +21,7 @@
             </div>
         </div>
 
-        <div class="grid gap-4 p-6 md:grid-cols-2 xl:grid-cols-3">
+        <div class="grid gap-4 p-4 sm:p-6 md:grid-cols-2 xl:grid-cols-3">
             @forelse ($templates as $template)
                 <article class="flex min-h-56 flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition duration-150 hover:-translate-y-px hover:border-blue-300 hover:shadow-md">
                     <div class="flex items-start justify-between gap-3">

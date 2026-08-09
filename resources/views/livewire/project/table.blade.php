@@ -672,7 +672,7 @@
         </div>
 
         <x-modal name="upload-project-document" maxWidth="lg" close-method="closeDocumentModal" focusable>
-            <div class="p-6" x-data="{ uploading: false, progress: 0 }" x-on:livewire-upload-start="uploading = true; progress = 0"
+            <div class="p-4 sm:p-6" x-data="{ uploading: false, progress: 0 }" x-on:livewire-upload-start="uploading = true; progress = 0"
                 x-on:livewire-upload-progress="progress = $event.detail.progress"
                 x-on:livewire-upload-finish="progress = 100; uploading = false"
                 x-on:livewire-upload-error="uploading = false; progress = 0"
@@ -734,7 +734,7 @@
                     </div>
                 </div>
 
-                <div class="mt-6 flex justify-end gap-3">
+                <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                     <button x-on:click="$dispatch('close-modal', 'upload-project-document')"
                         wire:click="closeDocumentModal" data-no-global-loading type="button"
                         class="upload-document-cancel inline-flex h-10 items-center rounded-lg px-4 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
@@ -751,7 +751,7 @@
         </x-modal>
 
         <x-modal name="manage-project-ideas" maxWidth="lg" close-method="closeProjectIdeaModal" focusable>
-            <div class="p-6" x-data="{ uploading: false, progress: 0 }"
+            <div class="p-4 sm:p-6" x-data="{ uploading: false, progress: 0 }"
                 x-on:livewire-upload-start="uploading = true; progress = 0"
                 x-on:livewire-upload-progress="progress = $event.detail.progress"
                 x-on:livewire-upload-finish="progress = 100; uploading = false"
@@ -782,7 +782,7 @@
                 </div>
 
                 @if ($currentProjectIdeaFileName)
-                    <div class="mt-5 flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                    <div class="mt-5 flex flex-col items-stretch gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between">
                         <div class="min-w-0">
                             <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Current Excel file</p>
                             <p class="mt-1 truncate text-sm font-semibold text-slate-900">{{ $currentProjectIdeaFileName }}</p>
@@ -836,7 +836,7 @@
                     </div>
                 @endif
 
-                <div class="mt-6 flex flex-wrap justify-end gap-3">
+                <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
                     <button wire:click="closeProjectIdeaModal" data-no-global-loading type="button"
                         class="upload-document-cancel inline-flex h-10 items-center rounded-lg px-4 text-sm font-semibold">Close</button>
                     @if ($projectIdeaCanManage && $currentProjectIdeaFileName)
@@ -860,7 +860,7 @@
         </x-modal>
 
         <x-modal name="import-project-data" maxWidth="lg" close-method="closeDataImportModal" focusable>
-            <div class="p-6" x-data="{ uploading: false, progress: 0 }"
+            <div class="p-4 sm:p-6" x-data="{ uploading: false, progress: 0 }"
                 x-on:livewire-upload-start="uploading = true; progress = 0"
                 x-on:livewire-upload-progress="progress = $event.detail.progress"
                 x-on:livewire-upload-finish="progress = 100; uploading = false"
@@ -945,7 +945,7 @@
                     </div>
                 </div>
 
-                <div class="mt-6 flex justify-end gap-3">
+                <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                     <button x-on:click="$dispatch('close-modal', 'import-project-data')"
                         wire:click="closeDataImportModal" data-no-global-loading type="button"
                         class="upload-document-cancel inline-flex h-10 items-center rounded-lg px-4 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2">
@@ -984,7 +984,7 @@
         </x-modal>
 
         <x-modal name="delete-project-document" maxWidth="md" close-method="closeDeleteDocumentModal" focusable>
-            <div class="p-6">
+            <div class="p-4 sm:p-6">
                 <div class="flex items-start gap-4">
                     <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
                         style="background-color: #fee2e2; color: #dc2626">
@@ -1019,7 +1019,7 @@
                     <p class="mt-2 text-xs text-slate-500">Download the document or permanently remove it from this project.</p>
                 </div>
 
-                <div class="mt-6 flex justify-end gap-3">
+                <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
                     <button x-on:click="$dispatch('close-modal', 'delete-project-document')"
                         wire:click="closeDeleteDocumentModal" data-no-global-loading type="button"
                         class="upload-document-cancel inline-flex h-10 items-center rounded-lg px-4 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2">

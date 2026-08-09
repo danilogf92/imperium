@@ -1,5 +1,5 @@
 @if ($pendingDeleteId)
-    <div wire:key="planification-delete-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-4" x-data
+    <div wire:key="planification-delete-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4" x-data
         x-on:keydown.escape.window="$wire.cancelDelete()">
 
         {{-- ============================================================
@@ -18,7 +18,7 @@
             wire:click.stop evita que un click dentro cierre el modal.
             ============================================================ --}}
         <div wire:click.stop
-            class="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            class="relative z-10 max-h-[calc(100dvh-1rem)] w-full max-w-md overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-2xl sm:rounded-2xl">
 
             {{-- ========================================================
                 CONTENIDO
@@ -58,7 +58,7 @@
             {{-- ========================================================
                 ACCIONES
                 ======================================================== --}}
-            <div class="flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
+            <div class="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:justify-end sm:px-6">
 
                 {{-- Cancelar --}}
                 <button type="button" wire:click="cancelDelete" data-no-global-loading

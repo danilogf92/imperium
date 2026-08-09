@@ -4,7 +4,7 @@
 
                 {{-- Cabecera del área de filtros --}}
                 <div
-                    class="flex items-center justify-between bg-gradient-to-r from-blue-50 via-white to-white px-5 py-3">
+                    class="flex flex-col items-start gap-3 bg-gradient-to-r from-blue-50 via-white to-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
 
                     <div class="flex items-center gap-3">
 
@@ -82,7 +82,7 @@
                     x-show="open"
                     x-collapse>
 
-                    <div class="flex items-center gap-3 overflow-x-auto bg-white px-4 py-4">
+                    <div class="flex flex-wrap items-center gap-3 bg-white px-4 py-4">
 
                         {{-- Planta --}}
                         <x-dashboard-filter-dropdown

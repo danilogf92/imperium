@@ -1,6 +1,6 @@
 <div x-data="{ open: true }" class="relative overflow-hidden rounded-lg bg-white shadow-md dark:bg-gray-800">
     {{-- Encabezado --}}
-    <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+    <div class="flex flex-col items-start gap-2 border-b border-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700">
         <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">
             {{ __('Project Actions') }}
         </h2>
@@ -25,11 +25,11 @@
 
     {{-- Contenido colapsable --}}
     <div x-show="open" x-collapse class="overflow-hidden transition-all duration-100 py-2">
-        <div class="overflow-x-auto">
-            <div class="flex min-w-[1100px] w-full flex-nowrap items-center gap-4 px-4 py-5">
+        <div>
+            <div class="grid w-full grid-cols-1 items-center gap-3 px-4 py-4 sm:grid-cols-2 lg:flex lg:flex-nowrap">
 
                 {{-- Buscar y limpiar --}}
-                <div class="min-w-64 flex-1">
+                <div class="min-w-0 flex-1 sm:col-span-2 lg:min-w-64">
                     <label for="projects-search" class="sr-only">{{ __('Search projects') }}</label>
                     <div class="relative">
                         <svg class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"

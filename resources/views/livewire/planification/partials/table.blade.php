@@ -12,7 +12,7 @@
                     $fixedWidth += $fixedWidths[$column];
                 }
             @endphp
-            <div class="overflow-x-auto">
+            <div class="planification-table-scroll overflow-x-auto overscroll-x-contain">
                 <table class="table-fixed border-separate border-spacing-0"
                     style="min-width: {{ $fixedWidth + $timelineYears->count() * 2304 }}px">
                     <colgroup>

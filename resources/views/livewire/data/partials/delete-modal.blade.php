@@ -19,7 +19,7 @@
                     {{ \Illuminate\Support\Str::limit($deletingDataLabel, 180) }}
                 </div>
 
-                <div class="mt-6 flex justify-end gap-3">
+                <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                     <button x-on:click="$dispatch('close-modal', 'delete-project-data')" wire:click="closeDeleteModal"
                         data-no-global-loading type="button"
                         class="data-modal-cancel inline-flex h-10 items-center rounded-lg px-4 text-sm font-semibold">

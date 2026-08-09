@@ -1,6 +1,6 @@
 @if ($showFormModal)
 
-    <div wire:key="planification-form-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-data
+    <div wire:key="planification-form-modal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4" x-data
         x-on:keydown.escape.window="$wire.closeForm()">
 
         {{-- ============================================================
@@ -15,7 +15,7 @@
             CONTENIDO DEL MODAL
             ============================================================ --}}
         <form wire:submit="saveMilestone" wire:click.stop
-            class="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            class="relative z-10 flex max-h-[calc(100dvh-1rem)] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl sm:max-h-[calc(100vh-2rem)] sm:rounded-2xl">
 
             {{-- ====================================================
                 CABECERA DEL MODAL
@@ -57,7 +57,7 @@
             {{-- ====================================================
                 CAMPOS DEL FORMULARIO
                 ==================================================== --}}
-            <div class="grid gap-4 px-6 py-5 sm:grid-cols-2">
+            <div class="grid min-h-0 flex-1 gap-4 overflow-y-auto px-4 py-4 sm:grid-cols-2 sm:px-6 sm:py-5">
 
                 {{-- Proyecto --}}
                 <div class="sm:col-span-2">
@@ -217,7 +217,7 @@
             {{-- ====================================================
                 PIE DEL MODAL
                 ==================================================== --}}
-            <div class="flex justify-end gap-4 border-t border-slate-200 bg-slate-50 px-6 py-4">
+            <div class="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:justify-end sm:gap-4 sm:px-6">
 
                 {{-- Cancelar --}}
                 <button type="button" wire:click="closeForm" data-no-global-loading

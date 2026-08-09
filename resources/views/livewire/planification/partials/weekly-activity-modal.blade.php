@@ -51,7 +51,7 @@
     </x-slot>
 
     <x-slot name="footer">
-        <div class="flex w-full justify-end gap-3">
+        <div class="flex w-full flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button type="button" wire:click="closeActivityModal" data-no-global-loading
                 class="inline-flex h-10 cursor-pointer items-center rounded-lg bg-red-500 px-4 text-sm font-semibold text-white hover:bg-red-600">
                 Cancel

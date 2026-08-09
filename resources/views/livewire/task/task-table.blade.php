@@ -17,7 +17,7 @@
         </section>
 
         <section x-data="{ open: true }" class="rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div class="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-5 py-4">
+            <div class="flex flex-col items-start gap-3 border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                 <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm"
                         style="background-color: #dbeafe; color: #2563eb;">
@@ -47,8 +47,8 @@
             </div>
 
             <div x-show="open" x-collapse>
-                <div class="flex items-center gap-3 overflow-x-auto px-4 py-4">
-                    <div class="relative min-w-64 flex-1">
+                <div class="flex flex-wrap items-center gap-3 px-4 py-4">
+                    <div class="relative w-full min-w-0 flex-1 sm:min-w-64">
                         <svg class="pointer-events-none absolute h-4 w-4 text-slate-400"
                             style="left: .75rem; top: 50%; transform: translateY(-50%);"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -230,7 +230,7 @@
             </label>
         </x-slot>
         <x-slot name="footer">
-            <div class="flex w-full justify-end gap-4">
+            <div class="flex w-full flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-4">
                 <x-secondary-button wire:click="closeEditModal" data-no-global-loading
                     style="background-color:#ef4444;border-color:#dc2626;color:#fff;">Cancel</x-secondary-button>
                 <x-button wire:click="updateData" data-global-loading wire:loading.attr="disabled" wire:target="updateData"
@@ -251,7 +251,7 @@
             </p>
         </x-slot>
         <x-slot name="footer">
-            <div class="flex w-full justify-end gap-4">
+            <div class="flex w-full flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-4">
                 <x-secondary-button wire:click="closeDeleteModal" data-no-global-loading
                     style="background-color:#ef4444;border-color:#dc2626;color:#fff;">Cancel</x-secondary-button>
                 <x-danger-button wire:click="deleteData" data-global-loading wire:loading.attr="disabled" wire:target="deleteData">

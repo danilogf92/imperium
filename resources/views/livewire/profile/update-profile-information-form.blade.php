@@ -199,7 +199,7 @@ new class extends Component
         </div>
 
         <x-modal name="confirm-profile-photo-removal" maxWidth="md" focusable>
-            <div class="p-6">
+            <div class="p-4 sm:p-6">
                 <div class="flex items-start gap-4">
                     <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -211,7 +211,7 @@ new class extends Component
                         <p class="mt-1 text-sm leading-6 text-slate-600">{{ __('Your current photo will be permanently removed. Your initials will be shown instead.') }}</p>
                     </div>
                 </div>
-                <div class="mt-6 flex justify-end gap-3">
+                <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                     <x-secondary-button type="button" x-on:click="$dispatch('close')">
                         {{ __('Cancel') }}
                     </x-secondary-button>

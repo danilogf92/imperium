@@ -132,7 +132,7 @@
     x-on:keydown.shift.tab.prevent="
         prevFocusable().focus()
     " x-show="show"
-    class="app-modal fixed inset-0 z-50 overflow-y-auto px-4 py-6 sm:px-6" style="display: {{ $show ? 'block' : 'none' }};">
+    class="app-modal fixed inset-0 z-50 overflow-y-auto px-2 py-2 sm:px-6 sm:py-6" style="display: {{ $show ? 'block' : 'none' }};">
     {{-- Fondo oscuro --}}
     <div x-show="show" class="fixed inset-0 cursor-pointer transform transition-all"
         x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
@@ -147,7 +147,7 @@
         {{-- Caja principal del modal --}}
         <div x-show="show"
             x-on:click.stop
-            class="relative flex max-h-[calc(100vh-3rem)] w-full cursor-default flex-col overflow-hidden rounded-lg bg-white shadow-xl transform transition-all {{ $maxWidthClass }}"
+            class="relative flex max-h-[calc(100dvh-1rem)] w-full cursor-default flex-col overflow-hidden rounded-lg bg-white shadow-xl transform transition-all sm:max-h-[calc(100vh-3rem)] {{ $maxWidthClass }}"
             x-transition:enter="ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200"

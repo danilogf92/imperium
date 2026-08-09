@@ -490,7 +490,7 @@
         </x-slot>
 
         <x-slot name="footer">
-            <div class="flex w-full items-center justify-end gap-4">
+            <div class="flex w-full flex-col-reverse items-stretch justify-end gap-3 sm:flex-row sm:items-center sm:gap-4">
                 <x-secondary-button wire:click="{{ $closeMethod }}" data-no-global-loading
                     wire:loading.attr="disabled" wire:target="{{ $saveMethod }}"
                     style="background-color: #ef4444; border-color: #dc2626; color: #ffffff;"

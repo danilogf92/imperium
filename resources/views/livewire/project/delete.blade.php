@@ -23,7 +23,7 @@
         </x-slot>
 
         <x-slot name="footer">
-            <div class="flex w-full justify-end gap-3">
+            <div class="flex w-full flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <x-secondary-button wire:click="closeModal" data-no-global-loading wire:loading.attr="disabled"
                     wire:target="deleteProject">
                     Cancel

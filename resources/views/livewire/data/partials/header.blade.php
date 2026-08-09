@@ -1,6 +1,6 @@
 <header x-data="{ open: true }" class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <div
-            class="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-5 py-3">
+            class="flex flex-col items-start gap-3 border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <div>
                 <h2 class="text-sm font-bold text-slate-900">{{ __('Project data actions') }}</h2>
                 <p class="text-xs text-slate-500">{{ __('Project details and available actions') }}</p>

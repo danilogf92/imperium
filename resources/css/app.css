@@ -112,6 +112,64 @@
     }
 }
 
+@media (max-width: 639px) {
+    .dashboard-page-shell {
+        padding: 0.75rem;
+    }
+
+    .dashboard-page-content {
+        gap: 0.875rem;
+    }
+
+    .dashboard-panel,
+    .unified-table-shell {
+        border-radius: 0.625rem;
+    }
+
+    .unified-table-toolbar {
+        align-items: stretch;
+        padding: 0.75rem;
+    }
+
+    .unified-data-table {
+        font-size: 0.75rem;
+    }
+
+    .unified-data-table thead th,
+    .unified-data-table tbody td,
+    .unified-data-table tbody th {
+        padding: 0.55rem 0.65rem;
+    }
+
+    .unified-table-pagination {
+        overflow-x: auto;
+        padding: 0.7rem 0.75rem;
+    }
+
+    .dashboard-page-shell h1 {
+        font-size: 1.35rem;
+        line-height: 1.75rem;
+    }
+
+    .dashboard-page-shell button,
+    .dashboard-page-shell a,
+    .dashboard-page-shell select,
+    .dashboard-page-shell input {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
+    .planification-table-scroll [style*="left:"] {
+        position: static;
+    }
+
+    .planification-table-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #64748b #e2e8f0;
+    }
+}
+
 @media (min-width: 768px) {
     .sectionSize {
         padding-inline: 4rem;

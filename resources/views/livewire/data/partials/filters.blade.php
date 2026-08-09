@@ -1,6 +1,6 @@
 <div x-data="{ open: true }" class="rounded-xl border border-slate-200 bg-white shadow-sm">
         <div
-            class="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-5 py-4">
+            class="flex flex-col items-start gap-3 border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <div class="flex items-center gap-3">
                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm"
                     style="background-color: #dbeafe; color: #2563eb;">

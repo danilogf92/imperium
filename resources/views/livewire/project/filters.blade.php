@@ -1,7 +1,7 @@
 <div x-data="{ open: true }"
     class="relative overflow-hidden rounded-lg bg-white shadow-md dark:bg-gray-800">
     {{-- Encabezado --}}
-    <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+    <div class="flex flex-col items-start gap-2 border-b border-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700">
         <div class="flex items-center gap-3">
             <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">
                 {{ __('Project filters') }}
@@ -30,8 +30,8 @@
 
     {{-- Contenido colapsable --}}
     <div x-show="open" x-collapse class="overflow-hidden">
-        <div class="overflow-x-auto px-4 py-4">
-            <div class="flex min-w-max items-center justify-center gap-3">
+        <div class="px-4 py-4">
+            <div class="flex flex-wrap items-center justify-start gap-3">
 
                 {{-- Compañías o plantas --}}
                 <x-dashboard-filter-dropdown label="Companies" model="plantFilter"

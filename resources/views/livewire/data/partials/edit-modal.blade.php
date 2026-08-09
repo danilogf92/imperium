@@ -160,7 +160,7 @@
             </x-slot>
 
             <x-slot name="footer">
-                <div class="flex w-full items-center justify-end gap-4">
+                <div class="flex w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4">
                     <x-secondary-button wire:click="closeEditModal" data-no-global-loading wire:loading.attr="disabled"
                         wire:target="{{ $dataSaveMethod }}"
                         style="background-color: #ef4444; border-color: #dc2626; color: #ffffff;"
