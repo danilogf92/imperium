@@ -5,6 +5,7 @@ namespace App\Services\Planification;
 use App\Models\Milestone;
 use App\Models\Project;
 use App\Models\ProjectMilestone;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -41,6 +42,7 @@ final class PlanificationMilestoneService
             'cycleYear' => $year,
             'editingId' => null,
             'percentage' => '0',
+            'milestoneExecuted' => false,
         ];
     }
 
@@ -56,6 +58,7 @@ final class PlanificationMilestoneService
             'month' => $item->month,
             'cycleYear' => $item->cycle_year,
             'percentage' => (string) $item->percentage,
+            'milestoneExecuted' => filled($item->executed_at),
         ];
     }
 
@@ -86,6 +89,18 @@ final class PlanificationMilestoneService
             $this->ensureProjectIsOpen($project);
         }
 
+        $plannedMonth = CarbonImmutable::create(
+            (int) $validated['cycleYear'],
+            (int) $validated['month'],
+            1
+        )->startOfMonth();
+
+        if ($validated['milestoneExecuted'] && $plannedMonth->isAfter(now()->startOfMonth())) {
+            throw ValidationException::withMessages([
+                'milestoneExecuted' => 'A future milestone cannot be marked as executed.',
+            ]);
+        }
+
         $selectedMilestone = Milestone::query()
             ->findOrFail($validated['milestoneId']);
 
@@ -107,6 +122,9 @@ final class PlanificationMilestoneService
                 'month' => (int) $validated['month'],
                 'cycle_year' => (int) $validated['cycleYear'],
                 'percentage' => (float) $validated['percentage'],
+                'executed_at' => $validated['milestoneExecuted']
+                    ? ($item->executed_at ?? now())
+                    : null,
             ]);
 
             if (! $item->exists) {

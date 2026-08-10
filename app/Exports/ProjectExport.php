@@ -19,11 +19,13 @@ class ProjectExport
 {
     private const HEADERS = [
         'id' => 'ID', 'order' => 'Order', 'plant' => 'Plant', 'pda_code' => 'PDA Code',
-        'forecast_start_date' => 'Forecast Start Year', 'investments' => 'Investments',
+        'forecast_start_year' => 'Forecast Start Year',
+        'forecast_start_date' => 'Forecast Start Date', 'investments' => 'Investments',
         'state' => 'State', 'budgeted_euros' => 'Budgeted Euros',
         'forecast_end_date' => 'Forecast End Date', 'real_euros' => 'Real Euros',
         'rate' => 'Rate', 'budgeted_dollars' => 'Budgeted Dollars',
         'real_dollars' => 'Real Dollars', 'upload_pda' => 'Upload PDA',
+        'handover_certificate' => 'Project Handover Certificate',
         'name' => 'Name', 'links' => 'Links', 'classification' => 'Classification',
         'justification' => 'Justification', 'creator' => 'Created By',
         'responsible' => 'Responsible', 'data_uploaded' => 'Data Uploaded',
@@ -33,7 +35,7 @@ class ProjectExport
     ];
 
     private const DEFAULT_COLUMNS = [
-        'id', 'order', 'plant', 'pda_code', 'forecast_start_date', 'investments', 'state',
+        'id', 'order', 'plant', 'pda_code', 'forecast_start_year', 'forecast_start_date', 'investments', 'state',
         'budgeted_euros', 'forecast_end_date', 'real_euros', 'rate',
     ];
 
@@ -77,13 +79,13 @@ class ProjectExport
                 ->addSelect(['rest' => Data::query()->selectRaw(
                     'COALESCE(SUM(global_price_euros), 0) - COALESCE(SUM(booked_euros), 0)'
                 )->whereColumn('project_id', 'projects.id')])->orderByDesc('rest');
-        } elseif (($filters['sortBy'] ?? 'id') === 'order') {
-            $this->applyNaturalOrder($query, $filters['sortDir'] ?? 'DESC');
+        } elseif (($filters['sortBy'] ?? 'order') === 'order') {
+            $this->applyNaturalOrder($query, $filters['sortDir'] ?? 'ASC');
         } else {
-            $sortBy = in_array($filters['sortBy'] ?? 'id', array_keys(self::HEADERS), true)
+            $sortBy = in_array($filters['sortBy'] ?? 'order', array_keys(self::HEADERS), true)
                 ? ($filters['sortBy'] === 'classification' ? 'classification_of_investments' : $filters['sortBy'])
-                : 'id';
-            $query->orderBy($sortBy, strtoupper($filters['sortDir'] ?? 'DESC') === 'ASC' ? 'ASC' : 'DESC');
+                : 'order';
+            $query->orderBy($sortBy, strtoupper($filters['sortDir'] ?? 'ASC') === 'ASC' ? 'ASC' : 'DESC');
         }
 
         $projects = $query->get();
@@ -126,13 +128,15 @@ class ProjectExport
         return match ($column) {
             'links' => route('projects.data', ['project' => $project->slug]),
             'upload_pda' => filled($project->upload_pda) ? 'Yes' : 'No',
+            'handover_certificate' => filled($project->handover_certificate_path) ? 'Yes' : 'No',
             'state', 'investments', 'justification' => $project->{$column}?->value,
             'classification' => $project->classification_of_investments?->value,
             'plant' => $project->company?->company_name,
             'creator' => $project->creator?->name,
             'responsible' => $project->responsible?->name,
             'data_uploaded' => $project->data_uploaded ? 'Yes' : 'No',
-            'forecast_start_date' => $project->forecast_start_date?->format('Y'),
+            'forecast_start_year' => $project->forecast_start_date?->format('Y'),
+            'forecast_start_date' => $project->forecast_start_date?->format('Y-m-d'),
             'forecast_end_date', 'quartile_date', 'approve_date', 'close_date' => $project->{$column}?->format('Y-m-d'),
             'created_at', 'updated_at' => $project->{$column}?->format('Y-m-d H:i:s'),
             default => $project->{$column},

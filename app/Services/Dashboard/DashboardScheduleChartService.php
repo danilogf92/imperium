@@ -2,42 +2,20 @@
 
 namespace App\Services\Dashboard;
 
-use Asantibanez\LivewireCharts\Models\LineChartModel;
 use Illuminate\Support\Collection;
 
 class DashboardScheduleChartService
 {
-    private const MONTHS = [
-        1 => 'Jan',
-        2 => 'Feb',
-        3 => 'Mar',
-        4 => 'Apr',
-        5 => 'May',
-        6 => 'Jun',
-        7 => 'Jul',
-        8 => 'Aug',
-        9 => 'Sep',
-        10 => 'Oct',
-        11 => 'Nov',
-        12 => 'Dec',
-    ];
-
     public function build(array $statistics): array
     {
         $hasProjects = (bool) $statistics['hasProjects'];
 
         return [
-            /*
-             * Forecast Start Date VS Approved Date.
-             *
-             * Las dos series utilizan Budgeted
-             * y se muestran como porcentaje acumulado.
-             */
             'plannedVsActualExecutionChart' => $hasProjects
                 ? $this->plannedVsActualExecutionChart(
-                    collect($statistics['budgetedByStartMonth']),
-                    collect($statistics['budgetedByApprovalMonth']),
-                    (float) $statistics['budgeted']
+                    collect($statistics['plannedProjectsByMonth']),
+                    collect($statistics['actualProjectsByMonth']),
+                    (int) $statistics['projectCount']
                 )
                 : null,
 
@@ -58,7 +36,6 @@ class DashboardScheduleChartService
             /*
              * Totales utilizados por los footers.
              */
-            'scheduleRealValueTotal' => (float) $statistics['budgeted'],
             'scheduleProjectTotal' => (int) $statistics['projectCount'],
         ];
     }
@@ -66,125 +43,139 @@ class DashboardScheduleChartService
     private function plannedVsActualExecutionChart(
         Collection $plannedValues,
         Collection $actualValues,
-        float $total
-    ): LineChartModel {
-        $chart = (new LineChartModel)
-            ->setTitle('StartDate vs Approved Date')
-            ->setAnimated(true)
-            ->multiLine()
-            ->setStraightCurve()
-            ->setStrokeWidth(3)
-            ->withGrid()
-            ->withLegend()
-            ->setColors([
-                '#2563eb',
-                '#16a34a',
-            ])
-            ->setJsonConfig(
-                $this->percentageChartConfig()
-            );
+        int $totalProjects
+    ): array {
+        $planned = 0;
+        $actual = 0;
+        $chartConfig = config('dashboard_charts.forecast_start_vs_approved');
+        $plannedPercentages = [];
+        $actualPercentages = [];
+        $monthlyProjects = [];
 
-        $planned = 0.0;
-        $actual = 0.0;
-
-        foreach (self::MONTHS as $number => $month) {
-            $planned +=
-                (float) $plannedValues->get($number, 0);
-
-            $actual +=
-                (float) $actualValues->get($number, 0);
-
-            $plannedPercentage = $total > 0
-                ? round(($planned / $total) * 100, 2)
+        foreach (config('dashboard_charts.months') as $number => $month) {
+            $monthlyCount = (int) $plannedValues->get($number, 0);
+            $actualMonthlyCount = (int) $actualValues->get($number, 0);
+            $planned += $monthlyCount;
+            $actual += $actualMonthlyCount;
+            $plannedPercentages[] = $totalProjects > 0
+                ? round(($planned / $totalProjects) * 100, 2)
                 : 0;
-
-            $actualPercentage = $total > 0
-                ? round(($actual / $total) * 100, 2)
+            $actualPercentages[] = $totalProjects > 0
+                ? round(($actual / $totalProjects) * 100, 2)
                 : 0;
-
-            $chart
-                ->addSeriesPoint(
-                    'Planned % (Start date)',
-                    $month,
-                    $plannedPercentage
-                )
-                ->addSeriesPoint(
-                    'Actual % (Approved date)',
-                    $month,
-                    $actualPercentage
-                );
+            $monthlyProjects[] = $monthlyCount;
         }
 
-        return $chart;
+        return $this->mixedChart(
+            $plannedPercentages,
+            $actualPercentages,
+            $monthlyProjects,
+            $chartConfig['planned_series_label'],
+            $chartConfig['actual_series_label'],
+            'Projects by forecast start date',
+            $chartConfig
+        );
     }
 
     private function forecastVsCloseDateChart(
         Collection $forecastValues,
         Collection $closeValues,
         int $totalProjects
-    ): LineChartModel {
-        $chart = (new LineChartModel)
-            ->setTitle('Forecast EndDate vs CloseDate')
-            ->setAnimated(true)
-            ->multiLine()
-            ->setStraightCurve()
-            ->setStrokeWidth(3)
-            ->withGrid()
-            ->withLegend()
-            ->setColors([
-                '#2563eb',
-                '#16a34a',
-            ])
-            ->setJsonConfig(
-                $this->percentageChartConfig()
-            );
-
+    ): array {
         $forecast = 0;
         $closed = 0;
+        $chartConfig = config('dashboard_charts.forecast_end_vs_close');
+        $forecastPercentages = [];
+        $closedPercentages = [];
+        $monthlyProjects = [];
 
-        foreach (self::MONTHS as $number => $month) {
-            $forecast +=
-                (int) $forecastValues->get($number, 0);
-
-            $closed +=
-                (int) $closeValues->get($number, 0);
-
-            $forecastPercentage = $totalProjects > 0
+        foreach (config('dashboard_charts.months') as $number => $month) {
+            $monthlyCount = (int) $forecastValues->get($number, 0);
+            $closedMonthlyCount = (int) $closeValues->get($number, 0);
+            $forecast += $monthlyCount;
+            $closed += $closedMonthlyCount;
+            $forecastPercentages[] = $totalProjects > 0
                 ? round(($forecast / $totalProjects) * 100, 2)
                 : 0;
-
-            $closedPercentage = $totalProjects > 0
+            $closedPercentages[] = $totalProjects > 0
                 ? round(($closed / $totalProjects) * 100, 2)
                 : 0;
-
-            $chart
-                ->addSeriesPoint(
-                    'Forecast End Date %',
-                    $month,
-                    $forecastPercentage
-                )
-                ->addSeriesPoint(
-                    'Close Date %',
-                    $month,
-                    $closedPercentage
-                );
+            $monthlyProjects[] = $monthlyCount;
         }
 
-        return $chart;
+        return $this->mixedChart(
+            $forecastPercentages,
+            $closedPercentages,
+            $monthlyProjects,
+            $chartConfig['forecast_series_label'],
+            $chartConfig['close_series_label'],
+            'Projects by forecast end date',
+            $chartConfig
+        );
     }
 
-    private function percentageChartConfig(): array
-    {
+    private function mixedChart(
+        array $firstPercentages,
+        array $secondPercentages,
+        array $monthlyProjects,
+        string $firstLabel,
+        string $secondLabel,
+        string $projectsLabel,
+        array $chartConfig
+    ): array {
+        $projectsMaximum = max(1, ...$monthlyProjects);
+
         return [
-            'yaxis.min' => 0,
-            'yaxis.max' => 100,
-            'yaxis.tickAmount' => 5,
-
-            'yaxis.labels.formatter' => '(value) => `${Math.round(value)}%`',
-
-            'tooltip.y.formatter' => '(value) => `${Number(value).toFixed(1)}%`',
-
-            'markers.size' => 4,
+            'series' => [
+                ['name' => $firstLabel, 'type' => 'line', 'data' => $firstPercentages],
+                ['name' => $secondLabel, 'type' => 'line', 'data' => $secondPercentages],
+                ['name' => $projectsLabel, 'type' => 'column', 'data' => $monthlyProjects],
+            ],
+            'chart' => ['type' => 'line', 'height' => '100%', 'toolbar' => ['show' => false]],
+            'colors' => ['#2563EB', '#16A34A', '#7C3AED'],
+            'stroke' => ['width' => [3, 3, 0], 'curve' => 'straight'],
+            'markers' => ['size' => [4, 4, 0]],
+            'plotOptions' => ['bar' => ['columnWidth' => '52%', 'borderRadius' => 4]],
+            'dataLabels' => ['enabled' => true, 'enabledOnSeries' => [2]],
+            'xaxis' => ['categories' => array_values(config('dashboard_charts.months'))],
+            'yaxis' => [
+                [
+                    'seriesName' => $firstLabel,
+                    'min' => $chartConfig['y_axis_min'],
+                    'max' => $chartConfig['y_axis_max'],
+                    'tickAmount' => 5,
+                    'title' => ['text' => 'Cumulative progress (%)'],
+                    'labels' => ['formatter' => "function(value) { return Math.round(value) + '%'; }"],
+                ],
+                [
+                    'seriesName' => $secondLabel,
+                    'show' => false,
+                    'min' => $chartConfig['y_axis_min'],
+                    'max' => $chartConfig['y_axis_max'],
+                    'tickAmount' => 5,
+                ],
+                [
+                    'seriesName' => $projectsLabel,
+                    'opposite' => true,
+                    'min' => 0,
+                    'max' => $projectsMaximum,
+                    'tickAmount' => min(5, $projectsMaximum),
+                    'decimalsInFloat' => 0,
+                    'title' => ['text' => 'Projects'],
+                    'labels' => ['formatter' => 'function(value) { return Math.round(value); }'],
+                ],
+            ],
+            'tooltip' => [
+                'shared' => true,
+                'intersect' => false,
+                'y' => [
+                    ['formatter' => "function(value) { return Number(value).toFixed(1) + '%'; }"],
+                    ['formatter' => "function(value) { return Number(value).toFixed(1) + '%'; }"],
+                    ['formatter' => "function(value) { return Math.round(value) + ' projects'; }"],
+                ],
+            ],
+            'legend' => ['show' => true, 'position' => 'top'],
+            'grid' => ['show' => true, 'borderColor' => '#E2E8F0'],
         ];
     }
 }

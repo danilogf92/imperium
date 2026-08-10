@@ -9,6 +9,13 @@
     </x-slot>
 
     <x-slot name="content">
+        @php
+            $activityWeekClosed = now()->isAfter(
+                \Carbon\CarbonImmutable::now()
+                    ->setISODate($activityWeekYear, $activityWeekNumber)
+                    ->endOfWeek(),
+            );
+        @endphp
         @if ($weekActivities !== [])
             <div class="mb-5 space-y-2">
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -17,14 +24,22 @@
                 @foreach ($weekActivities as $activity)
                     <div wire:key="weekly-activity-{{ $activity['id'] }}"
                         class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                        <button type="button"
+                            wire:click="toggleWeeklyActivityExecuted({{ $activity['id'] }})"
+                            data-no-global-loading
+                            title="{{ $activity['executed'] ? 'Executed — click to change' : 'Not executed — click to mark as executed' }}"
+                            class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-base font-bold
+                                cursor-pointer {{ $activity['executed'] ? 'border-green-600 bg-green-600 text-white' : ($activityWeekClosed ? 'border-red-600 bg-red-600 text-white hover:bg-red-500' : 'border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-100') }}">
+                            {{ $activity['executed'] ? '✓' : ($activityWeekClosed ? '×' : '○') }}
+                        </button>
                         <p class="min-w-0 flex-1 whitespace-pre-line text-sm text-slate-700">{{ $activity['activity'] }}</p>
                         <button type="button" wire:click="editWeeklyActivity({{ $activity['id'] }})"
                             data-no-global-loading title="Edit activity"
                             class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-500">
                             ✎
                         </button>
-                        <button type="button" wire:click="deleteWeeklyActivity({{ $activity['id'] }})"
-                            wire:confirm="Delete this weekly activity?" data-no-global-loading title="Delete activity"
+                        <button type="button" wire:click="requestDeleteWeeklyActivity({{ $activity['id'] }})"
+                            data-no-global-loading title="Delete activity"
                             class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-red-600 text-white hover:bg-red-500">
                             ×
                         </button>
@@ -48,6 +63,7 @@
                 <p class="mt-2 text-sm font-medium text-red-600">{{ $message }}</p>
             @enderror
         </label>
+
     </x-slot>
 
     <x-slot name="footer">

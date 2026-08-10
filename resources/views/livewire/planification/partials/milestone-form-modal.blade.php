@@ -192,6 +192,28 @@
                         </p>
                     @enderror
 
+                    @php
+                        $milestoneIsFuture = $cycleYear && $month
+                            ? \Carbon\CarbonImmutable::create((int) $cycleYear, (int) $month, 1)
+                                ->startOfMonth()->isAfter(now()->startOfMonth())
+                            : false;
+                    @endphp
+                    @if (! $milestoneIsFuture)
+                        <label class="mt-4 flex cursor-pointer items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-3">
+                            <input type="checkbox" wire:model="milestoneExecuted"
+                                class="h-5 w-5 rounded border-slate-300 text-green-600 focus:ring-green-500">
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-800">Milestone executed</span>
+                                <span class="block text-xs text-slate-500">
+                                    This status can be corrected during or after the planned month.
+                                </span>
+                            </span>
+                        </label>
+                        @error('milestoneExecuted')
+                            <p class="mt-2 text-sm font-medium text-red-600">{{ $message }}</p>
+                        @enderror
+                    @endif
+
                     {{-- =================================================
                         PREVISUALIZACIÓN DEL VALOR DEL MILESTONE
                         ================================================= --}}
@@ -209,7 +231,10 @@
                     <p class="mt-1 text-xs text-slate-500">
                         Calculated value:
 
-                        {{ $currency === 'eur' ? '€' : '$' }}{{ number_format($previewValue, 2) }}
+                        {{ \App\Support\MoneyValueFormatter::compact(
+                            $previewValue,
+                            $currency === 'eur' ? '€' : '$',
+                        ) }}
                     </p>
                 </div>
             </div>

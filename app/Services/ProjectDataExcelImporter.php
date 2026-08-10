@@ -209,7 +209,8 @@ class ProjectDataExcelImporter
 
                 if (in_array($field, self::NUMERIC_FIELDS, true)) {
                     if (filled($value) && ! is_numeric($value)) {
-                        $errors[] = "Row {$excelRow}: {$header} must be numeric.";
+                        $column = $this->columnLetter($columnIndex);
+                        $errors[] = "Row {$excelRow}, column {$column} ({$header}): value must be numeric.";
                         continue;
                     }
 
@@ -225,12 +226,22 @@ class ProjectDataExcelImporter
                     : null;
             }
 
+            foreach (self::REQUIRED_FIELDS as $field => $acceptedHeaders) {
+                $columnIndex = $this->findHeaderIndex($headerIndexes, $acceptedHeaders);
+                $value = $columnIndex === null ? null : ($row[$columnIndex] ?? null);
+                if ($value === null || trim((string) $value) === '') {
+                    $column = $columnIndex === null ? '?' : $this->columnLetter($columnIndex);
+                    $label = str_replace('_', ' ', $field);
+                    $errors[] = "Row {$excelRow}, column {$column} ({$label}): value is required.";
+                }
+            }
+
             if ($record['percentage'] < 0 || $record['percentage'] > 100) {
-                $errors[] = "Row {$excelRow}: percentage must be between 0 and 100.";
+                $errors[] = "Row {$excelRow}, percentage: value must be between 0 and 100.";
             }
 
             if ($record['order_year'] && ($record['order_year'] < 2000 || $record['order_year'] > 2100)) {
-                $errors[] = "Row {$excelRow}: order year must be between 2000 and 2100.";
+                $errors[] = "Row {$excelRow}, order year: value must be between 2000 and 2100.";
             }
 
             foreach (
@@ -250,16 +261,16 @@ class ProjectDataExcelImporter
             ) {
                 if (mb_strlen((string) $record[$field]) > 255) {
                     $label = str_replace('_', ' ', $field);
-                    $errors[] = "Row {$excelRow}: {$label} exceeds 255 characters.";
+                    $errors[] = "Row {$excelRow}, {$label}: exceeds 255 characters.";
                 }
             }
 
             if (mb_strlen((string) $record['description']) > 10000) {
-                $errors[] = "Row {$excelRow}: description exceeds 10,000 characters.";
+                $errors[] = "Row {$excelRow}, description: exceeds 10,000 characters.";
             }
 
             if (mb_strlen((string) $record['observations']) > 10000) {
-                $errors[] = "Row {$excelRow}: observations exceeds 10,000 characters.";
+                $errors[] = "Row {$excelRow}, observations: exceeds 10,000 characters.";
             }
 
             $record['project_id'] = $project->id;
@@ -280,10 +291,7 @@ class ProjectDataExcelImporter
 
         if ($errors !== []) {
             throw ValidationException::withMessages([
-                'dataImportFile' => implode(
-                    ' ',
-                    array_slice($errors, 0, 10)
-                ),
+                'dataImportErrors' => array_slice($errors, 0, 50),
             ]);
         }
 
@@ -456,5 +464,30 @@ class ProjectDataExcelImporter
     {
         return collect($row)
             ->every(fn($value): bool => blank($value));
+    }
+
+    private function columnLetter(int $zeroBasedIndex): string
+    {
+        $index = $zeroBasedIndex + 1;
+        $letters = '';
+
+        while ($index > 0) {
+            $index--;
+            $letters = chr(65 + ($index % 26)).$letters;
+            $index = intdiv($index, 26);
+        }
+
+        return $letters;
+    }
+
+    private function findHeaderIndex(array $headerIndexes, array $acceptedHeaders): ?int
+    {
+        foreach ($acceptedHeaders as $header) {
+            if (array_key_exists($header, $headerIndexes)) {
+                return $headerIndexes[$header];
+            }
+        }
+
+        return null;
     }
 }

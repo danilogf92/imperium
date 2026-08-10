@@ -68,7 +68,7 @@
         ],
         [
             'label' => 'Available',
-            'value' => $formatMoney($budgeted - $executionFinishedBudget),
+            'value' => $formatMoney($executionFinishedBudget - $booked),
             'accent' => 'bg-emerald-500',
             'text' => 'text-emerald-600',
             'iconBg' => 'bg-emerald-50',

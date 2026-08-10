@@ -19,9 +19,9 @@ trait ManagesProjectIdeas
         $this->currentProjectIdeaFileName = $project->project_idea_name;
         $this->projectIdeaCanManage = auth()->user()->companiesForPermissionQuery(ProjectPermissionEnum::Update)
             ->whereKey($project->company_id)->exists();
+        $this->projectIdeaDeleteConfirmation = false;
         $this->reset('projectIdeaFile');
         $this->resetValidation('projectIdeaFile');
-        $this->dispatch('open-modal', 'manage-project-ideas');
     }
 
     public function closeProjectIdeaModal(): void
@@ -30,6 +30,7 @@ trait ManagesProjectIdeas
             'projectIdeaFile', 'projectIdeaProjectId', 'projectIdeaProjectCode',
             'projectIdeaProjectName', 'currentProjectIdeaFileName',
             'projectIdeaCanManage',
+            'projectIdeaDeleteConfirmation',
         ]);
         $this->resetValidation('projectIdeaFile');
         $this->dispatch('close-modal', 'manage-project-ideas');
@@ -51,7 +52,7 @@ trait ManagesProjectIdeas
         $originalName = $this->projectIdeaFile->getClientOriginalName();
         $extension = strtolower($this->projectIdeaFile->getClientOriginalExtension());
         $baseName = Str::slug(pathinfo($originalName, PATHINFO_FILENAME)) ?: 'project-ideas';
-        $fileName = now()->format('YmdHis').'-'.$baseName.'.'.$extension;
+        $fileName = Str::uuid().'-'.$baseName.'.'.$extension;
         $path = $this->projectIdeaFile->storeAs("projects/{$project->id}/ideas", $fileName, 'public');
         $previousPath = $project->project_idea_path;
         $project->update(['project_idea_path' => $path, 'project_idea_name' => $originalName]);
@@ -89,6 +90,17 @@ trait ManagesProjectIdeas
 
         $this->notifyProjectChange($project, 'Project ideas deleted');
         $this->closeProjectIdeaModal();
+    }
+
+    public function requestProjectIdeaDeletion(): void
+    {
+        abort_unless($this->projectIdeaProjectId && $this->projectIdeaCanManage, 403);
+        $this->projectIdeaDeleteConfirmation = true;
+    }
+
+    public function cancelProjectIdeaDeletion(): void
+    {
+        $this->projectIdeaDeleteConfirmation = false;
     }
 
     private function authorizedProjectIdea(int $projectId, ProjectPermissionEnum $permission): Project

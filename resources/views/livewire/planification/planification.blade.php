@@ -62,4 +62,5 @@
         MODAL DE CONFIRMACIÓN DE ELIMINACIÓN
         ================================================================ --}}
     @include('livewire.planification.partials.delete-milestone-modal')
+    @include('livewire.planification.partials.delete-weekly-activity-modal')
 </div>

@@ -4,6 +4,7 @@ namespace App\Livewire\Data;
 
 use App\Enums\ProjectPermissionEnum;
 use App\Exports\ProjectDataExport;
+use App\Exports\ProjectDataImportExport;
 use App\Livewire\Data\Concerns\AuthorizesProjectData;
 use App\Livewire\Data\Concerns\ConvertsDataCurrencies;
 use App\Livewire\Data\Concerns\InteractsWithDataColumns;
@@ -123,6 +124,17 @@ class DataTable extends Component
                     )
                 )
             );
+    }
+
+    #[Renderless]
+    public function exportImportReadyExcel(): BinaryFileResponse
+    {
+        $this->authorizeProjectData(ProjectPermissionEnum::Export);
+
+        return (new ProjectDataImportExport())->download(
+            $this->project,
+            $this->project->data()->orderBy('id')->get()
+        );
     }
 
     public function render(): View

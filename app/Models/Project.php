@@ -38,6 +38,8 @@ class Project extends Model
         'upload_pda',
         'project_idea_path',
         'project_idea_name',
+        'handover_certificate_path',
+        'handover_certificate_name',
         'approve_date',
         'close_date',
     ];

@@ -17,10 +17,11 @@
         'chartData' => $cumulativeProjectsBudgetData,
         'chartKey' => 'created',
         'chartTitle' => 'Cumulative projects vs budget',
-        'chartSubtitle' => 'Cumulative project progress and budget by creation month',
+        'chartSubtitle' => 'Cumulative project progress and budget by forecast start month',
         'chartFilename' => 'cumulative-projects-vs-budget-created',
-        'chartDateLabel' => 'project creation month',
-        'valueSeriesLabel' => 'Cumulative budget',
+        'chartDateLabel' => 'forecast start month',
+        'projectSeriesLabel' => config('dashboard_charts.cumulative_projects_budget.projects_series_label'),
+        'valueSeriesLabel' => config('dashboard_charts.cumulative_projects_budget.budget_series_label'),
     ])
 
     @include('livewire.dashboard.partials.cumulative-projects-budget-chart', [
@@ -29,7 +30,8 @@
         'chartTitle' => 'Cumulative projects vs approved budget',
         'chartSubtitle' => 'Execution and Finished budget by approval month',
         'chartFilename' => 'cumulative-projects-vs-budget-approved',
-        'chartDateLabel' => 'approval month (updated month when approval date is missing)',
-        'valueSeriesLabel' => 'Cumulative approved',
+        'chartDateLabel' => 'approval month',
+        'projectSeriesLabel' => config('dashboard_charts.cumulative_approved_budget.projects_series_label'),
+        'valueSeriesLabel' => config('dashboard_charts.cumulative_approved_budget.budget_series_label'),
     ])
 </section>

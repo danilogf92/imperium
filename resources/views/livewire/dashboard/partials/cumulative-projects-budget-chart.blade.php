@@ -23,6 +23,8 @@
 
                     const valueSeriesLabel =
                         @js($valueSeriesLabel);
+                    const projectSeriesLabel =
+                        @js($projectSeriesLabel);
             
                     const money = value => {
                         const number = Number(value);
@@ -70,7 +72,7 @@
                             },
             
                             series: [{
-                                    name: 'Cumulative projects',
+                                    name: projectSeriesLabel,
                                     type: 'line',
                                     data: projects
                                 },
@@ -133,7 +135,7 @@
                             },
             
                             yaxis: [{
-                                    seriesName: 'Cumulative projects',
+                                    seriesName: projectSeriesLabel,
             
                                     min: 0,
                                     max: 100,

@@ -7,7 +7,6 @@ use App\Livewire\Project\Concerns\InteractsWithProjectColumns;
 use App\Livewire\Project\Concerns\InteractsWithProjectFilters;
 use App\Livewire\Project\Concerns\ManagesProjectDataImports;
 use App\Livewire\Project\Concerns\ManagesProjectDocuments;
-use App\Livewire\Project\Concerns\ManagesProjectIdeas;
 use App\Livewire\Concerns\InteractsWithPerPagePreference;
 use App\Services\Project\ProjectTableQueryService;
 use App\Support\Project\ProjectTableDefinition;
@@ -24,15 +23,14 @@ class Table extends Component
     use InteractsWithPerPagePreference;
     use ManagesProjectDataImports;
     use ManagesProjectDocuments;
-    use ManagesProjectIdeas;
     use WithFileUploads;
     use WithPagination;
 
     public bool $active = false;
     public int $perPage = 10;
     public string $search = '';
-    public string $sortBy = 'id';
-    public string $sortDir = 'DESC';
+    public string $sortBy = 'order';
+    public string $sortDir = 'ASC';
     public array $yearSearch = [];
     public array $stateSearch = [];
     public array $typeOfProjectSearch = [];
@@ -55,12 +53,7 @@ class Table extends Component
     public string $dataImportProjectName = '';
     public string $dataImportProjectCode = '';
     public int $dataImportExistingRows = 0;
-    public mixed $projectIdeaFile = null;
-    public ?int $projectIdeaProjectId = null;
-    public string $projectIdeaProjectCode = '';
-    public string $projectIdeaProjectName = '';
-    public ?string $currentProjectIdeaFileName = null;
-    public bool $projectIdeaCanManage = false;
+    public bool $dataDeleteConfirmation = false;
 
     public function mount(bool $active = false): void
     {

@@ -6,6 +6,7 @@ use App\Enums\ProjectStateEnum;
 use App\Models\Milestone;
 use App\Models\Project;
 use App\Models\ProjectWeeklyActivity;
+use App\Support\ProjectOrderSort;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Carbon\CarbonImmutable;
@@ -19,9 +20,9 @@ final class PlanificationQueryService
     public function viewData(array $filters): array
     {
         $activityWeeks = $this->activityWeeks($filters['activityWeeks'] ?? '');
-        $plannedProjects = $this->plannedProjectsQuery($filters, $activityWeeks)
-            ->orderBy('name')
-            ->paginate((int) $filters['perPage']);
+        $plannedProjects = ProjectOrderSort::apply(
+            $this->plannedProjectsQuery($filters, $activityWeeks)
+        )->paginate((int) $filters['perPage']);
 
         $timelineYears = $this->timelineYears(
             $plannedProjects->getCollection()
@@ -63,9 +64,13 @@ final class PlanificationQueryService
                 'company:id,company_name',
                 'projectMilestones' => fn ($query) => $query
                     ->with('milestone:id,name,code,color,view_color')
+                    ->when(($filters['milestoneExecution'] ?? '') === 'completed', fn (Builder $query) => $query->due()->whereNotNull('executed_at'))
+                    ->when(($filters['milestoneExecution'] ?? '') === 'incomplete', fn (Builder $query) => $query->due()->whereNull('executed_at'))
                     ->orderBy('cycle_year')
                     ->orderBy('sequence'),
                 'weeklyActivities' => fn ($query) => $query
+                    ->when(($filters['activityExecution'] ?? '') === 'completed', fn (Builder $query) => $query->whereNotNull('executed_at'))
+                    ->when(($filters['activityExecution'] ?? '') === 'incomplete', fn (Builder $query) => $query->whereNull('executed_at'))
                     ->where(function (Builder $query) use ($activityWeeks): void {
                         foreach ($activityWeeks as $week) {
                             $query->orWhere(fn (Builder $query) => $query
@@ -77,12 +82,12 @@ final class PlanificationQueryService
             ->withSum('data as data_budgeted', 'global_price')
             ->withSum('data as data_budgeted_euros', 'global_price_euros');
 
-        $this->applyFilters($query, $filters);
+        $this->applyFilters($query, $filters, $activityWeeks);
 
         return $query;
     }
 
-    private function applyFilters(Builder $query, array $filters): void
+    private function applyFilters(Builder $query, array $filters, array $activityWeeks): void
     {
         if ($filters['plants'] !== []) {
             $query->whereIn('company_id', $filters['plants']);
@@ -102,6 +107,32 @@ final class PlanificationQueryService
 
         if ($filters['onlyWithMilestones']) {
             $query->whereHas('projectMilestones');
+        }
+
+        if (($filters['milestoneExecution'] ?? '') === 'completed') {
+            $query->whereHas('projectMilestones', fn (Builder $query) => $query->due()->whereNotNull('executed_at'));
+        } elseif (($filters['milestoneExecution'] ?? '') === 'incomplete') {
+            $query->whereHas('projectMilestones', fn (Builder $query) => $query->due()->whereNull('executed_at'));
+        }
+
+        if (($filters['activityExecution'] ?? '') === 'completed') {
+            $query->whereHas('weeklyActivities', fn (Builder $query) => $query
+                ->whereNotNull('executed_at')
+                ->where(function (Builder $query) use ($activityWeeks): void {
+                    foreach ($activityWeeks as $week) {
+                        $query->orWhere(fn (Builder $query) => $query
+                            ->where('week_year', $week['year'])->where('week_number', $week['week']));
+                    }
+                }));
+        } elseif (($filters['activityExecution'] ?? '') === 'incomplete') {
+            $query->whereHas('weeklyActivities', fn (Builder $query) => $query
+                ->whereNull('executed_at')
+                ->where(function (Builder $query) use ($activityWeeks): void {
+                    foreach ($activityWeeks as $week) {
+                        $query->orWhere(fn (Builder $query) => $query
+                            ->where('week_year', $week['year'])->where('week_number', $week['week']));
+                    }
+                }));
         }
 
         if (trim($filters['search']) !== '') {
@@ -154,7 +185,7 @@ final class PlanificationQueryService
 
     private function modalProjects(): Collection
     {
-        return $this->access
+        return ProjectOrderSort::apply($this->access
             ->authorizedProjects()
             ->withExists([
                 'projectMilestones as is_closed' => fn (Builder $query) => $query
@@ -165,8 +196,7 @@ final class PlanificationQueryService
                     ),
             ])
             ->withSum('data as data_budgeted', 'global_price')
-            ->withSum('data as data_budgeted_euros', 'global_price_euros')
-            ->orderBy('name')
+            ->withSum('data as data_budgeted_euros', 'global_price_euros'))
             ->get([
                 'id',
                 'name',

@@ -10,9 +10,13 @@ class ProjectWeeklyActivity extends Model
 {
     use Auditable;
 
-    protected $fillable = ['project_id', 'week_year', 'week_number', 'activity'];
+    protected $fillable = ['project_id', 'week_year', 'week_number', 'activity', 'executed_at'];
 
-    protected $casts = ['week_year' => 'integer', 'week_number' => 'integer'];
+    protected $casts = [
+        'week_year' => 'integer',
+        'week_number' => 'integer',
+        'executed_at' => 'datetime',
+    ];
 
     public function project(): BelongsTo
     {

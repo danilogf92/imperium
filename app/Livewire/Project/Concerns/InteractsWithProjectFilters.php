@@ -47,8 +47,8 @@ trait InteractsWithProjectFilters
             'investmentFilter', 'plantFilter', 'orderByProject',
             'projectIdeaFilter',
         ]);
-        $this->sortBy = 'id';
-        $this->sortDir = 'DESC';
+        $this->sortBy = 'order';
+        $this->sortDir = 'ASC';
         $this->resetPage();
         $this->dispatchTableState();
     }

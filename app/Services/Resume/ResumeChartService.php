@@ -8,28 +8,55 @@ use Illuminate\Support\Collection;
 class ResumeChartService
 {
     /** @return array<string, array<string, mixed>> */
-    public function additionalCharts(Collection $rows, string $symbol): array
+    public function additionalCharts(
+        Collection $rows,
+        string $symbol,
+        ?Collection $coverageRows = null
+    ): array
     {
         $years = $rows->pluck('year')->map(fn ($year): string => (string) $year)->values()->all();
+        $coverageRows ??= $rows;
+        $coverageYears = $coverageRows->pluck('year')
+            ->map(fn ($year): string => (string) $year)->values()->all();
         $moneyFormatter = ChartValueFormatter::compactMoney($symbol);
+        $coverageSeries = [
+            ['name' => 'Approved / Budgeted', 'data' => $this->ratios($coverageRows, 'approved', 'budgeted')],
+            ['name' => 'Booked / Approved', 'data' => $this->ratios($coverageRows, 'booked', 'approved')],
+            ['name' => 'Booked / Budgeted', 'data' => $this->ratios($coverageRows, 'booked', 'budgeted')],
+            ['name' => 'Executed / Budgeted', 'data' => $this->ratios($coverageRows, 'executed', 'budgeted')],
+        ];
+        $coverageMaximum = max(
+            100,
+            (int) (ceil(collect($coverageSeries)->pluck('data')->flatten()->max() / 10) * 10)
+        );
 
         return [
             'coverageChartOptions' => [
-                'series' => [
-                    ['name' => 'Approved / Budgeted', 'data' => $this->ratios($rows, 'approved', 'budgeted')],
-                    ['name' => 'Booked / Approved', 'data' => $this->ratios($rows, 'booked', 'approved')],
-                    ['name' => 'Booked / Budgeted', 'data' => $this->ratios($rows, 'booked', 'budgeted')],
-                ],
+                'series' => $coverageSeries,
                 'chart' => ['type' => 'line', 'height' => '100%', 'toolbar' => ['show' => false]],
-                'colors' => ['#2563EB', '#F59E0B', '#059669'],
+                'colors' => ['#2563EB', '#F59E0B', '#059669', '#7C3AED'],
                 'stroke' => ['curve' => 'smooth', 'width' => 3],
                 'markers' => ['size' => 5],
                 'dataLabels' => ['enabled' => false],
-                'xaxis' => ['categories' => $years],
+                'xaxis' => ['categories' => $coverageYears],
                 'yaxis' => [
                     'labels' => ['formatter' => "function(value) { return Number(value).toFixed(1) + '%'; }"],
                     'title' => ['text' => 'Coverage (%)'],
-                    'forceNiceScale' => true,
+                    'min' => 0,
+                    'max' => $coverageMaximum,
+                    'forceNiceScale' => false,
+                ],
+                'annotations' => [
+                    'yaxis' => [[
+                        'y' => 100,
+                        'borderColor' => '#DC2626',
+                        'strokeDashArray' => 6,
+                        'label' => [
+                            'text' => '100% target',
+                            'borderColor' => '#DC2626',
+                            'style' => ['background' => '#DC2626', 'color' => '#FFFFFF'],
+                        ],
+                    ]],
                 ],
                 'tooltip' => ['y' => ['formatter' => "function(value) { return Number(value).toFixed(2) + '%'; }"]],
                 'legend' => ['show' => true, 'position' => 'top'],

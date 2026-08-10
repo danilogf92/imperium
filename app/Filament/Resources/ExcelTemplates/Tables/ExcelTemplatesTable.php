@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ExcelTemplates\Tables;
 
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -24,13 +25,19 @@ class ExcelTemplatesTable
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'orders' => 'Orders',
                         'project_data' => 'Project Data',
+                        'project_ideas' => 'Project Ideas',
                         default => $state,
                     })
-                    ->color(fn (string $state): string => $state === 'orders' ? 'warning' : 'info'),
+                    ->color(fn (string $state): string => match ($state) {
+                        'orders' => 'warning',
+                        'project_ideas' => 'success',
+                        default => 'info',
+                    }),
 
                 TextColumn::make('original_file_name')
                     ->label('File')
                     ->icon('heroicon-o-document-text')
+                    ->limit(25)
                     ->searchable(),
 
                 IconColumn::make('is_active')
@@ -53,6 +60,7 @@ class ExcelTemplatesTable
             ->paginationPageOptions([5, 10, 20, 50, 100])
             ->recordActions([
                 EditAction::make(),
+                DeleteAction::make(),
             ]);
     }
 }

@@ -32,7 +32,7 @@ trait ManagesProjectIdeaUpload
         $originalName = $this->projectIdea->getClientOriginalName();
         $extension = strtolower($this->projectIdea->getClientOriginalExtension());
         $baseName = Str::slug(pathinfo($originalName, PATHINFO_FILENAME)) ?: 'project-ideas';
-        $fileName = now()->format('YmdHis').'-'.$baseName.'.'.$extension;
+        $fileName = Str::uuid().'-'.$baseName.'.'.$extension;
         $path = $this->projectIdea->storeAs("projects/{$project->id}/ideas", $fileName, 'public');
         $previousPath = $project->project_idea_path;
 

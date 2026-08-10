@@ -27,7 +27,6 @@ class DashboardPortfolioChartService
         'Planning' => '#f59e0b',
         'Execution' => '#0ea5e9',
         'Finished' => '#22c55e',
-        'Postponed' => '#ef4444',
     ];
 
     public function build(array $statistics, string $currency): array

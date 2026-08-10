@@ -16,6 +16,7 @@ trait ManagesProjectDataImports
         $this->dataImportProjectName = $project->name;
         $this->dataImportProjectCode = $project->pda_code;
         $this->dataImportExistingRows = Data::query()->where('project_id', $project->id)->count();
+        $this->dataDeleteConfirmation = false;
         $this->reset('dataImportFile');
         $this->resetValidation('dataImportFile');
         $this->dispatch('open-modal', 'import-project-data');
@@ -28,7 +29,7 @@ trait ManagesProjectDataImports
         }
         $this->reset([
             'dataImportFile', 'dataImportProjectId', 'dataImportProjectName',
-            'dataImportProjectCode', 'dataImportExistingRows',
+            'dataImportProjectCode', 'dataImportExistingRows', 'dataDeleteConfirmation',
         ]);
         $this->resetValidation('dataImportFile');
         $this->dispatch('close-modal', 'import-project-data');
@@ -63,5 +64,16 @@ trait ManagesProjectDataImports
         });
         $this->notifyProjectChange($project, 'Project data deleted');
         $this->closeDataImportModal();
+    }
+
+    public function requestImportedDataDeletion(): void
+    {
+        abort_unless($this->dataImportProjectId && $this->dataImportExistingRows > 0, 404);
+        $this->dataDeleteConfirmation = true;
+    }
+
+    public function cancelImportedDataDeletion(): void
+    {
+        $this->dataDeleteConfirmation = false;
     }
 }

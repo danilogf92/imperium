@@ -69,7 +69,7 @@ class Dashboard extends Component
 
         return view('livewire.dashboard.dashboard', [
             'companies' => auth()->user()?->availableCompanies() ?? collect(),
-            'stateOptions' => ProjectStateEnum::cases(),
+            'stateOptions' => $this->reportableStateOptions(),
             'classificationOptions' => InvestmentClassificationEnum::cases(),
             'investmentOptions' => InvestmentEnum::cases(),
             'justificationOptions' => ProjectJustificationEnum::cases(),
@@ -102,7 +102,7 @@ class Dashboard extends Component
 
         $this->stateSearch = $this->normalizeSelection(
             $this->stateSearch,
-            array_column(ProjectStateEnum::cases(), 'value')
+            array_column($this->reportableStateOptions(), 'value')
         );
 
         $this->typeOfProjectSearch = $this->normalizeSelection(
@@ -133,9 +133,17 @@ class Dashboard extends Component
         return $normalized;
     }
 
+    private function reportableStateOptions(): array
+    {
+        return array_values(array_filter(
+            ProjectStateEnum::cases(),
+            fn (ProjectStateEnum $state): bool => $state !== ProjectStateEnum::Postponed
+        ));
+    }
+
     private function cacheKey(DashboardFilters $filters): string
     {
-        return 'dashboard:charts-v2:v'.DashboardCache::version().':'.hash(
+        return 'dashboard:charts-v8:v'.DashboardCache::version().':'.hash(
             'sha256',
             json_encode([
                 'user' => auth()->id(),

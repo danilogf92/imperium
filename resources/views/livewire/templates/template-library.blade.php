@@ -33,7 +33,12 @@
                             </svg>
                         </div>
                         <span class="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                            {{ $template->category === 'orders' ? 'Orders' : 'Project Data' }}
+                            {{ match ($template->category) {
+                                'orders' => 'Orders',
+                                'project_ideas' => 'Project Ideas',
+                                'project_data' => 'Project Data',
+                                default => \Illuminate\Support\Str::headline($template->category),
+                            } }}
                         </span>
                     </div>
 

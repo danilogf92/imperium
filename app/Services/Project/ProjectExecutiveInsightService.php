@@ -24,7 +24,9 @@ final class ProjectExecutiveInsightService
             'executiveHealth' => $this->health($project, $financial, $alerts),
             'executiveFinancial' => [
                 ...$financial,
-                'available' => $financial['budgeted'] - $financial['booked'],
+                'available' => (in_array($project->state?->value, ['Execution', 'Finished'], true)
+                    ? $financial['budgeted']
+                    : 0) - $financial['executed'],
                 'real_variance' => $financial['budgeted'] - $financial['real'],
                 'execution_variance' => $financial['budgeted'] - $financial['executed'],
                 'execution_overrun' => max($financial['executed'] - $financial['budgeted'], 0),

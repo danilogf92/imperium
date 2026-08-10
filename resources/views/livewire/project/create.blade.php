@@ -5,6 +5,12 @@
         $saveMethod = $editing ? 'updateProject' : 'createProject';
         $closeMethod = $editing ? 'closeModal' : 'closeCreateModal';
         $fieldSuffix = $editing ? '-' . $projectId : '';
+        $documentErrors = $errors->hasAny(['pdaDocument', 'projectIdea', 'handoverCertificate']);
+        $dateErrors = $errors->hasAny([
+            'form.forecast_start_date', 'form.forecast_end_date', 'form.approve_date',
+            'form.close_date', 'form.quartile_date',
+        ]);
+        $initialSection = $documentErrors ? 'documents' : ($dateErrors ? 'dates' : 'details');
     @endphp
 
     @if ($editing)
@@ -25,7 +31,7 @@
         @endif
     @endif
 
-    <x-dialog-modal :name="$formModalName" maxWidth="6xl" :close-method="$closeMethod">
+    <x-dialog-modal :name="$formModalName" maxWidth="90vw" :close-method="$closeMethod">
         <x-slot name="title">
             <div>
                 <h2 class="text-xl font-bold text-gray-900">
@@ -34,459 +40,39 @@
 
                 <p class="mt-1 text-sm font-normal text-gray-500">
                     {{ $editing
-                        ? 'Update the general information, classification and project dates.'
-                        : 'Complete the general information, classification and project dates.' }}
+                        ? 'Update project details, dates and documents.'
+                        : 'Complete the project details, dates and documents.' }}
                 </p>
             </div>
         </x-slot>
 
         <x-slot name="content">
-            <div class="max-h-[70vh] space-y-6 overflow-y-auto pr-2 py-2">
-                {{-- Identification --}}
-                <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div class="border-b border-gray-200 bg-gray-50 px-5 py-4">
-                        <h3 class="font-semibold text-gray-900">
-                            Project identification
-                        </h3>
-
-                        <p class="mt-1 text-sm text-gray-500">
-                            Select the company and enter the project identification.
-                        </p>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-6 p-5 lg:grid-cols-3">
-
-                        {{-- Columna 1 --}}
-                        <div>
-
-                            {{-- Company --}}
-                            <div class="mb-5">
-                                <label for="company-id{{ $fieldSuffix }}"
-                                    class="mb-2 block text-sm font-medium text-gray-700">
-                                    Company
-                                    <span class="text-red-500">*</span>
-                                </label>
-
-                                <select id="company-id{{ $fieldSuffix }}" wire:model.live="form.company_id" data-no-global-loading
-                                    data-no-global-loading
-                                    class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <option value="">Select a company</option>
-
-                                    @foreach ($companies as $company)
-                                        <option value="{{ $company->id }}">
-                                            {{ $company->company_name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-
-                                @error('form.company_id')
-                                    <p class="mt-1.5 text-sm text-red-600">
-                                        {{ $message }}
-                                    </p>
-                                @enderror
-                            </div>
-
-                        </div>
-
-                        <div>
-                            <div class="mb-5">
-                                <label for="project-order{{ $fieldSuffix }}"
-                                    class="mb-2 block text-sm font-medium text-gray-700">
-                                    Order
-                                    <span class="text-red-500">*</span>
-                                </label>
-
-                                <input id="project-order{{ $fieldSuffix }}" type="text" wire:model="form.order"
-                                    inputmode="text" maxlength="20"
-                                    class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    placeholder="Examples: 1, 5a, 100b">
-
-                                <p class="mt-1 text-xs text-gray-500">Must be unique within the selected plant.</p>
-
-                                @error('form.order')
-                                    <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        {{-- Columna 3 --}}
-                        <div>
-                            {{-- Project name --}}
-                            <div class="mb-5">
-                                <label for="project-name{{ $fieldSuffix }}"
-                                    class="mb-2 block text-sm font-medium text-gray-700">
-                                    Project name
-                                    <span class="text-red-500">*</span>
-                                </label>
-
-                                <input id="project-name{{ $fieldSuffix }}" type="text" wire:model="form.name"
-                                    class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    placeholder="Enter the project name">
-
-                                @error('form.name')
-                                    <p class="mt-1.5 text-sm text-red-600">
-                                        {{ $message }}
-                                    </p>
-                                @enderror
-                            </div>
-
-                        </div>
-
-                        {{-- PDA code --}}
-                        <div class="col-span-full">
-                            <label for="pda-code{{ $fieldSuffix }}"
-                                class="mb-2 block text-sm font-medium text-gray-700">
-                                PDA code
-                                <span class="text-red-500">*</span>
-                            </label>
-
-                            <div class="flex w-full rounded-lg shadow-sm">
-
-                                {{-- Prefijo no editable --}}
-                                <div
-                                    class="flex items-center rounded-l-lg border border-r-0 border-gray-300 bg-gray-100 px-4 py-2.5 font-mono text-sm font-semibold uppercase text-gray-700">
-                                    @if ($form->company_code)
-                                        {{ $form->company_code }}_
-                                    @else
-                                        COMPANY_
-                                    @endif
-                                </div>
-
-                                {{-- Parte editable --}}
-                                <input id="pda-code{{ $fieldSuffix }}" type="text" wire:model="form.pda_code"
-                                    class="block min-w-0 flex-1 rounded-r-lg border-gray-300 bg-white px-3 py-2.5 font-mono text-sm uppercase focus:border-blue-500 focus:ring-blue-500"
-                                    placeholder="Enter project code" @disabled(!$form->company_id)>
-                            </div>
-
-                            @if (!$form->company_id)
-                                <p class="mt-1.5 text-xs text-gray-500">
-                                    Select a company before entering the PDA code.
-                                </p>
-                            @else
-                                <p class="mt-1.5 text-xs text-gray-500">
-                                    The company code is automatically added as a locked prefix.
-                                </p>
-                            @endif
-
-                            @error('form.pda_code')
-                                <p class="mt-1.5 text-sm text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-                    </div>
-
-                </section>
-
-                {{-- Classification --}}
-                <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div class="border-b border-gray-200 bg-gray-50 px-5 py-4">
-                        <h3 class="font-semibold text-gray-900">
-                            Classification and investment
-                        </h3>
-
-                        <p class="mt-1 text-sm text-gray-500">
-                            Define the current state and financial classification.
-                        </p>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-6 p-5 lg:grid-cols-2">
-
-                        {{-- State --}}
-                        <div>
-                            <label for="state{{ $fieldSuffix }}" class="mb-2 block text-sm font-medium text-gray-700">
-                                State
-                                <span class="text-red-500">*</span>
-                            </label>
-
-                            <select id="state{{ $fieldSuffix }}" wire:model.live="form.state" data-no-global-loading
-                                class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
-
-                                @foreach ($stateOptions as $stateOption)
-                                    <option value="{{ $stateOption->value }}">
-                                        {{ $stateOption->value }}
-                                    </option>
-                                @endforeach
-
-                            </select>
-
-                            @error('form.state')
-                                <p class="mt-1.5 text-sm text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        {{-- Rate --}}
-                        <div>
-                            <label for="rate{{ $fieldSuffix }}" class="mb-2 block text-sm font-medium text-gray-700">
-                                Rate
-                            </label>
-
-                            <input id="rate{{ $fieldSuffix }}" type="number" wire:model="form.rate" step="0.01"
-                                min="{{ $rateLimits->min_rate }}" max="{{ $rateLimits->max_rate }}"
-                                class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                placeholder="0.00">
-
-                            <p class="mt-1 text-xs text-gray-500">
-                                Allowed range: {{ (float) $rateLimits->min_rate }}–{{ (float) $rateLimits->max_rate }}.
-                            </p>
-
-                            @error('form.rate')
-                                <p class="mt-1.5 text-sm text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        {{-- Investment --}}
-                        <div>
-                            <label for="investments{{ $fieldSuffix }}"
-                                class="mb-2 block text-sm font-medium text-gray-700">
-                                Investment
-                            </label>
-
-                            <select id="investments{{ $fieldSuffix }}" wire:model="form.investments"
-                                class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
-
-                                <option value="">
-                                    Select investment
-                                </option>
-
-                                @foreach ($investmentOptions as $investment)
-                                    <option value="{{ $investment->value }}">
-                                        {{ $investment->value }}
-                                    </option>
-                                @endforeach
-
-                            </select>
-
-                            @error('form.investments')
-                                <p class="mt-1.5 text-sm text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        {{-- Investment classification --}}
-                        <div>
-                            <label for="classification_of_investments{{ $fieldSuffix }}"
-                                class="mb-2 block text-sm font-medium text-gray-700">
-                                Investment classification
-                            </label>
-
-                            <select id="classification_of_investments{{ $fieldSuffix }}"
-                                wire:model="form.classification_of_investments"
-                                class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
-
-                                <option value="">
-                                    Select classification
-                                </option>
-
-                                @foreach ($classificationOptions as $classificationOption)
-                                    <option value="{{ $classificationOption->value }}">
-                                        {{ $classificationOption->value }}
-                                    </option>
-                                @endforeach
-
-                            </select>
-
-                            @error('form.classification_of_investments')
-                                <p class="mt-1.5 text-sm text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        {{-- Justification --}}
-                        <div>
-                            <label for="justification{{ $fieldSuffix }}"
-                                class="mb-2 block text-sm font-medium text-gray-700">
-                                Justification
-                            </label>
-
-                            <select id="justification{{ $fieldSuffix }}" wire:model="form.justification"
-                                class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
-
-                                <option value="">
-                                    Select justification
-                                </option>
-
-                                @foreach ($justificationOptions as $justificationOption)
-                                    <option value="{{ $justificationOption->value }}">
-                                        {{ $justificationOption->value }}
-                                    </option>
-                                @endforeach
-
-                            </select>
-
-                            @error('form.justification')
-                                <p class="mt-1.5 text-sm text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                    </div>
-
-                </section>
-
-                {{-- Dates --}}
-                <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div class="border-b border-gray-200 bg-gray-50 px-5 py-4">
-                        <h3 class="font-semibold text-gray-900">
-                            Project dates
-                        </h3>
-
-                        <p class="mt-1 text-sm text-gray-500">
-                            Define the planning and execution dates.
-                        </p>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-6 p-5 lg:grid-cols-2">
-                        <div>
-                            <label for="start-date{{ $fieldSuffix }}"
-                                class="mb-2 block text-sm font-medium text-gray-700">
-                                Forecast Start date
-                            </label>
-
-                            <input id="start-date{{ $fieldSuffix }}" type="date"
-                                wire:model="form.forecast_start_date"
-                                @disabled($form->state === 'Postponed')
-                                @class([
-                                    'block w-full rounded-lg px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500',
-                                    'border-red-300 bg-red-50/40' => $errors->has('form.forecast_start_date'),
-                                    'border-gray-300' => !$errors->has('form.forecast_start_date'),
-                                    'cursor-not-allowed bg-gray-100 text-gray-500' => $form->state === 'Postponed',
-                                ])>
-
-                            @error('form.forecast_start_date')
-                                <p class="mt-1.5 text-sm text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="finish-date{{ $fieldSuffix }}"
-                                class="mb-2 block text-sm font-medium text-gray-700">
-                                Forecast End Date
-                            </label>
-
-                            <input id="finish-date{{ $fieldSuffix }}" type="date"
-                                wire:model="form.forecast_end_date"
-                                @disabled($form->state === 'Postponed')
-                                @class([
-                                    'block w-full rounded-lg px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500',
-                                    'border-red-300 bg-red-50/40' => $errors->has('form.forecast_end_date'),
-                                    'border-gray-300' => !$errors->has('form.forecast_end_date'),
-                                    'cursor-not-allowed bg-gray-100 text-gray-500' => $form->state === 'Postponed',
-                                ])>
-
-                            @error('form.forecast_end_date')
-                                <p class="mt-1.5 text-sm text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        @if ($form->state === 'Postponed')
-                            <p class="lg:col-span-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                                Forecast dates are not required while the project is Postponed. Previous values will be restored if another state is selected before saving.
-                            </p>
-                        @endif
-
-                        <div>
-                            <label for="approve-date{{ $fieldSuffix }}"
-                                class="mb-2 block text-sm font-medium text-gray-700">
-                                Approve date
-                            </label>
-
-                            <input id="approve-date{{ $fieldSuffix }}" type="date"
-                                wire:model="form.approve_date"
-                                class="block w-full rounded-lg border-gray-300 px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
-
-                            @error('form.approve_date')
-                                <p class="mt-1.5 text-sm text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-
-                        <div>
-                            <label for="close-date{{ $fieldSuffix }}"
-                                class="mb-2 block text-sm font-medium text-gray-700">
-                                Close date
-                            </label>
-
-                            <input id="close-date{{ $fieldSuffix }}" type="date" wire:model="form.close_date"
-                                class="block w-full rounded-lg border-gray-300 px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
-
-                            @error('form.close_date')
-                                <p class="mt-1.5 text-sm text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        <div class="lg:col-span-2" x-data="{ uploadingIdea: false, ideaProgress: 0 }"
-                            x-on:livewire-upload-start="uploadingIdea = true; ideaProgress = 0"
-                            x-on:livewire-upload-progress="ideaProgress = $event.detail.progress"
-                            x-on:livewire-upload-finish="ideaProgress = 100; uploadingIdea = false"
-                            x-on:livewire-upload-error="uploadingIdea = false; ideaProgress = 0"
-                            x-on:livewire-upload-cancel="uploadingIdea = false; ideaProgress = 0">
-                            <label for="project-ideas{{ $fieldSuffix }}"
-                                class="mb-2 block text-sm font-medium text-gray-700">
-                                Project ideas (Excel)
-                            </label>
-
-                            @if ($editing && filled($currentProjectIdeaName ?? null))
-                                <p class="mb-2 text-sm text-emerald-700">
-                                    Current file: {{ $currentProjectIdeaName }}. Select another file to replace it.
-                                </p>
-                            @endif
-
-                            <input id="project-ideas{{ $fieldSuffix }}" type="file"
-                                wire:model="projectIdea" accept=".xlsx,.xls"
-                                data-no-global-loading class="sr-only">
-                            <label for="project-ideas{{ $fieldSuffix }}"
-                                class="group flex cursor-pointer items-center gap-4 rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50/40 p-5 transition hover:border-emerald-500 hover:bg-emerald-50">
-                                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white shadow-md transition group-hover:scale-105">
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" d="M12 16V5m0 0L8 9m4-4 4 4M5 19h14" />
-                                    </svg>
-                                </span>
-                                <span class="min-w-0 flex-1">
-                                    <span class="block text-sm font-semibold text-slate-800">
-                                        {{ $editing && filled($currentProjectIdeaName ?? null) ? 'Replace Project ideas Excel' : 'Upload Project ideas Excel' }}
-                                    </span>
-                                    <span class="mt-1 block truncate text-xs text-slate-500">
-                                        {{ $projectIdea?->getClientOriginalName() ?? 'Click to select an .xlsx or .xls file · maximum 10 MB' }}
-                                    </span>
-                                </span>
-                            </label>
-
-                            <div x-show="uploadingIdea" x-cloak class="mt-3" aria-live="polite">
-                                <div class="mb-1.5 flex justify-between text-xs font-semibold text-emerald-700">
-                                    <span>Uploading Excel...</span><span x-text="`${ideaProgress}%`">0%</span>
-                                </div>
-                                <div class="h-2.5 overflow-hidden rounded-full bg-emerald-100">
-                                    <div class="h-full rounded-full bg-emerald-600 transition-all duration-200"
-                                        x-bind:style="`width: ${ideaProgress}%`"></div>
-                                </div>
-                            </div>
-
-                            @error('projectIdea')
-                                <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                    </div>
-
-                </section>
+            <div class="min-w-0" x-data="{ activeSection: @js($initialSection) }">
+                <nav class="mb-5 grid grid-cols-3 gap-2 rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm"
+                    aria-label="Project form sections">
+                    <button type="button" x-on:click="activeSection = 'details'"
+                        x-bind:class="activeSection === 'details' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'"
+                        class="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition">
+                        <span class="hidden sm:inline">Project</span> Details
+                    </button>
+                    <button type="button" x-on:click="activeSection = 'dates'"
+                        x-bind:class="activeSection === 'dates' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'"
+                        class="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition">
+                        Dates
+                        @if ($dateErrors)<span class="h-2 w-2 rounded-full bg-red-500" aria-label="Dates contain errors"></span>@endif
+                    </button>
+                    <button type="button" x-on:click="activeSection = 'documents'"
+                        x-bind:class="activeSection === 'documents' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'"
+                        class="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition">
+                        Documents
+                        @if ($documentErrors)<span class="h-2 w-2 rounded-full bg-red-500" aria-label="Documents contain errors"></span>@endif
+                    </button>
+                </nav>
+
+                @include('livewire.project.partials.form-details')
+                @include('livewire.project.partials.form-dates')
+                @include('livewire.project.partials.form-documents')
             </div>
-
         </x-slot>
 
         <x-slot name="footer">
@@ -499,10 +85,8 @@
                     {{ __('Cancel') }}
                 </x-secondary-button>
 
-                <x-button wire:click="{{ $saveMethod }}"
-                    data-no-global-loading
-                    wire:loading.attr="disabled"
-                    wire:target="{{ $saveMethod }}"
+                <x-button wire:click="{{ $saveMethod }}" data-no-global-loading
+                    wire:loading.attr="disabled" wire:target="{{ $saveMethod }}"
                     style="background-color: #2563eb; border-color: #1d4ed8; color: #ffffff;"
                     onmouseenter="this.style.backgroundColor='#1d4ed8'"
                     onmouseleave="this.style.backgroundColor='#2563eb'">
@@ -516,6 +100,5 @@
                 </x-button>
             </div>
         </x-slot>
-
     </x-dialog-modal>
 </div>

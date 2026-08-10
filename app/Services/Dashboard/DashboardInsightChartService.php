@@ -95,14 +95,13 @@ final class DashboardInsightChartService
             'Pre-execution' => (int) $states->only(['Capex', 'Planning'])->sum(),
             'Execution' => (int) ($states['Execution'] ?? 0),
             'Finished' => (int) ($states['Finished'] ?? 0),
-            'Postponed' => (int) ($states['Postponed'] ?? 0),
         ];
-        $colors = ['#6366f1', '#0ea5e9', '#22c55e', '#ef4444'];
+        $colors = ['#6366f1', '#0ea5e9', '#22c55e'];
         $chart = (new PieChartModel)
             ->setTitle('Portfolio stage')
             ->setAnimated(true)
             ->setType('donut')
-            ->setColors(['#7C3AED', '#0891B2', '#16A34A', '#DC2626'])
+            ->setColors(['#7C3AED', '#0891B2', '#16A34A'])
             ->disableShades()
             ->withDataLabels()
             ->withLegend()

@@ -117,7 +117,7 @@ class Dashboard extends Component
         $budgetByInvestment = collect($statistics['budgetByInvestment'])->map(fn (array $row) => (object) $row);
         $budgetByState = collect($statistics['budgetByState'])->map(fn (array $row) => (object) $row);
         $budgetByArea = collect($statistics['budgetByArea'])->map(fn (array $row) => (object) $row);
-        $projectsByCreationMonth = collect($statistics['projectsByCreationMonth'])->map(fn (array $row) => (object) $row);
+        $projectsByForecastStartDateCreationMonth = collect($statistics['projectsByForecastStartDateCreationMonth'])->map(fn (array $row) => (object) $row);
         $budgetByCreationMonth = collect($statistics['budgetByCreationMonth'])->map(fn (array $row) => (object) $row);
         $realValueByStartMonth = collect($statistics['realValueByStartMonth']);
         $realValueByApprovalMonth = collect($statistics['realValueByApprovalMonth']);
@@ -150,7 +150,7 @@ class Dashboard extends Component
             'budgetByInvestmentRadarChart' => $this->budgetInvestmentRadarChart($budgetByInvestment),
             'budgetByAreaRadarChart' => $this->budgetAreaRadarChart($budgetByArea),
             'projectsCreationCurveChart' => $this->cumulativeLineChart(
-                $projectsByCreationMonth,
+                $projectsByForecastStartDateCreationMonth,
                 'Cumulative projects by creation month'
             ),
             'budgetCreationCurveChart' => $this->cumulativeLineChart(
@@ -236,7 +236,7 @@ class Dashboard extends Component
             ->map(fn ($row) => ['label' => (string) $row->label, 'total' => (float) $row->total])
             ->all();
 
-        $projectsByCreationMonth = $this->projectQuery()
+        $projectsByForecastStartDateCreationMonth = $this->projectQuery()
             ->whereNotNull('projects.created_at')
             ->selectRaw($this->monthExpression('projects.created_at').' AS month, COUNT(*) AS total')
             ->groupBy('month')
@@ -311,7 +311,7 @@ class Dashboard extends Component
             'budgetByInvestment' => $budgetByInvestment,
             'budgetByState' => $budgetByState,
             'budgetByArea' => $budgetByArea,
-            'projectsByCreationMonth' => $projectsByCreationMonth,
+            'projectsByForecastStartDateCreationMonth' => $projectsByForecastStartDateCreationMonth,
             'budgetByCreationMonth' => $budgetByCreationMonth,
             'realValueByStartMonth' => $realValueByStartMonth,
             'realValueByApprovalMonth' => $realValueByApprovalMonth,

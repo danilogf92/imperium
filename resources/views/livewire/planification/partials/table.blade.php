@@ -157,6 +157,11 @@
                                         $weeklyActivity = $weeklyActivitiesForWeek->first();
                                         $weeklyActivityTooltip = $weeklyActivitiesForWeek
                                             ->map(fn($activity, $index) => ($index + 1).'. '.$activity->activity)->implode("\n");
+                                        $weekDeadline = \Carbon\CarbonImmutable::now()
+                                            ->setISODate($week['year'], $week['week'])->endOfWeek();
+                                        $weekExpired = now()->isAfter($weekDeadline);
+                                        $allActivitiesExecuted = $weeklyActivitiesForWeek->isNotEmpty()
+                                            && $weeklyActivitiesForWeek->every(fn($activity) => filled($activity->executed_at));
                                     @endphp
                                     <td class="group/activity sticky z-10 border-b border-r border-cyan-200 bg-cyan-50 px-1.5 py-1.5 text-center"
                                         style="left: {{ $fixedOffsets[$activityColumn] }}px">
@@ -166,6 +171,12 @@
                                                 data-no-global-loading
                                                 title="{{ $weeklyActivityTooltip ?: __('Add activity') }}"
                                                 class="inline-flex max-w-full cursor-pointer items-center gap-1.5 rounded-lg border border-cyan-500 bg-cyan-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-px hover:bg-cyan-500 hover:shadow-md">
+                                                @if ($weeklyActivity)
+                                                    <span class="inline-flex h-5 w-5 items-center justify-center rounded-full font-bold
+                                                        {{ $allActivitiesExecuted ? 'bg-green-500 text-white' : ($weekExpired ? 'bg-red-500 text-white' : 'bg-amber-100 text-amber-700') }}">
+                                                        {{ $allActivitiesExecuted ? '✓' : ($weekExpired ? '×' : '○') }}
+                                                    </span>
+                                                @endif
                                                 <span class="text-base leading-none">+</span>
                                                 <span class="truncate">{{ $weeklyActivity ? $weeklyActivitiesForWeek->count().' activities' : 'Add activity' }}</span>
                                             </button>
@@ -210,19 +221,40 @@
                                                     @php
                                                         $milestoneValue =
                                                             $projectBudget * ((float) $item->percentage / 100);
+                                                        $formattedMilestoneValue = \App\Support\MoneyValueFormatter::compact(
+                                                            $milestoneValue,
+                                                            $currencySymbol,
+                                                        );
                                                         $milestoneText = match ($cellDisplay) {
                                                             'milestone' => $item->milestone->code,
-                                                            'value' => $currencySymbol .
-                                                                number_format($milestoneValue, 2),
+                                                            'value' => $formattedMilestoneValue,
                                                             default => $item->milestone->code .
                                                                 ' | ' .
-                                                                $currencySymbol .
-                                                                number_format($milestoneValue, 2),
+                                                                $formattedMilestoneValue,
                                                         };
+                                                        $milestoneDeadline = \Carbon\CarbonImmutable::create(
+                                                            (int) $item->cycle_year,
+                                                            (int) $item->month,
+                                                            1,
+                                                        )->endOfMonth();
+                                                        $milestoneExpired = now()->isAfter($milestoneDeadline);
+                                                        $milestoneExecuted = filled($item->executed_at);
+                                                        $milestoneIsFuture = \Carbon\CarbonImmutable::create(
+                                                            (int) $item->cycle_year,
+                                                            (int) $item->month,
+                                                            1,
+                                                        )->startOfMonth()->isAfter(now()->startOfMonth());
                                                     @endphp
                                                     <span wire:key="project-milestone-{{ $item->id }}"
                                                         class="inline-flex shrink-0 items-center overflow-hidden rounded-md text-white shadow-sm ring-1 ring-black/5 transition hover:-translate-y-px hover:shadow"
                                                         style="background-color: {{ $item->milestone->view_color ?: $item->milestone->color }}; color: {{ $item->milestone->viewTextColor() }}">
+                                                        @if (! $milestoneIsFuture)
+                                                            <span title="{{ $milestoneExecuted ? 'Executed' : ($milestoneExpired ? 'Not executed' : 'Pending execution') }}"
+                                                                class="m-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold leading-none shadow-sm ring-1 ring-white/40
+                                                                    {{ $milestoneExecuted ? 'bg-green-600 text-white' : ($milestoneExpired ? 'bg-red-600 text-white' : 'bg-white/20') }}">
+                                                                {{ $milestoneExecuted ? '✓' : ($milestoneExpired ? '×' : '○') }}
+                                                            </span>
+                                                        @endif
                                                         <button type="button"
                                                             wire:click="editMilestone({{ $item->id }})"
                                                             data-no-global-loading

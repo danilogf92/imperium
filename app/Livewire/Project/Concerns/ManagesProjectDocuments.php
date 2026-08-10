@@ -20,7 +20,6 @@ trait ManagesProjectDocuments
         $this->currentDocumentName = $project->file_name;
         $this->reset('document');
         $this->resetValidation('document');
-        $this->dispatch('open-modal', 'upload-project-document');
     }
 
     public function closeDocumentModal(): void
@@ -70,7 +69,6 @@ trait ManagesProjectDocuments
         $this->deleteDocumentProjectName = $project->name;
         $this->deleteDocumentProjectCode = $project->pda_code;
         $this->deleteDocumentName = $project->file_name ?: basename($project->upload_pda);
-        $this->dispatch('open-modal', 'delete-project-document');
     }
 
     public function closeDeleteDocumentModal(): void

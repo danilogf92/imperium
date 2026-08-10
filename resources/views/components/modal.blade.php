@@ -132,7 +132,7 @@
     x-on:keydown.shift.tab.prevent="
         prevFocusable().focus()
     " x-show="show"
-    class="app-modal fixed inset-0 z-50 overflow-y-auto px-2 py-2 sm:px-6 sm:py-6" style="display: {{ $show ? 'block' : 'none' }};">
+    class="app-modal fixed inset-0 z-50 overflow-hidden px-2 py-2 sm:px-6 sm:py-6" style="display: {{ $show ? 'block' : 'none' }};">
     {{-- Fondo oscuro --}}
     <div x-show="show" class="fixed inset-0 cursor-pointer transform transition-all"
         x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
@@ -142,7 +142,7 @@
     </div>
 
     {{-- Contenedor para centrar el modal --}}
-    <div class="relative flex min-h-full cursor-pointer items-center justify-center" x-on:click.self="dismiss($event)">
+    <div class="relative flex h-full min-h-0 cursor-pointer items-center justify-center" x-on:click.self="dismiss($event)">
 
         {{-- Caja principal del modal --}}
         <div x-show="show"

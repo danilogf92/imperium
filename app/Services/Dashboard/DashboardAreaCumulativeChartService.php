@@ -11,7 +11,7 @@ class DashboardCumulativeChartService
     public function build(array $statistics, string $currency): array
     {
         $projects = $this->toCollection(
-            $statistics['projectsByCreationMonth']
+            $statistics['projectsByForecastStartDateCreationMonth']
         );
 
         $budget = $this->toCollection(

@@ -232,7 +232,7 @@
                 </x-dashboard-chart-card>
 
                 <x-dashboard-chart-card title="Projects by year"
-                    subtitle="Project columns with Budgeted and Booked value lines" filename="annual-project-count"
+                    subtitle="Project columns with Budgeted, Booked and Executed value lines" filename="annual-project-count"
                     height="34rem">
                     <x-dashboard-apex-chart :options="$projectsChartOptions"
                         chart-key="resume-projects-{{ md5(json_encode($projectsChartOptions)) }}" />
@@ -245,7 +245,7 @@
                 </x-dashboard-chart-card>
 
                 <x-dashboard-chart-card title="Financial coverage ratios"
-                    subtitle="Approved and booked coverage percentages by year"
+                    subtitle="Approved, booked and executed coverage by approval year, with a 100% target"
                     filename="annual-financial-coverage" height="34rem">
                     <x-dashboard-apex-chart :options="$coverageChartOptions"
                         chart-key="resume-coverage-{{ md5(json_encode($coverageChartOptions)) }}" />
@@ -260,6 +260,18 @@
                     <x-dashboard-apex-chart :options="$averageChartOptions"
                         chart-key="resume-average-{{ md5(json_encode($averageChartOptions)) }}" />
                 </x-dashboard-chart-card>
+
+                @if (($cashFlowChartOptions['series'][0]['data'] ?? []) !== [])
+                    <x-dashboard-chart-card title="Milestone cash flow"
+                        subtitle="Monthly sum of project budget allocated through milestone percentages"
+                        filename="monthly-milestone-cash-flow" height="34rem">
+                        <x-dashboard-apex-chart :options="$cashFlowChartOptions"
+                            chart-key="resume-cash-flow-{{ md5(json_encode($cashFlowChartOptions)) }}" />
+                        <x-slot:footer>
+                            Each month equals project budget multiplied by milestone percentage. All Resume filters apply.
+                        </x-slot:footer>
+                    </x-dashboard-chart-card>
+                @endif
             </section>
         @endif
 

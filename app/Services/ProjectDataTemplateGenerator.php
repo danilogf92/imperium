@@ -13,7 +13,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ProjectDataTemplateGenerator
 {
-    private const HEADERS = [
+    public const HEADERS = [
         'id',
         'area',
         'group 1',

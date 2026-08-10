@@ -20,6 +20,8 @@ trait ExportsPlanification
             'creationYears' => $this->creationYearFilter,
             'onlyWithMilestones' => $this->onlyWithMilestones,
             'activityWeeks' => $this->activityWeekFilter,
+            'milestoneExecution' => $this->milestoneExecutionFilter,
+            'activityExecution' => $this->activityExecutionFilter,
             'currency' => $this->currency,
             'cellDisplay' => $this->cellDisplay,
             'visibleColumns' => $this->visibleColumns,

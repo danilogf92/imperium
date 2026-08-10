@@ -15,6 +15,10 @@ class DashboardStatisticsService
     public function load(User $user, DashboardFilters $filters): array
     {
         $columns = DashboardCurrency::columns($filters->currency);
+        $projectsBudgetChart = config('dashboard_charts.cumulative_projects_budget');
+        $approvedChart = config('dashboard_charts.cumulative_approved_budget');
+        $startApprovalChart = config('dashboard_charts.forecast_start_vs_approved');
+        $endCloseChart = config('dashboard_charts.forecast_end_vs_close');
 
         $projectCount = $this->queries
             ->projectQuery($user, $filters)
@@ -126,10 +130,10 @@ class DashboardStatisticsService
         /*
          * Proyectos creados por mes.
          */
-        $projectsByCreationMonth = $this->queries->projectCountByMonth(
+        $projectsByForecastStartDateCreationMonth = $this->queries->projectCountByMonth(
             $user,
             $filters,
-            'projects.created_at'
+            $projectsBudgetChart['projects_date_column']
         );
 
         /*
@@ -138,61 +142,36 @@ class DashboardStatisticsService
         $budgetByCreationMonth = $this->queries->dataByMonth(
             $user,
             $filters,
-            'projects.created_at',
-            $columns['budgeted']
+            $projectsBudgetChart['budget_date_column'],
+            $columns[$projectsBudgetChart['budget_value']]
         );
 
         $projectsByApprovalMonth = $this->queries->projectCountByMonth(
             $user,
             $filters,
-            'projects.approve_date',
-            ['Execution', 'Finished'],
-            'projects.updated_at'
+            $approvedChart['projects_date_column'],
+            $approvedChart['projects_states']
         );
 
         $approvedBudgetByMonth = $this->queries->dataByMonth(
             $user,
             $filters,
-            'projects.approve_date',
-            $columns['budgeted'],
-            ['Execution', 'Finished'],
-            'projects.updated_at'
+            $approvedChart['budget_date_column'],
+            $columns[$approvedChart['budget_value']],
+            $approvedChart['budget_states']
         );
 
-        /*
-         * IMPORTANTE:
-         *
-         * Forecast Start Date VS Budgeted
-         *
-         * USD:
-         * data.global_price
-         *
-         * EUR:
-         * data.global_price_euros
-         */
-        $budgetedByStartMonth = $this->queries->dataByMonth(
+        $plannedProjectsByMonth = $this->queries->projectCountByMonth(
             $user,
             $filters,
-            'projects.forecast_start_date',
-            $columns['budgeted']
+            $startApprovalChart['planned_date_column']
         );
 
-        /*
-         * IMPORTANTE:
-         *
-         * Approve Date VS Budgeted
-         *
-         * USD:
-         * data.global_price
-         *
-         * EUR:
-         * data.global_price_euros
-         */
-        $budgetedByApprovalMonth = $this->queries->dataByMonth(
+        $actualProjectsByMonth = $this->queries->projectCountByMonth(
             $user,
             $filters,
-            'projects.approve_date',
-            $columns['budgeted']
+            $startApprovalChart['actual_date_column'],
+            $startApprovalChart['actual_states']
         );
 
         return [
@@ -246,7 +225,7 @@ class DashboardStatisticsService
                 $columns['executed']
             ),
 
-            'projectsByCreationMonth' => $projectsByCreationMonth,
+            'projectsByForecastStartDateCreationMonth' => $projectsByForecastStartDateCreationMonth,
 
             'budgetByCreationMonth' => $budgetByCreationMonth,
 
@@ -254,23 +233,20 @@ class DashboardStatisticsService
 
             'approvedBudgetByMonth' => $approvedBudgetByMonth,
 
-            /*
-             * Nuevas series basadas en Budgeted.
-             */
-            'budgetedByStartMonth' => $budgetedByStartMonth,
+            'plannedProjectsByMonth' => $plannedProjectsByMonth,
 
-            'budgetedByApprovalMonth' => $budgetedByApprovalMonth,
+            'actualProjectsByMonth' => $actualProjectsByMonth,
 
             'forecastEndDatesByMonth' => $this->queries->projectCountByMonth(
                 $user,
                 $filters,
-                'projects.forecast_end_date'
+                $endCloseChart['forecast_date_column']
             ),
 
             'closeDatesByMonth' => $this->queries->projectCountByMonth(
                 $user,
                 $filters,
-                'projects.close_date'
+                $endCloseChart['close_date_column']
             ),
         ];
     }

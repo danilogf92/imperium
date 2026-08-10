@@ -32,6 +32,7 @@ class Planification extends Component
     public ?int $editingId = null;
 
     public string $percentage = '0';
+    public bool $milestoneExecuted = false;
 
     public string $currency = 'usd';
 
@@ -62,6 +63,10 @@ class Planification extends Component
     public string $weeklyActivity = '';
     public ?int $activityEditingId = null;
     public array $weekActivities = [];
+    public ?int $pendingActivityDeleteId = null;
+    public string $pendingActivityDeleteLabel = '';
+    public string $milestoneExecutionFilter = '';
+    public string $activityExecutionFilter = '';
 
     public function updatedProjectId(PlanificationAccessService $access): void
     {
@@ -121,6 +126,28 @@ class Planification extends Component
         $this->resetPage();
     }
 
+    public function resetActivityWeekFilter(): void
+    {
+        $this->activityWeekFilter = '';
+        $this->resetPage();
+    }
+
+    public function updatedMilestoneExecutionFilter(string $value): void
+    {
+        if (! in_array($value, ['', 'completed', 'incomplete'], true)) {
+            $this->milestoneExecutionFilter = '';
+        }
+        $this->resetPage();
+    }
+
+    public function updatedActivityExecutionFilter(string $value): void
+    {
+        if (! in_array($value, ['', 'completed', 'incomplete'], true)) {
+            $this->activityExecutionFilter = '';
+        }
+        $this->resetPage();
+    }
+
     public function updatedCurrency(string $value): void
     {
         if (! in_array($value, ['usd', 'eur'], true)) {
@@ -149,6 +176,8 @@ class Planification extends Component
             'creationYearFilter',
             'onlyWithMilestones',
             'activityWeekFilter',
+            'milestoneExecutionFilter',
+            'activityExecutionFilter',
         ]);
 
         $this->currency = 'usd';
@@ -170,6 +199,7 @@ class Planification extends Component
         ]);
 
         $this->percentage = '0';
+        $this->milestoneExecuted = false;
         $this->showFormModal = true;
     }
 
@@ -195,12 +225,19 @@ class Planification extends Component
 
     public function saveMilestone(PlanificationMilestoneService $milestones): void
     {
+        if ($this->cycleYear && $this->month
+            && CarbonImmutable::create($this->cycleYear, $this->month, 1)
+                ->startOfMonth()->isAfter(now()->startOfMonth())) {
+            $this->milestoneExecuted = false;
+        }
+
         $validated = $this->validate([
             'projectId' => ['required', 'integer'],
             'milestoneId' => ['required', 'integer', 'exists:milestones,id'],
             'month' => ['required', 'integer', 'between:1,12'],
             'cycleYear' => ['required', 'integer', 'between:2000,2200'],
             'percentage' => ['required', 'numeric', 'between:0,100'],
+            'milestoneExecuted' => ['boolean'],
         ]);
 
         $wasEditing = (bool) $this->editingId;
@@ -209,7 +246,7 @@ class Planification extends Component
 
         $this->showFormModal = false;
 
-        $this->reset(['milestoneId', 'month', 'cycleYear', 'editingId']);
+        $this->reset(['milestoneId', 'month', 'cycleYear', 'editingId', 'milestoneExecuted']);
 
         $this->percentage = '0';
         // $this->resetPage();
@@ -264,7 +301,10 @@ class Planification extends Component
     public function closeActivityModal(): void
     {
         $this->showActivityModal = false;
-        $this->reset(['activityProjectId', 'weeklyActivity', 'activityEditingId', 'weekActivities']);
+        $this->reset([
+            'activityProjectId', 'weeklyActivity', 'activityEditingId', 'weekActivities',
+            'pendingActivityDeleteId', 'pendingActivityDeleteLabel',
+        ]);
         $this->resetValidation('weeklyActivity');
         $this->dispatch('close-modal', 'weekly-project-activity');
     }
@@ -295,13 +335,29 @@ class Planification extends Component
         $this->resetValidation('weeklyActivity');
     }
 
-    public function deleteWeeklyActivity(int $activityId): void
+    public function requestDeleteWeeklyActivity(int $activityId): void
     {
+        $activity = ProjectWeeklyActivity::query()->whereKey($activityId)
+            ->where('project_id', $this->activityProjectId)->firstOrFail();
+        $this->pendingActivityDeleteId = $activity->id;
+        $this->pendingActivityDeleteLabel = str($activity->activity)->limit(120)->toString();
+    }
+
+    public function cancelDeleteWeeklyActivity(): void
+    {
+        $this->reset(['pendingActivityDeleteId', 'pendingActivityDeleteLabel']);
+    }
+
+    public function confirmDeleteWeeklyActivity(): void
+    {
+        abort_unless($this->pendingActivityDeleteId, 404);
+        $activityId = $this->pendingActivityDeleteId;
         ProjectWeeklyActivity::query()->whereKey($activityId)
             ->where('project_id', $this->activityProjectId)->firstOrFail()->delete();
         if ($this->activityEditingId === $activityId) {
             $this->reset(['weeklyActivity', 'activityEditingId']);
         }
+        $this->reset(['pendingActivityDeleteId', 'pendingActivityDeleteLabel']);
         $this->loadWeekActivities();
     }
 
@@ -315,6 +371,8 @@ class Planification extends Component
             'creationYears' => $this->creationYearFilter,
             'onlyWithMilestones' => $this->onlyWithMilestones,
             'activityWeeks' => $this->activityWeekFilter,
+            'milestoneExecution' => $this->milestoneExecutionFilter,
+            'activityExecution' => $this->activityExecutionFilter,
         ]);
 
         return view('livewire.planification.planification', [
@@ -323,12 +381,29 @@ class Planification extends Component
         ])->layout('layouts.app');
     }
 
+    public function toggleWeeklyActivityExecuted(
+        int $activityId,
+        PlanificationAccessService $access
+    ): void
+    {
+        $activity = ProjectWeeklyActivity::query()->whereKey($activityId)
+            ->where('project_id', $this->activityProjectId)
+            ->whereHas('project', fn ($query) => $query->whereIn('company_id', $access->allowedCompanyIds()))
+            ->firstOrFail();
+        $activity->update(['executed_at' => $activity->executed_at ? null : now()]);
+        $this->loadWeekActivities();
+    }
+
     private function loadWeekActivities(): void
     {
         $this->weekActivities = ProjectWeeklyActivity::query()
             ->where('project_id', $this->activityProjectId)->where('week_year', $this->activityWeekYear)
-            ->where('week_number', $this->activityWeekNumber)->latest('id')->get(['id', 'activity'])
-            ->map(fn (ProjectWeeklyActivity $activity) => $activity->only(['id', 'activity']))->all();
+            ->where('week_number', $this->activityWeekNumber)->latest('id')->get(['id', 'activity', 'executed_at'])
+            ->map(fn (ProjectWeeklyActivity $activity) => [
+                'id' => $activity->id,
+                'activity' => $activity->activity,
+                'executed' => filled($activity->executed_at),
+            ])->all();
     }
 
     private function selectedActivityWeek(): CarbonImmutable

@@ -31,8 +31,8 @@ class Actions extends Component
     public array $typeOfProjectSearch = [];
     public array $investmentFilter = [];
     public array $visibleColumns = [];
-    public string $sortBy = 'id';
-    public string $sortDir = 'DESC';
+    public string $sortBy = 'order';
+    public string $sortDir = 'ASC';
     public bool $orderByProject = false;
 
     public function mount(): void

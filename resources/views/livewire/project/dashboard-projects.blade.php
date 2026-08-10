@@ -231,7 +231,7 @@
         @php
             $currencySymbol = $dollarOrEuro === 'dollar' ? '$' : '€';
             $approved = in_array($project->state?->value, ['Execution', 'Finished'], true) ? $budgeted : 0;
-            $available = $budgeted - $approved;
+            $available = $approved - $executed;
             $metrics = [
                 ['label' => 'Budgeted', 'value' => $currencySymbol . ' ' . number_format($budgeted, 2), 'color' => 'blue'],
                 ['label' => 'Approved', 'value' => $currencySymbol . ' ' . number_format($approved, 2), 'color' => 'slate'],

@@ -5,9 +5,16 @@ namespace App\Exports;
 use App\Enums\ProjectPermissionEnum;
 use App\Models\Project;
 use App\Models\User;
+use App\Support\ProjectOrderSort;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Chart\Chart;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
+use PhpOffice\PhpSpreadsheet\Chart\Legend;
+use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
+use PhpOffice\PhpSpreadsheet\Chart\Title;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -28,7 +35,7 @@ class PlanificationExport
             return ['year' => (int) $date->isoWeekYear, 'week' => (int) $date->isoWeek];
         });
 
-        $projects = Project::query()
+        $projectsQuery = Project::query()
             ->with([
                 'company:id,company_name',
                 'projectMilestones' => fn ($query) => $query
@@ -61,6 +68,26 @@ class PlanificationExport
                 });
             })
             ->when($filters['onlyWithMilestones'], fn (Builder $query) => $query->whereHas('projectMilestones'))
+            ->when(($filters['milestoneExecution'] ?? '') === 'completed', fn (Builder $query) => $query
+                ->whereHas('projectMilestones', fn (Builder $query) => $query->due()->whereNotNull('executed_at')))
+            ->when(($filters['milestoneExecution'] ?? '') === 'incomplete', fn (Builder $query) => $query
+                ->whereHas('projectMilestones', fn (Builder $query) => $query->due()->whereNull('executed_at')))
+            ->when(($filters['activityExecution'] ?? '') === 'completed', fn (Builder $query) => $query
+                ->whereHas('weeklyActivities', fn (Builder $query) => $query->whereNotNull('executed_at')
+                    ->where(function (Builder $query) use ($activityWeeks): void {
+                        foreach ($activityWeeks as $week) {
+                            $query->orWhere(fn (Builder $query) => $query
+                                ->where('week_year', $week['year'])->where('week_number', $week['week']));
+                        }
+                    })))
+            ->when(($filters['activityExecution'] ?? '') === 'incomplete', fn (Builder $query) => $query
+                ->whereHas('weeklyActivities', fn (Builder $query) => $query->whereNull('executed_at')
+                    ->where(function (Builder $query) use ($activityWeeks): void {
+                        foreach ($activityWeeks as $week) {
+                            $query->orWhere(fn (Builder $query) => $query
+                                ->where('week_year', $week['year'])->where('week_number', $week['week']));
+                        }
+                    })))
             ->when($filters['search'] !== '', function (Builder $query) use ($filters): void {
                 $search = '%' . trim($filters['search']) . '%';
                 $query->where(function (Builder $query) use ($search): void {
@@ -73,9 +100,9 @@ class PlanificationExport
                             ->where('name', 'like', $search)
                             ->orWhere('code', 'like', $search));
                 });
-            })
-            ->orderBy('name')
-            ->get();
+            });
+
+        $projects = ProjectOrderSort::apply($projectsQuery)->get();
 
         $years = $projects
             ->flatMap(function (Project $project) {
@@ -99,6 +126,7 @@ class PlanificationExport
             ? $filters['cellDisplay']
             : 'combined';
         $currencySymbol = $currency === 'eur' ? '€' : '$';
+        $moneyFormat = '"'.$currencySymbol.'"#,##0.00';
 
         $fixedHeaders = ['Forecast Start Year', 'Plant', 'PDA Code', 'Name', 'Budgeted Total', 'Status', 'Actual Week', 'Next Week'];
         foreach ($fixedHeaders as $index => $header) {
@@ -141,7 +169,7 @@ class PlanificationExport
 
             $sheet->getStyle("E{$row}")
                 ->getNumberFormat()
-                ->setFormatCode($currency === 'eur' ? '€#,##0.00' : '$#,##0.00');
+                ->setFormatCode($moneyFormat);
 
             $sheet->getStyle("G{$row}:H{$row}")->getAlignment()->setWrapText(true);
 
@@ -161,25 +189,50 @@ class PlanificationExport
                     $cellMilestones = $project->projectMilestones
                         ->where('cycle_year', $year)
                         ->where('month', $month);
-                    $codes = $cellMilestones
-                        ->map(function ($item) use ($project, $currency, $currencySymbol, $cellDisplay): string {
+                    $milestoneValues = $cellMilestones
+                        ->map(function ($item) use ($project, $currency): float {
                             $budget = (float) ($currency === 'eur'
                                 ? $project->data_budgeted_euros
                                 : $project->data_budgeted);
-                            $value = $budget * ((float) $item->percentage / 100);
-
-                            return match ($cellDisplay) {
-                                'milestone' => (string) $item->milestone?->code,
-                                'value' => $currencySymbol . number_format($value, 2),
-                                default => $item->milestone?->code . ' | ' . $currencySymbol . number_format($value, 2),
-                            };
-                        })
-                        ->filter()
-                        ->implode(', ');
+                            return $budget * ((float) $item->percentage / 100);
+                        });
                     $column = Coordinate::stringFromColumnIndex($columnIndex);
-                    $sheet->setCellValue("{$column}{$row}", $codes);
+                    if ($cellDisplay === 'value') {
+                        $sheet->setCellValue(
+                            "{$column}{$row}",
+                            $cellMilestones->isEmpty() ? null : (float) $milestoneValues->sum()
+                        );
+                        $sheet->getStyle("{$column}{$row}")->getNumberFormat()->setFormatCode($moneyFormat);
+                    } else {
+                        $text = $cellMilestones
+                            ->map(function ($item) use ($project, $currency, $currencySymbol, $cellDisplay): string {
+                                $budget = (float) ($currency === 'eur'
+                                    ? $project->data_budgeted_euros
+                                    : $project->data_budgeted);
+                                $value = $budget * ((float) $item->percentage / 100);
+
+                                return $cellDisplay === 'milestone'
+                                    ? (string) $item->milestone?->code
+                                    : $item->milestone?->code.' | '.$currencySymbol.number_format($value, 2);
+                            })
+                            ->filter()
+                            ->implode(', ');
+                        $sheet->setCellValue("{$column}{$row}", $text);
+                    }
 
                     if ($cellMilestones->isNotEmpty()) {
+                        $milestoneDescription = $cellMilestones
+                            ->map(fn ($item): string => sprintf(
+                                '%s - %s (%.2f%%)',
+                                $item->milestone?->code,
+                                $item->milestone?->name,
+                                (float) $item->percentage
+                            ))
+                            ->implode("\n");
+                        $sheet->getComment("{$column}{$row}")
+                            ->setAuthor('Imperium')
+                            ->getText()->createTextRun($milestoneDescription);
+
                         $backgroundColor = $this->normalizeColor(
                             $cellMilestones->first()->milestone?->color
                         );
@@ -246,12 +299,92 @@ class PlanificationExport
             count(array_intersect($fixedColumnKeys, $visibleColumns)) + 1
         ).'3');
 
+        $visibleFixedColumns = array_values(array_intersect($fixedColumnKeys, $visibleColumns));
+        $monthStartIndex = count($visibleFixedColumns) + 1;
+        $monthEndIndex = $monthStartIndex + ($years->count() * 12) - 1;
+        $lastDataRow = $row - 1;
+        $totalRow = $row;
+        $totalLastColumn = Coordinate::stringFromColumnIndex(max(
+            count($visibleFixedColumns),
+            $years->isNotEmpty() ? $monthEndIndex : 1
+        ));
+
+        if ($cellDisplay === 'value') {
+            $sheet->setCellValue("A{$totalRow}", 'TOTAL');
+            $sheet->getStyle("A{$totalRow}:{$totalLastColumn}{$totalRow}")->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '0F766E']],
+                'borders' => ['top' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '0F172A']]],
+            ]);
+
+            if (($budgetIndex = array_search('budgeted', $visibleFixedColumns, true)) !== false) {
+                $budgetColumn = Coordinate::stringFromColumnIndex($budgetIndex + 1);
+                $sheet->setCellValue(
+                    "{$budgetColumn}{$totalRow}",
+                    $lastDataRow >= 3 ? "=SUM({$budgetColumn}3:{$budgetColumn}{$lastDataRow})" : 0
+                );
+                $sheet->getStyle("{$budgetColumn}{$totalRow}")->getNumberFormat()->setFormatCode($moneyFormat);
+            }
+        }
+
+        if ($cellDisplay === 'value' && $years->isNotEmpty()) {
+            $monthStartColumn = Coordinate::stringFromColumnIndex($monthStartIndex);
+            $monthEndColumn = Coordinate::stringFromColumnIndex($monthEndIndex);
+
+            for ($index = $monthStartIndex; $index <= $monthEndIndex; $index++) {
+                $column = Coordinate::stringFromColumnIndex($index);
+                $sheet->setCellValue(
+                    "{$column}{$totalRow}",
+                    $lastDataRow >= 3 ? "=SUM({$column}3:{$column}{$lastDataRow})" : 0
+                );
+                $sheet->getStyle("{$column}{$totalRow}")->getNumberFormat()->setFormatCode($moneyFormat);
+            }
+
+            $sheetName = $sheet->getTitle();
+            $series = new DataSeries(
+                DataSeries::TYPE_BARCHART,
+                DataSeries::GROUPING_CLUSTERED,
+                [0],
+                [new DataSeriesValues(
+                    DataSeriesValues::DATASERIES_TYPE_STRING,
+                    "'{$sheetName}'!\$A\$".$totalRow,
+                    null,
+                    1
+                )],
+                [new DataSeriesValues(
+                    DataSeriesValues::DATASERIES_TYPE_STRING,
+                    "'{$sheetName}'!\$".$monthStartColumn.'$2:$'.$monthEndColumn.'$2',
+                    null,
+                    $years->count() * 12
+                )],
+                [new DataSeriesValues(
+                    DataSeriesValues::DATASERIES_TYPE_NUMBER,
+                    "'{$sheetName}'!\$".$monthStartColumn.'$'.$totalRow.':$'.$monthEndColumn.'$'.$totalRow,
+                    null,
+                    $years->count() * 12
+                )]
+            );
+            $series->setPlotDirection(DataSeries::DIRECTION_COL);
+
+            $chart = new Chart(
+                'monthly_milestone_totals',
+                new Title('Monthly milestone totals'),
+                new Legend(Legend::POSITION_BOTTOM),
+                new PlotArea(null, [$series])
+            );
+            $chart->setTopLeftPosition('A'.($totalRow + 3));
+            $chart->setBottomRightPosition($monthEndColumn.($totalRow + 22));
+            $sheet->addChart($chart);
+        }
+
         $directory = storage_path('app/private/exports');
         if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
         $path = $directory . '/planification-' . uniqid('', true) . '.xlsx';
-        (new Xlsx($spreadsheet))->save($path);
+        $writer = new Xlsx($spreadsheet);
+        $writer->setIncludeCharts(true);
+        $writer->save($path);
         $spreadsheet->disconnectWorksheets();
 
         return response()->download(

@@ -38,6 +38,8 @@
                                     count($statusFilter) ||
                                     count($creationYearFilter) ||
                                     $activityWeekFilter !== '' ||
+                                    $milestoneExecutionFilter !== '' ||
+                                    $activityExecutionFilter !== '' ||
                                     $onlyWithMilestones ||
                                     $currency !== 'usd' ||
                                     $cellDisplay !== 'combined'
@@ -123,13 +125,42 @@
                             :selected="$creationYearFilter"
                             multiple />
 
-                        <x-dashboard-filter-dropdown
-                            label="Activity week"
-                            model="activityWeekFilter"
-                            :options="$activityWeekOptions"
-                            :selected="$activityWeekFilter"
-                            default=""
-                            show-selection />
+                        <div class="flex items-center gap-1">
+                            <x-dashboard-filter-dropdown
+                                label="Activity week"
+                                model="activityWeekFilter"
+                                :options="$activityWeekOptions"
+                                :selected="$activityWeekFilter"
+                                default=""
+                                show-selection />
+                            @if ($activityWeekFilter !== '')
+                                <button type="button" wire:click="resetActivityWeekFilter" data-no-global-loading
+                                    title="Return to current week" aria-label="Return to current week"
+                                    class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg bg-red-600 text-lg font-bold text-white shadow-sm hover:bg-red-700">
+                                    ×
+                                </button>
+                            @endif
+                        </div>
+
+                        <label class="shrink-0">
+                            <span class="sr-only">Milestone execution</span>
+                            <select wire:model.change="milestoneExecutionFilter" data-no-global-loading
+                                class="h-11 rounded-lg border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">All milestones</option>
+                                <option value="completed">Completed milestones</option>
+                                <option value="incomplete">Incomplete milestones</option>
+                            </select>
+                        </label>
+
+                        <label class="shrink-0">
+                            <span class="sr-only">Activity execution</span>
+                            <select wire:model.change="activityExecutionFilter" data-no-global-loading
+                                class="h-11 rounded-lg border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">All activities</option>
+                                <option value="completed">Completed activities</option>
+                                <option value="incomplete">Incomplete activities</option>
+                            </select>
+                        </label>
 
                         {{--
                             Moneda.
@@ -219,6 +250,8 @@
                                 $statusFilter !== [] ||
                                 $creationYearFilter !== [] ||
                                 $activityWeekFilter !== '' ||
+                                $milestoneExecutionFilter !== '' ||
+                                $activityExecutionFilter !== '' ||
                                 $onlyWithMilestones ||
                                 $currency !== 'usd' ||
                                 $cellDisplay !== 'combined'

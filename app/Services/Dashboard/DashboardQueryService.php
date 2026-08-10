@@ -2,6 +2,7 @@
 
 namespace App\Services\Dashboard;
 
+use App\Enums\ProjectStateEnum;
 use App\Models\Data;
 use App\Models\Project;
 use App\Models\User;
@@ -126,7 +127,7 @@ class DashboardQueryService
             ? "COALESCE({$dateColumn}, {$fallbackDateColumn})"
             : $dateColumn;
 
-        return $this->dataQuery($user, $filters)
+        $query = $this->dataQuery($user, $filters)
             ->when(
                 $fallbackDateColumn === null,
                 fn (Builder $query) => $query->whereNotNull($dateColumn)
@@ -134,7 +135,11 @@ class DashboardQueryService
             ->when(
                 $states !== [],
                 fn (Builder $query) => $query->whereIn('projects.state', $states)
-            )
+            );
+
+        $this->applyGroupDateYearFilter($query, $filters, $groupDate);
+
+        return $query
             ->selectRaw(
                 $this->monthNumberExpression($groupDate).
                 " AS month, COALESCE(SUM(data.{$valueColumn}), 0) AS total"
@@ -157,7 +162,7 @@ class DashboardQueryService
             ? "COALESCE({$dateColumn}, {$fallbackDateColumn})"
             : $dateColumn;
 
-        return $this->projectQuery($user, $filters)
+        $query = $this->projectQuery($user, $filters)
             ->when(
                 $fallbackDateColumn === null,
                 fn (Builder $query) => $query->whereNotNull($dateColumn)
@@ -165,7 +170,11 @@ class DashboardQueryService
             ->when(
                 $states !== [],
                 fn (Builder $query) => $query->whereIn('projects.state', $states)
-            )
+            );
+
+        $this->applyGroupDateYearFilter($query, $filters, $groupDate);
+
+        return $query
             ->selectRaw(
                 $this->monthNumberExpression($groupDate).' AS month, COUNT(*) AS total'
             )
@@ -190,6 +199,33 @@ class DashboardQueryService
             : "MONTH({$column})";
     }
 
+    /**
+     * Keep each monthly series inside the same selected years as its own date.
+     *
+     * The project scope is selected by forecast_start_date, but comparison
+     * series can use approve_date, forecast_end_date or close_date. Without
+     * this constraint, January from another year is rendered as January of
+     * the selected dashboard period because the chart groups by month number.
+     */
+    private function applyGroupDateYearFilter(
+        Builder $query,
+        DashboardFilters $filters,
+        string $groupDate
+    ): void {
+        if ($filters->years === []) {
+            return;
+        }
+
+        $query->where(function (Builder $dateQuery) use ($filters, $groupDate): void {
+            foreach ($filters->years as $year) {
+                $dateQuery->orWhereRaw(
+                    "{$groupDate} BETWEEN ? AND ?",
+                    ["{$year}-01-01 00:00:00", "{$year}-12-31 23:59:59"]
+                );
+            }
+        });
+    }
+
     private function applyFilters(
         Builder $query,
         User $user,
@@ -201,6 +237,12 @@ class DashboardQueryService
             $user->availableCompaniesQuery()
                 ->select('companies.id')
                 ->reorder()
+        );
+
+        $query->where(
+            "{$table}.state",
+            '<>',
+            ProjectStateEnum::Postponed->value
         );
 
         if ($filters->companies !== []) {

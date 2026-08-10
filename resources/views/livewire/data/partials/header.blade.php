@@ -45,6 +45,8 @@
 
                 <div class="flex flex-wrap gap-2">
                     @if ($canExportData)
+                        <x-excel-export-button method="exportImportReadyExcel" label="Export for import"
+                            loading-label="Preparing import file..." />
                         <x-excel-export-button method="exportExcel" label="Export data" />
                     @endif
                     @if ($canEditData)
