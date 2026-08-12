@@ -46,7 +46,7 @@
     </div>
 
     {{-- Acciones de la barra superior --}}
-    <div class="flex items-center gap-3">
+    <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
 
         <x-dashboard-filter-dropdown label="Columns" model="visibleColumns"
             :options="collect($fixedColumnOptions)->map(fn($label, $value) => ['value' => $value, 'label' => $label])->values()"

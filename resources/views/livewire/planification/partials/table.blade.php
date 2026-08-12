@@ -155,21 +155,41 @@
                                         $weeklyActivitiesForWeek = $plannedProject->weeklyActivities
                                             ->where('week_year', $week['year'])->where('week_number', $week['week'])->values();
                                         $weeklyActivity = $weeklyActivitiesForWeek->first();
-                                        $weeklyActivityTooltip = $weeklyActivitiesForWeek
-                                            ->map(fn($activity, $index) => ($index + 1).'. '.$activity->activity)->implode("\n");
                                         $weekDeadline = \Carbon\CarbonImmutable::now()
                                             ->setISODate($week['year'], $week['week'])->endOfWeek();
                                         $weekExpired = now()->isAfter($weekDeadline);
                                         $allActivitiesExecuted = $weeklyActivitiesForWeek->isNotEmpty()
                                             && $weeklyActivitiesForWeek->every(fn($activity) => filled($activity->executed_at));
                                     @endphp
-                                    <td class="group/activity sticky z-10 border-b border-r border-cyan-200 bg-cyan-50 px-1.5 py-1.5 text-center"
+                                    <td class="sticky z-10 border-b border-r border-cyan-200 bg-cyan-50 px-1.5 py-1.5 text-center"
                                         style="left: {{ $fixedOffsets[$activityColumn] }}px">
-                                        <div class="relative flex min-h-8 items-center justify-center">
+                                        <div class="relative flex min-h-8 items-center justify-center gap-1"
+                                            @click.outside="tooltipOpen = false"
+                                            x-data="{
+                                                tooltipOpen: false,
+                                                tooltipStyle: '',
+                                                showTooltip(event) {
+                                                    const rect = event.currentTarget.getBoundingClientRect();
+                                                    const width = Math.min(320, window.innerWidth - 24);
+                                                    const left = Math.max(12, Math.min(rect.left + rect.width / 2 - width / 2, window.innerWidth - width - 12));
+                                                    const showBelow = rect.top < 180;
+                                                    const top = showBelow ? rect.bottom + 10 : rect.top - 10;
+                                                    this.tooltipStyle = `position:fixed;width:${width}px;left:${left}px;${showBelow ? `top:${top}px` : `top:${top}px;transform:translateY(-100%)`}`;
+                                                    this.tooltipOpen = true;
+                                                }
+                                            }">
                                             <button type="button"
                                                 wire:click="openWeeklyActivity({{ $plannedProject->id }}, {{ $week['offset'] }})"
                                                 data-no-global-loading
-                                                title="{{ $weeklyActivityTooltip ?: __('Add activity') }}"
+                                                @if ($weeklyActivity)
+                                                    x-on:mouseenter="showTooltip($event)"
+                                                    x-on:mouseleave="tooltipOpen = false"
+                                                    x-on:focus="showTooltip($event)"
+                                                    x-on:blur="tooltipOpen = false"
+                                                    aria-describedby="activity-tooltip-{{ $plannedProject->id }}-{{ $week['offset'] }}"
+                                                @else
+                                                    title="{{ __('Add activity') }}"
+                                                @endif
                                                 class="inline-flex max-w-full cursor-pointer items-center gap-1.5 rounded-lg border border-cyan-500 bg-cyan-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-px hover:bg-cyan-500 hover:shadow-md">
                                                 @if ($weeklyActivity)
                                                     <span class="inline-flex h-5 w-5 items-center justify-center rounded-full font-bold
@@ -181,13 +201,40 @@
                                                 <span class="truncate">{{ $weeklyActivity ? $weeklyActivitiesForWeek->count().' activities' : 'Add activity' }}</span>
                                             </button>
                                             @if ($weeklyActivity)
-                                                <div class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 hidden w-72 -translate-x-1/2 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-left text-xs font-normal leading-relaxed text-white shadow-xl group-hover/activity:block">
-                                                    <div class="space-y-2">
-                                                        @foreach ($weeklyActivitiesForWeek as $activity)
-                                                            <p>{{ $loop->iteration }}. {{ $activity->activity }}</p>
-                                                        @endforeach
+                                                <button type="button"
+                                                    data-no-global-loading
+                                                    x-on:click.stop="tooltipOpen ? tooltipOpen = false : showTooltip($event)"
+                                                    class="planification-activity-info"
+                                                    aria-label="Show activities"
+                                                    aria-controls="activity-tooltip-{{ $plannedProject->id }}-{{ $week['offset'] }}">i</button>
+                                                <template x-teleport="body">
+                                                    <div x-cloak x-show="tooltipOpen" x-transition.opacity
+                                                        id="activity-tooltip-{{ $plannedProject->id }}-{{ $week['offset'] }}"
+                                                        role="tooltip" :style="tooltipStyle"
+                                                        class="planification-activity-tooltip">
+                                                        <div class="flex items-center justify-between border-b border-cyan-400/20 pb-2">
+                                                            <span class="font-bold text-cyan-100">{{ $week['offset'] === 0 ? 'Actual week' : 'Next week' }}</span>
+                                                            <span class="rounded-full bg-cyan-400/15 px-2 py-0.5 text-[10px] font-semibold text-cyan-100">{{ $weeklyActivitiesForWeek->count() }} {{ $weeklyActivitiesForWeek->count() === 1 ? 'activity' : 'activities' }}</span>
+                                                        </div>
+                                                        <ol class="mt-2 space-y-2">
+                                                            @foreach ($weeklyActivitiesForWeek as $activity)
+                                                                <li class="flex items-start gap-2">
+                                                                    <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-400/20 text-[10px] font-bold text-cyan-100">{{ $loop->iteration }}</span>
+                                                                    <span class="min-w-0 flex-1 whitespace-pre-line text-slate-100">{{ $activity->activity }}</span>
+                                                                    @if (filled($activity->executed_at))
+                                                                        <span class="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-400/20 px-2 py-0.5 text-[10px] font-bold text-emerald-200">
+                                                                            <span aria-hidden="true">✓</span> Executed
+                                                                        </span>
+                                                                    @else
+                                                                        <span class="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold {{ $weekExpired ? 'bg-red-400/20 text-red-200' : 'bg-amber-300/20 text-amber-100' }}">
+                                                                            <span aria-hidden="true">{{ $weekExpired ? '×' : '○' }}</span> Not executed
+                                                                        </span>
+                                                                    @endif
+                                                                </li>
+                                                            @endforeach
+                                                        </ol>
                                                     </div>
-                                                </div>
+                                                </template>
                                             @endif
                                         </div>
                                     </td>

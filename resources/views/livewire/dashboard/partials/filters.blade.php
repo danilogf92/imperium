@@ -6,7 +6,7 @@
     </div>
 
     <div class="p-4 sm:p-5">
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="dashboard-filter-controls flex flex-wrap items-center gap-3">
             <x-dashboard-filter-dropdown
                 label="Companies"
                 model="companyFilter"
@@ -23,7 +23,7 @@
             <div
                 x-data="{ open: false }"
                 x-on:scroll.window="open = false"
-                class="shrink-0"
+                class="dashboard-year-filter shrink-0"
             >
                 <button
                     x-ref="trigger"

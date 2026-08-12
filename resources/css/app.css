@@ -20,6 +20,10 @@
             radial-gradient(circle at 10% 0%, rgb(37 99 235 / 0.10), transparent 30rem),
             #f8fafc;
     }
+
+    [x-cloak] {
+        display: none !important;
+    }
 }
 
 @layer components {
@@ -44,6 +48,31 @@
         border-radius: 0.75rem;
         background-color: #ffffff;
         box-shadow: 0 1px 3px rgb(15 23 42 / 0.08);
+    }
+
+    .dashboard-metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 1rem;
+    }
+
+    .planification-activity-tooltip {
+        z-index: 99999;
+        max-height: min(22rem, calc(100vh - 24px));
+        overflow-y: auto;
+        border: 1px solid rgb(34 211 238 / 0.35);
+        border-radius: 0.75rem;
+        padding: 0.75rem;
+        color: #fff;
+        background: linear-gradient(145deg, #0f172a, #164e63);
+        box-shadow: 0 20px 45px -12px rgb(15 23 42 / 0.55);
+        font-size: 0.75rem;
+        line-height: 1.5;
+        pointer-events: none;
+    }
+
+    .planification-activity-info {
+        display: none;
     }
 
     .sectionSize {
@@ -113,8 +142,12 @@
 }
 
 @media (max-width: 639px) {
+    html {
+        font-size: 12.5px;
+    }
+
     .dashboard-page-shell {
-        padding: 0.75rem;
+        padding: 0.625rem;
     }
 
     .dashboard-page-content {
@@ -157,6 +190,127 @@
     .dashboard-page-shell input {
         max-width: 100%;
     }
+
+    .dashboard-page-shell img,
+    .dashboard-page-shell svg,
+    .dashboard-page-shell canvas {
+        max-width: 100%;
+    }
+
+    .dashboard-metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.625rem;
+    }
+
+    .dashboard-metrics-grid article {
+        min-height: 94px;
+        padding: 0.75rem;
+    }
+
+    /* One readable chart per row on phone-sized screens. */
+    .dashboard-page-content section.grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 0.875rem;
+    }
+
+    .dashboard-chart-card {
+        width: 100%;
+        height: 31rem !important;
+    }
+
+    .dashboard-chart-card > header {
+        min-height: 0;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.75rem;
+    }
+
+    .dashboard-chart-card > header h3,
+    .dashboard-chart-card > header p {
+        overflow: visible;
+        white-space: normal;
+    }
+
+    .dashboard-chart-card > .min-h-0 {
+        padding: 0.625rem;
+    }
+
+    .dashboard-filter-controls > *,
+    .dashboard-filter-controls > * > button,
+    .dashboard-year-filter,
+    .dashboard-year-filter > button {
+        width: 100% !important;
+    }
+
+    .planification-activity-info {
+        display: inline-flex;
+        width: 2rem;
+        height: 2rem;
+        flex: 0 0 2rem;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #0891b2;
+        border-radius: 9999px;
+        color: #0e7490;
+        background: #fff;
+        font-size: 0.85rem;
+        font-weight: 800;
+        box-shadow: 0 1px 2px rgb(15 23 42 / 0.12);
+    }
+
+    .planification-activity-tooltip {
+        font-size: 0.85rem;
+        pointer-events: auto;
+    }
+
+    .dashboard-panel > .flex:first-child > div,
+    .dashboard-panel > .flex:first-child > div > div,
+    .dashboard-panel > .flex:first-child input {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .dashboard-panel > .flex:first-child > div:last-child > * {
+        flex: 1 1 calc(50% - 0.5rem);
+        justify-content: center;
+    }
+
+    .dashboard-panel select,
+    .dashboard-panel input,
+    .dashboard-panel button {
+        min-height: 2.75rem;
+    }
+
+    .dashboard-panel [x-show] > .flex.flex-wrap {
+        align-items: stretch;
+        gap: 0.625rem;
+        padding: 0.75rem;
+    }
+
+    .dashboard-panel [x-show] > .flex.flex-wrap > * {
+        flex: 1 1 calc(50% - 0.625rem);
+        min-width: 0;
+    }
+
+    .dashboard-panel [x-show] > .flex.flex-wrap > label select,
+    .dashboard-panel [x-show] > .flex.flex-wrap > div > button,
+    .dashboard-panel [x-show] > .flex.flex-wrap > button {
+        width: 100%;
+    }
+
+    .dashboard-page-shell textarea,
+    .dashboard-page-shell select,
+    .dashboard-page-shell input {
+        font-size: 16px;
+    }
+
+    .dashboard-page-shell table {
+        font-size: 0.72rem;
+    }
+
+    .dashboard-page-shell .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 1rem;
+    }
 }
 
 @media (max-width: 767px) {
@@ -165,6 +319,8 @@
     }
 
     .planification-table-scroll {
+        max-width: 100%;
+        -webkit-overflow-scrolling: touch;
         scrollbar-width: thin;
         scrollbar-color: #64748b #e2e8f0;
     }

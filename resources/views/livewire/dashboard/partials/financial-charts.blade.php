@@ -1,4 +1,4 @@
-<section class="grid gap-6" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+<section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
     <x-dashboard-chart-card title="Investment type" subtitle="Investment value by classification"
         filename="investment-type">
         <livewire:livewire-radar-chart key="{{ $budgetByInvestmentRadarChart->reactiveKey() }}" :radar-chart-model="$budgetByInvestmentRadarChart" />

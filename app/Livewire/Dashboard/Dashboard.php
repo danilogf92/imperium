@@ -143,7 +143,7 @@ class Dashboard extends Component
 
     private function cacheKey(DashboardFilters $filters): string
     {
-        return 'dashboard:charts-v8:v'.DashboardCache::version().':'.hash(
+        return 'dashboard:charts-v9:v'.DashboardCache::version().':'.hash(
             'sha256',
             json_encode([
                 'user' => auth()->id(),

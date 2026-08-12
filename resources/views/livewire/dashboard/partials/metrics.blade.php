@@ -21,9 +21,9 @@
             'secondaryLabel' => '',
             'value' => number_format($projectCount),
             'secondaryValue' => number_format($projectsWithData),
-            'accent' => 'bg-indigo-500',
-            'text' => 'text-indigo-600',
-            'iconBg' => 'bg-indigo-50',
+            'accent' => 'bg-fuchsia-500',
+            'text' => 'text-fuchsia-700',
+            'iconBg' => 'bg-fuchsia-50',
             'icon' => 'projects',
         ],
         [
@@ -77,13 +77,8 @@
     ];
 @endphp
 
-<section class="overflow-x-auto pb-1">
-    <div class="gap-4"
-        style="
-            display: grid;
-            grid-template-columns: repeat(7, minmax(180px, 1fr));
-            min-width: 1260px;
-        ">
+<section class="pb-1">
+    <div class="dashboard-metrics-grid">
         @foreach ($metrics as $metric)
             <article
                 class="relative min-h-[116px] overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
