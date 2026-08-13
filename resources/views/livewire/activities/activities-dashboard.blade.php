@@ -92,42 +92,41 @@
 
             <section class="grid gap-5 xl:grid-cols-2">
                 <x-dashboard-chart-card title="Activity health" filename="activity-health"
-                    subtitle="Immediate view of completed work, overdue commitments and upcoming workload"
-                    height="30rem">
+                    subtitle="Completed, overdue and upcoming activities"
+                    height="27rem">
                     <x-dashboard-apex-chart :options="$statusChart"
                         chart-key="activities-status-{{ md5(json_encode($statusChart)) }}" />
                     <x-slot name="footer">A growing orange segment signals that planned work is not being closed on
                         time.</x-slot>
                 </x-dashboard-chart-card>
 
-                <x-dashboard-chart-card title="Projects requiring corrective action"
-                    filename="overdue-commitments-by-project"
-                    subtitle="Combined overdue activities and milestones; milestones carry greater operational impact"
-                    height="30rem">
-                    <x-dashboard-apex-chart :options="$riskProjectChart"
-                        chart-key="activities-risk-projects-{{ md5(json_encode($riskProjectChart)) }}" />
-                    <x-slot name="footer">Start with the projects at the top: they concentrate the largest overdue
-                        workload.</x-slot>
-                </x-dashboard-chart-card>
-
                 <x-dashboard-chart-card title="Milestone health" filename="milestone-health"
-                    subtitle="Completed, overdue and upcoming project milestones" height="30rem">
+                    subtitle="Completed, overdue and upcoming milestones" height="27rem">
                     <x-dashboard-apex-chart :options="$milestoneStatusChart"
                         chart-key="milestones-status-{{ md5(json_encode($milestoneStatusChart)) }}" />
                     <x-slot name="footer">Overdue milestones can affect the project sequence and should be reviewed
                         before routine activities.</x-slot>
                 </x-dashboard-chart-card>
 
+                <x-dashboard-chart-card class="xl:col-span-2" title="Projects requiring corrective action"
+                    filename="overdue-commitments-by-project"
+                    subtitle="Combined overdue activities and milestones, ranked by operational exposure"
+                    height="32rem">
+                    <x-dashboard-apex-chart :options="$riskProjectChart"
+                        chart-key="activities-risk-projects-{{ md5(json_encode($riskProjectChart)) }}" />
+                    <x-slot name="footer">Projects at the top concentrate the largest overdue workload and should be reviewed first.</x-slot>
+                </x-dashboard-chart-card>
+
                 <x-dashboard-chart-card title="Eight-week execution trend" filename="weekly-activity-trend"
-                    subtitle="Weekly mix of completed, overdue and upcoming activities" height="30rem">
+                    subtitle="Weekly movement of completed, overdue and upcoming work" height="28rem">
                     <x-dashboard-apex-chart :options="$weeklyTrendChart"
                         chart-key="activities-weekly-trend-{{ md5(json_encode($weeklyTrendChart)) }}" />
                     <x-slot name="footer">Compare blue versus orange each week to identify whether execution is
                         recovering or deteriorating.</x-slot>
                 </x-dashboard-chart-card>
 
-                <x-dashboard-chart-card class="xl:col-span-2" title="Overdue aging" filename="overdue-activity-aging"
-                    subtitle="How long incomplete activities have remained overdue" height="30rem">
+                <x-dashboard-chart-card title="Overdue aging" filename="overdue-activity-aging"
+                    subtitle="Time elapsed since incomplete activities became overdue" height="28rem">
                     <x-dashboard-apex-chart :options="$agingChart"
                         chart-key="activities-aging-{{ md5(json_encode($agingChart)) }}" />
                     <x-slot name="footer">Items in the 8+ week range should be escalated, rescheduled or formally
