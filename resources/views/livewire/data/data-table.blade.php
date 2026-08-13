@@ -1,4 +1,4 @@
-<section class="flex w-full min-w-0 max-w-full flex-col overflow-x-hidden" style="gap: 1.25rem;">
+<section class="flex w-full min-w-0 max-w-full flex-col gap-6 overflow-x-hidden">
     <x-unified-table-theme />
 
     @include('livewire.data.partials.styles')

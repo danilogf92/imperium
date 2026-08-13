@@ -5,10 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ \App\Models\BrandSetting::current()?->name ?? config('app.name', 'Laravel') }}</title>
         <meta name="theme-color" content="#2563eb">
-        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}?v=3">
-        <link rel="alternate icon" href="{{ asset('favicon.ico') }}?v=3">
+        <link rel="icon" href="{{ \App\Models\BrandSetting::logoUrl() }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

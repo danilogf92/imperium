@@ -40,7 +40,8 @@
             @endif
         </div>
 
-        <span class="inline-flex shrink-0 items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+        <span
+            class="inline-flex shrink-0 items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
             {{ __(':count projects', ['count' => number_format($plannedProjects->total())]) }}
         </span>
     </div>
@@ -48,23 +49,38 @@
     {{-- Acciones de la barra superior --}}
     <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
 
-        <x-dashboard-filter-dropdown label="Columns" model="visibleColumns"
-            :options="collect($fixedColumnOptions)->map(fn($label, $value) => ['value' => $value, 'label' => $label])->values()"
-            :selected="$visibleColumns" multiple />
+        <x-dashboard-filter-dropdown label="Columns" model="visibleColumns" :options="collect($fixedColumnOptions)
+            ->map(fn($label, $value) => ['value' => $value, 'label' => $label])
+            ->values()" :selected="$visibleColumns"
+            multiple />
 
-        <button type="button" wire:click="resetColumns" data-no-global-loading
+        {{-- <button type="button" wire:click="resetColumns" data-no-global-loading
             class="inline-flex h-10 cursor-pointer items-center rounded-lg bg-slate-600 px-3 text-sm font-semibold text-white hover:bg-slate-500">
             Default columns
-        </button>
+        </button> --}}
+
+        <x-ui-button :text="__('Default columns')" color="#4B5569" hover-opacity="0.80" text-color="#FFFFFF"
+            wire:click="resetColumns" data-no-global-loading />
 
         @if ($canExport)
-            <x-excel-export-button method="exportExcel" />
+            {{-- <x-excel-export-button method="exportExcel" /> --}}
+
+            <x-ui-button icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
+                wire:click="exportExcel" wire:loading.attr="disabled" wire:target="exportExcel" data-no-global-loading>
+                <span wire:loading.remove wire:target="exportExcel">
+                    {{ __('Export Excel') }}
+                </span>
+
+                <span wire:loading wire:target="exportExcel">
+                    {{ __('Generating...') }}
+                </span>
+            </x-ui-button>
         @endif
 
         <x-per-page-select id="planification-per-page" />
 
         {{-- Abrir modal de creación --}}
-        <button type="button" wire:click="openCreate" data-no-global-loading
+        {{-- <button type="button" wire:click="openCreate" data-no-global-loading
             class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
 
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,6 +89,9 @@
             </svg>
 
             {{ __('Add milestone') }}
-        </button>
+        </button> --}}
+
+        <x-ui-button :text="__('Add milestone')" icon="plus" color="#EBB352" hover-opacity="0.80" text-color="#FFFFFF"
+            wire:click="openCreate" data-no-global-loading />
     </div>
 </div>

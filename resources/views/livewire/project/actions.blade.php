@@ -1,6 +1,13 @@
-<div x-data="{ open: true }" class="relative overflow-hidden rounded-lg bg-white shadow-md dark:bg-gray-800">
+<div x-data="{ open: true }"
+    class="module-accent-line relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md dark:bg-gray-800">
+
+
     {{-- Encabezado --}}
-    <div class="flex flex-col items-start gap-2 border-b border-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700">
+    <div
+        class="flex flex-col items-start gap-2 border-b border-b-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-b-gray-700">
+
+
+
         <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">
             {{ __('Project Actions') }}
         </h2>
@@ -37,13 +44,15 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" />
                         </svg>
-                        <input id="projects-search" wire:model.live.debounce.400ms="search" data-no-global-loading type="text"
-                            placeholder="{{ __('Search project, PDA or plant') }}" autocomplete="off"
+                        <input id="projects-search" wire:model.live.debounce.400ms="search" data-no-global-loading
+                            type="text" placeholder="{{ __('Search project, PDA or plant') }}" autocomplete="off"
                             class="block h-11 w-full rounded-lg border border-slate-300 bg-white py-2 pl-11 pr-11 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
                         @if (filled($search))
-                            <button wire:click="clearSearch" data-global-loading type="button" title="{{ __('Clear search') }}" aria-label="{{ __('Clear search') }}"
+                            <button wire:click="clearSearch" data-global-loading type="button"
+                                title="{{ __('Clear search') }}" aria-label="{{ __('Clear search') }}"
                                 class="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                                    stroke-width="1.8">
                                     <path stroke-linecap="round" d="m5 5 10 10M15 5 5 15" />
                                 </svg>
                             </button>
@@ -54,25 +63,29 @@
                 {{-- Botones de exportación --}}
                 <div class="flex shrink-0 items-center gap-3">
                     @if ($canExportProjects)
-                    <button wire:click="exportDashboard" data-no-global-loading wire:loading.attr="disabled"
-                        wire:target="exportDashboard" type="button"
-                        class="group inline-flex h-11 items-center justify-center gap-2.5 rounded-lg border border-blue-700 bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition duration-150 hover:-translate-y-px hover:bg-blue-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-60">
-                        <svg wire:loading.remove wire:target="exportDashboard" class="h-5 w-5"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M4 19.5h16M6.5 17V11m5 6V6.5m5 10.5V9" />
-                        </svg>
-                        <svg wire:loading wire:target="exportDashboard" class="h-5 w-5 animate-spin"
-                            fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4Z"></path>
-                        </svg>
-                        <span wire:loading.remove wire:target="exportDashboard">{{ __('Dashboard Excel') }}</span>
-                        <span wire:loading wire:target="exportDashboard">{{ __('Generating...') }}</span>
-                    </button>
+                        <x-ui-button icon="chart" color="#7DB9F1" hover-opacity="0.80" text-color="#FFFFFF"
+                            wire:click="exportDashboard" wire:loading.attr="disabled" wire:target="exportDashboard"
+                            data-no-global-loading>
+                            <span wire:loading.remove wire:target="exportDashboard">
+                                {{ __('Dashboard Excel') }}
+                            </span>
 
-                    <x-excel-export-button method="export" label="Export projects"
-                        loading-label="Generating Excel..." />
+                            <span wire:loading wire:target="exportDashboard">
+                                {{ __('Generating...') }}
+                            </span>
+                        </x-ui-button>
+
+                        <x-ui-button icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
+                            wire:click="export" wire:loading.attr="disabled" wire:target="export"
+                            data-no-global-loading>
+                            <span wire:loading.remove wire:target="export">
+                                {{ __('Export projects') }}
+                            </span>
+
+                            <span wire:loading wire:target="export">
+                                {{ __('Generating Excel...') }}
+                            </span>
+                        </x-ui-button>
                     @endif
 
                 </div>

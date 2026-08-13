@@ -3,7 +3,7 @@
 <button type="button"
     data-download-filename="{{ $filename }}"
     onclick="event.preventDefault(); event.stopPropagation(); window.downloadDashboardChart(this)"
-    class="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-blue-600 bg-blue-600 text-white shadow-md transition duration-150 hover:-translate-y-px hover:border-blue-700 hover:bg-blue-700 hover:text-white hover:shadow-lg active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-50"
+    class="chart-image-export inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border text-white shadow-md transition duration-150 hover:-translate-y-px hover:brightness-95 hover:text-white hover:shadow-lg active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-50"
     title="Download chart as PNG"
     aria-label="Download chart as PNG">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none"

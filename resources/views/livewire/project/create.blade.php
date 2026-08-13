@@ -7,8 +7,11 @@
         $fieldSuffix = $editing ? '-' . $projectId : '';
         $documentErrors = $errors->hasAny(['pdaDocument', 'projectIdea', 'handoverCertificate']);
         $dateErrors = $errors->hasAny([
-            'form.forecast_start_date', 'form.forecast_end_date', 'form.approve_date',
-            'form.close_date', 'form.quartile_date',
+            'form.forecast_start_date',
+            'form.forecast_end_date',
+            'form.approve_date',
+            'form.close_date',
+            'form.quartile_date',
         ]);
         $initialSection = $documentErrors ? 'documents' : ($dateErrors ? 'dates' : 'details');
     @endphp
@@ -25,9 +28,8 @@
         </button>
     @else
         @if ($canCreate ?? false)
-            <x-button wire:click="openCreateModal" data-no-global-loading>
-                {{ __('Create project') }}
-            </x-button>
+            <x-ui-button :text="__('Create project')" icon="plus" color="#EBB352" hover-opacity="0.75" text-color="#FFFFFF"
+                wire:click="openCreateModal" />
         @endif
     @endif
 
@@ -51,21 +53,28 @@
                 <nav class="mb-5 grid grid-cols-3 gap-2 rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm"
                     aria-label="Project form sections">
                     <button type="button" x-on:click="activeSection = 'details'"
-                        x-bind:class="activeSection === 'details' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'"
+                        x-bind:class="activeSection === 'details' ? 'bg-blue-600 text-white shadow-sm' :
+                            'text-slate-600 hover:bg-slate-100'"
                         class="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition">
                         <span class="hidden sm:inline">Project</span> Details
                     </button>
                     <button type="button" x-on:click="activeSection = 'dates'"
-                        x-bind:class="activeSection === 'dates' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'"
+                        x-bind:class="activeSection === 'dates' ? 'bg-blue-600 text-white shadow-sm' :
+                            'text-slate-600 hover:bg-slate-100'"
                         class="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition">
                         Dates
-                        @if ($dateErrors)<span class="h-2 w-2 rounded-full bg-red-500" aria-label="Dates contain errors"></span>@endif
+                        @if ($dateErrors)
+                            <span class="h-2 w-2 rounded-full bg-red-500" aria-label="Dates contain errors"></span>
+                        @endif
                     </button>
                     <button type="button" x-on:click="activeSection = 'documents'"
-                        x-bind:class="activeSection === 'documents' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'"
+                        x-bind:class="activeSection === 'documents' ? 'bg-blue-600 text-white shadow-sm' :
+                            'text-slate-600 hover:bg-slate-100'"
                         class="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition">
                         Documents
-                        @if ($documentErrors)<span class="h-2 w-2 rounded-full bg-red-500" aria-label="Documents contain errors"></span>@endif
+                        @if ($documentErrors)
+                            <span class="h-2 w-2 rounded-full bg-red-500" aria-label="Documents contain errors"></span>
+                        @endif
                     </button>
                 </nav>
 
@@ -76,17 +85,18 @@
         </x-slot>
 
         <x-slot name="footer">
-            <div class="flex w-full flex-col-reverse items-stretch justify-end gap-3 sm:flex-row sm:items-center sm:gap-4">
-                <x-secondary-button wire:click="{{ $closeMethod }}" data-no-global-loading
-                    wire:loading.attr="disabled" wire:target="{{ $saveMethod }}"
+            <div
+                class="flex w-full flex-col-reverse items-stretch justify-end gap-3 sm:flex-row sm:items-center sm:gap-4">
+                <x-secondary-button wire:click="{{ $closeMethod }}" data-no-global-loading wire:loading.attr="disabled"
+                    wire:target="{{ $saveMethod }}"
                     style="background-color: #ef4444; border-color: #dc2626; color: #ffffff;"
                     onmouseenter="this.style.backgroundColor='#dc2626'"
                     onmouseleave="this.style.backgroundColor='#ef4444'">
                     {{ __('Cancel') }}
                 </x-secondary-button>
 
-                <x-button wire:click="{{ $saveMethod }}" data-no-global-loading
-                    wire:loading.attr="disabled" wire:target="{{ $saveMethod }}"
+                <x-button wire:click="{{ $saveMethod }}" data-no-global-loading wire:loading.attr="disabled"
+                    wire:target="{{ $saveMethod }}"
                     style="background-color: #2563eb; border-color: #1d4ed8; color: #ffffff;"
                     onmouseenter="this.style.backgroundColor='#1d4ed8'"
                     onmouseleave="this.style.backgroundColor='#2563eb'">

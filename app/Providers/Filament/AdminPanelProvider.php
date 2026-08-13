@@ -33,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login(Login::class)
-            ->favicon(asset('favicon.svg') . '?v=3')
+            ->favicon(fn (): string => BrandSetting::logoUrl())
             ->brandName(fn (): string => BrandSetting::current()?->name ?? 'DaImperium')
             ->brandLogo(fn (): string => BrandSetting::logoUrl())
             ->brandLogoHeight('2.5rem')
@@ -47,6 +47,14 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Sky,
                 'warning' => Color::Orange,
             ])
+            ->renderHook(
+                PanelsRenderHook::STYLES_BEFORE,
+                fn (): string => sprintf(
+                    '<style>:root{--brand-accent:%s;--brand-excel:%s}.fi-header{border-top:2px solid var(--brand-accent)!important;border-radius:.75rem;padding-top:1rem}.fi-btn-color-warning{background-color:var(--brand-excel)}</style>',
+                    BrandSetting::accentColor(),
+                    BrandSetting::excelColor(),
+                )
+            )
             ->renderHook(
                 PanelsRenderHook::STYLES_AFTER,
                 fn (): string => <<<'HTML'
@@ -126,6 +134,14 @@ class AdminPanelProvider extends PanelProvider
                             color: #dbeafe;
                         }
                     </style>
+                    HTML
+            )
+            ->renderHook(
+                PanelsRenderHook::SCRIPTS_AFTER,
+                fn (): string => <<<'HTML'
+                    <script>
+                        window.addEventListener('brand-settings-updated', () => window.location.reload());
+                    </script>
                     HTML
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')

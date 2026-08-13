@@ -1,7 +1,7 @@
 <div class="dashboard-page-shell">
     <x-unified-table-theme />
-    <div class="dashboard-page-content flex flex-col" style="gap: 1.25rem;">
-        <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="dashboard-page-content space-y-6">
+        <section class="module-accent-line rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p class="text-xs font-semibold uppercase tracking-wider text-blue-600">Task management</p>
             <div class="mt-1 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <div>

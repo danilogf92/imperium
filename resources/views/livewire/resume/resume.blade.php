@@ -1,18 +1,32 @@
 <div class="dashboard-page-shell">
     <x-unified-table-theme />
     <div class="dashboard-page-content space-y-6">
-        <header class="rounded-xl border border-slate-200 bg-white px-5 py-5 shadow-sm">
+        <header class="module-accent-line rounded-xl border border-slate-200 bg-white px-5 py-5 shadow-sm">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">{{ __('Portfolio analytics') }}</p>
-                    <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">{{ __('Annual project resume') }}</h1>
+                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
+                        {{ __('Portfolio analytics') }}</p>
+                    <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">{{ __('Annual project resume') }}
+                    </h1>
                     <p class="mt-1 text-sm text-slate-500">
                         {{ __('Executive financial summary by project forecast start year.') }}
                     </p>
                 </div>
 
                 @if ($canExport)
-                    <x-excel-export-button method="exportExcel" label="Export resume" />
+                    {{-- <x-excel-export-button method="exportExcel" label="Export resume" /> --}}
+
+                    <x-ui-button icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
+                        wire:click="exportExcel" wire:loading.attr="disabled" wire:target="exportExcel"
+                        data-no-global-loading>
+                        <span wire:loading.remove wire:target="exportExcel">
+                            {{ __('Export resume') }}
+                        </span>
+
+                        <span wire:loading wire:target="exportExcel">
+                            {{ __('Generating Excel...') }}
+                        </span>
+                    </x-ui-button>
                 @endif
             </div>
         </header>
@@ -31,7 +45,8 @@
                             </span>
                         @endif
                     </div>
-                    <p class="mt-0.5 text-sm text-slate-500">{{ __('Filter the projects included in the annual totals.') }}</p>
+                    <p class="mt-0.5 text-sm text-slate-500">
+                        {{ __('Filter the projects included in the annual totals.') }}</p>
                 </div>
                 <button type="button" x-on:click="open = !open"
                     class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -108,8 +123,7 @@
                         </select>
                     </div>
 
-                    <x-clear-filters-button method="clearFilters" :active="$hasActiveFilters"
-                        :global-loading="false" />
+                    <x-clear-filters-button method="clearFilters" :active="$hasActiveFilters" :global-loading="false" />
                 </div>
             </div>
         </section>
@@ -143,7 +157,8 @@
                                     @endif
                                 </svg>
                             </span>
-                            <p class="whitespace-nowrap text-sm font-medium text-slate-500">{{ __($metric['label']) }}</p>
+                            <p class="whitespace-nowrap text-sm font-medium text-slate-500">{{ __($metric['label']) }}
+                            </p>
                         </div>
                         <p class="mt-2 whitespace-nowrap text-2xl font-bold tracking-tight text-slate-900">
                             @if ($metric['money'])
@@ -158,11 +173,11 @@
         </section>
 
         <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div
-                class="soft-title-surface flex items-center justify-between border-b px-5 py-4">
+            <div class="soft-title-surface flex items-center justify-between border-b px-5 py-4">
                 <div>
                     <h2 class="font-semibold text-slate-900">{{ __('Annual detail') }}</h2>
-                    <p class="mt-0.5 text-sm text-slate-500">{{ __('Financial values backing the stacked chart.') }}</p>
+                    <p class="mt-0.5 text-sm text-slate-500">{{ __('Financial values backing the stacked chart.') }}
+                    </p>
                 </div>
                 <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
                     {{ $rows->count() }} years
@@ -202,7 +217,8 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="px-6 py-14 text-center">
-                                    <p class="font-semibold text-slate-700">{{ __('No projects match the selected filters.') }}</p>
+                                    <p class="font-semibold text-slate-700">
+                                        {{ __('No projects match the selected filters.') }}</p>
                                     <p class="mt-1 text-sm text-slate-500">Clear or change the filters to view the
                                         resume.</p>
                                 </td>
@@ -232,8 +248,8 @@
                 </x-dashboard-chart-card>
 
                 <x-dashboard-chart-card title="Projects by year"
-                    subtitle="Project columns with Budgeted, Booked and Executed value lines" filename="annual-project-count"
-                    height="34rem">
+                    subtitle="Project columns with Budgeted, Booked and Executed value lines"
+                    filename="annual-project-count" height="34rem">
                     <x-dashboard-apex-chart :options="$projectsChartOptions"
                         chart-key="resume-projects-{{ md5(json_encode($projectsChartOptions)) }}" />
                 </x-dashboard-chart-card>
@@ -250,7 +266,8 @@
                     <x-dashboard-apex-chart :options="$coverageChartOptions"
                         chart-key="resume-coverage-{{ md5(json_encode($coverageChartOptions)) }}" />
                     <x-slot:footer>
-                        Approved / Budgeted measures realized value against budget; Booked / Approved measures commitments against realized value.
+                        Approved / Budgeted measures realized value against budget; Booked / Approved measures
+                        commitments against realized value.
                     </x-slot:footer>
                 </x-dashboard-chart-card>
 
@@ -268,7 +285,8 @@
                         <x-dashboard-apex-chart :options="$cashFlowChartOptions"
                             chart-key="resume-cash-flow-{{ md5(json_encode($cashFlowChartOptions)) }}" />
                         <x-slot:footer>
-                            Each month equals project budget multiplied by milestone percentage. All Resume filters apply.
+                            Each month equals project budget multiplied by milestone percentage. All Resume filters
+                            apply.
                         </x-slot:footer>
                     </x-dashboard-chart-card>
                 @endif

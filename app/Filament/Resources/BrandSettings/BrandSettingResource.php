@@ -7,6 +7,7 @@ use App\Filament\Resources\BrandSettings\Pages\ListBrandSettings;
 use App\Models\BrandSetting;
 use BackedEnum;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -52,6 +53,16 @@ class BrandSettingResource extends Resource
                 ->maxSize(4096)
                 ->helperText('PNG, JPG, WEBP or SVG. Recommended: transparent background and horizontal format.')
                 ->columnSpanFull(),
+            ColorPicker::make('accent_color')
+                ->label('Main accent color')
+                ->default('#7DB9F1')
+                ->required()
+                ->helperText('Controls module top lines and PNG chart export buttons.'),
+            ColorPicker::make('excel_color')
+                ->label('Excel export color')
+                ->default('#FDBA74')
+                ->required()
+                ->helperText('Controls chart Excel export buttons.'),
         ]);
     }
 

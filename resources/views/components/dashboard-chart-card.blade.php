@@ -8,7 +8,7 @@
 <article data-chart-card
     {{ $attributes->class('dashboard-chart-card flex min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:border-sky-200 hover:shadow-md') }}
     style="height: {{ $height }};">
-    <header class="soft-title-surface flex min-h-16 shrink-0 items-center justify-between gap-4 border-b px-5 py-3.5">
+    <header class="flex min-h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-200 bg-white px-5 py-3.5">
         <div class="min-w-0">
             <h3 class="truncate text-sm font-bold tracking-tight text-slate-800">{{ __($title) }}</h3>
             @if ($subtitle)

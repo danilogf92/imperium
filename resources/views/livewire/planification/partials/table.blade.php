@@ -26,9 +26,9 @@
                         @endforeach
                     </colgroup>
                     <thead class="sticky top-0 z-20 shadow-sm">
-                        <tr class="bg-indigo-600 text-white">
+                        <tr class="bg-[#7DB9F1] text-slate-900">
                             @foreach ($visibleFixedColumns->filter(fn($column) => !in_array($column, ['actual_week', 'next_week'], true)) as $column)
-                                <th rowspan="2" class="sticky z-30 border-r border-indigo-500 bg-indigo-700 px-2 py-2 text-[10px] font-semibold uppercase tracking-wide"
+                                <th rowspan="2" class="sticky z-30 border-r border-blue-300 bg-[#7DB9F1] px-2 py-2 text-[10px] font-bold uppercase tracking-wide"
                                     style="left: {{ $fixedOffsets[$column] }}px; width: {{ $fixedWidths[$column] }}px; text-align: {{ in_array($column, ['budgeted']) ? 'right' : (in_array($column, ['forecast_year', 'status']) ? 'center' : 'left') }}">
                                     {{ __($fixedColumnOptions[$column]) }}
                                 </th>
@@ -37,10 +37,10 @@
                                 @php $activityColumn = $week['offset'] === 0 ? 'actual_week' : 'next_week'; @endphp
                                 @if (in_array($activityColumn, $visibleColumns, true))
                                     <th rowspan="2"
-                                    class="sticky z-30 border-r border-indigo-500 bg-cyan-700 px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wide"
+                                    class="sticky z-30 border-r border-blue-300 bg-[#7DB9F1] px-2 py-2 text-center text-[10px] font-bold uppercase tracking-wide"
                                     style="left: {{ $fixedOffsets[$activityColumn] }}px; width: {{ $fixedWidths[$activityColumn] }}px">
                                     {{ $week['offset'] === 0 ? 'Actual Week' : 'Next Week' }}
-                                    <span class="mt-1 block font-normal text-cyan-100">
+                                    <span class="mt-1 block font-medium text-blue-900">
                                         W{{ str_pad($week['week'], 2, '0', STR_PAD_LEFT) }} · {{ $week['year'] }}
                                     </span>
                                     </th>
@@ -48,18 +48,18 @@
                             @endforeach
                             @foreach ($timelineYears as $year)
                                 <th colspan="12"
-                                    class="border-r-2 border-indigo-300 px-2 py-1.5 text-center text-sm font-bold {{ (int) $year === now()->year ? 'bg-indigo-500' : '' }}">
+                                    class="border-r-2 border-blue-300 px-2 py-1.5 text-center text-sm font-bold {{ (int) $year === now()->year ? 'bg-blue-300' : '' }}">
                                     {{ $year }}
                                 </th>
                             @endforeach
                         </tr>
-                        <tr class="bg-indigo-500 text-white">
+                        <tr class="bg-blue-200 text-slate-900">
                             @foreach ($timelineYears as $year)
                                 @foreach (['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'] as $monthLabel)
                                     <th
-                                        class="w-48 border-r border-indigo-400 px-1 py-1.5 text-center text-xs font-semibold
-                                        {{ (int) $year === now()->year && $loop->iteration === now()->month ? '!border-x-2 !border-x-cyan-200 !bg-cyan-500 text-white' : '' }}
-                                        {{ $loop->last ? 'border-r-2 border-indigo-300' : '' }}">
+                                        class="w-48 border-r border-blue-300 px-1 py-1.5 text-center text-xs font-semibold
+                                        {{ (int) $year === now()->year && $loop->iteration === now()->month ? '!border-x-2 !border-x-blue-500 !bg-[#7DB9F1] text-slate-900' : '' }}
+                                        {{ $loop->last ? 'border-r-2 border-blue-300' : '' }}">
                                         {{ $monthLabel }}
                                     </th>
                                 @endforeach
@@ -88,18 +88,18 @@
                                 $currencySymbol = $currency === 'eur' ? '€' : '$';
                             @endphp
                             <tr wire:key="planned-project-{{ $plannedProject->id }}"
-                                class="group min-h-10 {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} hover:bg-indigo-50">
+                                class="group min-h-10 {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} hover:bg-blue-50">
                                 @if (in_array('forecast_year', $visibleColumns, true))
                                 <td style="left: {{ $fixedOffsets['forecast_year'] }}px"
                                     class="sticky z-10 w-24 border-b border-r border-gray-200 px-2 py-1.5 text-center text-xs font-medium text-slate-700
-                            {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-indigo-50">
+                            {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-blue-50">
                                     {{ $plannedProject->forecast_start_date?->year }}
                                 </td>
                                 @endif
                                 @if (in_array('plant', $visibleColumns, true))
                                 <td style="left: {{ $fixedOffsets['plant'] }}px"
                                     class="sticky z-10 w-40 border-b border-r border-gray-200 px-2 py-1.5 text-xs text-slate-700
-                            {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-indigo-50">
+                            {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-blue-50">
                                     <div class="truncate" title="{{ $plannedProject->company?->company_name }}">
                                         {{ $plannedProject->company?->company_name ?? '—' }}
                                     </div>
@@ -108,7 +108,7 @@
                                 @if (in_array('pda_code', $visibleColumns, true))
                                 <td style="left: {{ $fixedOffsets['pda_code'] }}px"
                                     class="sticky z-10 w-40 border-b border-r border-gray-200 px-2 py-1.5 text-xs font-semibold text-slate-700
-                            {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-indigo-50">
+                            {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-blue-50">
                                     <div class="truncate" title="{{ $plannedProject->pda_code }}">
                                         {{ $plannedProject->pda_code ?? '—' }}
                                     </div>
@@ -117,7 +117,7 @@
                                 @if (in_array('name', $visibleColumns, true))
                                 <td style="left: {{ $fixedOffsets['name'] }}px"
                                     class="sticky z-10 w-64 border-b border-r border-gray-200 px-4 py-1.5 align-middle
-                            {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-indigo-50">
+                            {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-blue-50">
                                     <div class="flex items-center gap-2">
                                         <div class="line-clamp-2 text-xs font-medium leading-tight text-gray-900"
                                             title="{{ $plannedProject->name }}">
@@ -129,14 +129,14 @@
                                 @if (in_array('budgeted', $visibleColumns, true))
                                 <td style="left: {{ $fixedOffsets['budgeted'] }}px"
                                     class="sticky z-10 w-36 border-b border-r border-gray-200 px-2 py-1.5 text-right text-xs font-bold text-slate-800
-                            {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-indigo-50">
+                            {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-blue-50">
                                     {{ $currencySymbol }}{{ number_format($projectBudget, 2) }}
                                 </td>
                                 @endif
                                 @if (in_array('status', $visibleColumns, true))
                                 <td style="left: {{ $fixedOffsets['status'] }}px"
                                     class="sticky z-10 w-28 border-b border-r-2 border-gray-200 px-2 py-1.5 text-center
-                            {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-indigo-50">
+                            {{ $loop->even ? 'bg-slate-50' : 'bg-white' }} group-hover:bg-blue-50">
                                     @php
                                         $statusValue = $plannedProject->state?->value ?? '—';
                                         $statusBackground = $plannedProject->state?->softColor() ?? '#F1F5F9';
@@ -260,7 +260,7 @@
                                         @endphp
                                         <td
                                             class="w-48 border-b border-r border-gray-200 px-1 py-1 text-center align-middle
-                                    {{ $monthNumber === 12 ? 'border-r-2 border-r-indigo-200' : '' }}
+                                    {{ $monthNumber === 12 ? 'border-r-2 border-r-blue-200' : '' }}
                                     {{ !$cellCanCreate ? 'bg-slate-100/80' : '' }}
                                     {{ (int) $year === now()->year && $monthNumber === now()->month ? '!border-x-2 !border-x-cyan-400 !bg-cyan-100' : '' }}">
                                             <div class="flex min-h-6 flex-wrap content-center justify-center gap-1 overflow-visible">
@@ -320,7 +320,7 @@
                                                     <button type="button"
                                                         wire:click="openCreateAt({{ $plannedProject->id }}, {{ $year }}, {{ $monthNumber }})"
                                                         data-no-global-loading
-                                                        class="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-indigo-600 bg-indigo-600 text-base font-bold leading-none text-white shadow-sm transition hover:-translate-y-px hover:bg-indigo-500 hover:shadow-md"
+                                                        class="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-blue-500 bg-[#7DB9F1] text-base font-bold leading-none text-white shadow-sm transition hover:-translate-y-px hover:bg-blue-400 hover:shadow-md"
                                                         title="Add milestone to {{ $months[$monthNumber] }} {{ $year }}">+</button>
                                                 @endif
                                             </div>

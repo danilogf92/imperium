@@ -5,7 +5,7 @@
         ================================================================ --}}
     <div class="dashboard-page-content space-y-6">
 
-        <div>
+        <div class="module-accent-line rounded-xl border border-slate-200 bg-white px-5 py-5 shadow-sm">
             <h1 class="text-2xl font-bold text-gray-900">
                 {{ __('Project Planification') }}
             </h1>

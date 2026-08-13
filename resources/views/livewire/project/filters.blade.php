@@ -1,12 +1,14 @@
 <div x-data="{ open: true }"
-    class="relative overflow-hidden rounded-lg bg-white shadow-md dark:bg-gray-800">
+    class="relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md dark:bg-gray-800">
     {{-- Encabezado --}}
-    <div class="flex flex-col items-start gap-2 border-b border-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700">
+    <div
+        class="flex flex-col items-start gap-2 border-b border-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700">
         <div class="flex items-center gap-3">
             <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">
                 {{ __('Project filters') }}
             </h2>
-            <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+            <span
+                class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
                 {{ __(':count projects', ['count' => number_format($filteredProjectCount)]) }}
             </span>
         </div>
@@ -16,8 +18,8 @@
             x-bind:title="open ? '{{ __('Collapse') }}' : '{{ __('Expand') }}'" x-bind:aria-expanded="open">
             <span class="sr-only" x-text="open ? '{{ __('Collapse filters') }}' : '{{ __('Expand filters') }}'"></span>
 
-            <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m18 15-6-6-6 6" />
             </svg>
 
@@ -34,12 +36,13 @@
             <div class="flex flex-wrap items-center justify-start gap-3">
 
                 {{-- Compañías o plantas --}}
-                <x-dashboard-filter-dropdown label="Companies" model="plantFilter"
-                    :options="$companies->map(fn ($company) => [
+                <x-dashboard-filter-dropdown label="Companies" model="plantFilter" :options="$companies->map(
+                    fn($company) => [
                         'value' => $company->company_code,
                         'label' => $company->company_name,
-                    ])"
-                    :selected="$plantFilter" multiple />
+                    ],
+                )" :selected="$plantFilter"
+                    multiple />
 
                 {{-- Ordenar por restante --}}
                 <div class="shrink-0">
@@ -61,62 +64,72 @@
                         <span wire:loading wire:target="projectOrder">{{ __('Updating...') }}</span>
 
                         @if ($orderByProject)
-                            <svg wire:loading.remove wire:target="projectOrder" class="h-4 w-4"
-                                viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <svg wire:loading.remove wire:target="projectOrder" class="h-4 w-4" viewBox="0 0 20 20"
+                                fill="none" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" d="m5 5 10 10M15 5 5 15" />
                             </svg>
                         @else
-                            <svg wire:loading.remove wire:target="projectOrder" class="h-4 w-4 transition group-hover:-translate-y-0.5"
-                                viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 14.5 10 9l3 3 3.5-5M13 7h3.5v3.5" />
+                            <svg wire:loading.remove wire:target="projectOrder"
+                                class="h-4 w-4 transition group-hover:-translate-y-0.5" viewBox="0 0 20 20"
+                                fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M5 14.5 10 9l3 3 3.5-5M13 7h3.5v3.5" />
                             </svg>
                         @endif
                     </button>
                 </div>
 
                 {{-- Año --}}
-                <x-dashboard-filter-dropdown label="Years" model="yearSearch"
-                    :options="collect($years)->map(fn ($year) => [
+                <x-dashboard-filter-dropdown label="Years" model="yearSearch" :options="collect($years)->map(
+                    fn($year) => [
                         'value' => $year,
                         'label' => $year,
-                    ])"
-                    :selected="$yearSearch" multiple />
+                    ],
+                )" :selected="$yearSearch"
+                    multiple />
 
                 {{-- Clasificación del proyecto --}}
-                <x-dashboard-filter-dropdown label="Classifications" model="typeOfProjectSearch"
-                    :options="collect($classificationOptions)->map(fn ($classification) => [
+                <x-dashboard-filter-dropdown label="Classifications" model="typeOfProjectSearch" :options="collect($classificationOptions)->map(
+                    fn($classification) => [
                         'value' => $classification->value,
                         'label' => $classification->value,
-                    ])"
+                    ],
+                )"
                     :selected="$typeOfProjectSearch" multiple />
 
                 {{-- Estado --}}
-                <x-dashboard-filter-dropdown label="States" model="stateSearch"
-                    :options="collect($stateOptions)->map(fn ($state) => [
+                <x-dashboard-filter-dropdown label="States" model="stateSearch" :options="collect($stateOptions)->map(
+                    fn($state) => [
                         'value' => $state->value,
                         'label' => $state->value,
-                    ])"
-                    :selected="$stateSearch" multiple />
+                    ],
+                )" :selected="$stateSearch"
+                    multiple />
 
                 {{-- Inversión --}}
-                <x-dashboard-filter-dropdown label="Investments" model="investmentFilter"
-                    :options="collect($investmentOptions)->map(fn ($investment) => [
+                <x-dashboard-filter-dropdown label="Investments" model="investmentFilter" :options="collect($investmentOptions)->map(
+                    fn($investment) => [
                         'value' => $investment->value,
                         'label' => $investment->value,
-                    ])"
+                    ],
+                )"
                     :selected="$investmentFilter" multiple />
 
-                <x-dashboard-filter-dropdown label="Project ideas" model="projectIdeaFilter"
-                    :options="collect([
-                        ['value' => 'with', 'label' => 'With project ideas'],
-                        ['value' => 'without', 'label' => 'Without project ideas'],
-                    ])"
+                <x-dashboard-filter-dropdown label="Project ideas" model="projectIdeaFilter" :options="collect([
+                    ['value' => 'with', 'label' => 'With project ideas'],
+                    ['value' => 'without', 'label' => 'Without project ideas'],
+                ])"
                     :selected="$projectIdeaFilter" multiple />
 
                 {{-- Limpiar todos los filtros --}}
                 <div class="shrink-0">
-                    <x-clear-filters-button method="resetAll"
-                        :active="$plantFilter !== [] || $yearSearch !== [] || $stateSearch !== [] || $typeOfProjectSearch !== [] || $investmentFilter !== [] || $projectIdeaFilter !== [] || $orderByProject" />
+                    <x-clear-filters-button method="resetAll" :active="$plantFilter !== [] ||
+                        $yearSearch !== [] ||
+                        $stateSearch !== [] ||
+                        $typeOfProjectSearch !== [] ||
+                        $investmentFilter !== [] ||
+                        $projectIdeaFilter !== [] ||
+                        $orderByProject" />
                 </div>
             </div>
 

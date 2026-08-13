@@ -5,9 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#2563eb">
 
-        <title>DaImperium</title>
-        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}?v=3">
-        <link rel="alternate icon" href="{{ asset('favicon.ico') }}?v=3">
+        <title>{{ \App\Models\BrandSetting::current()?->name ?? 'DaImperium' }}</title>
+        <link rel="icon" href="{{ \App\Models\BrandSetting::logoUrl() }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -45,9 +44,9 @@
                 <!-- Navigation -->
         <nav class="bg-custom flex justify-between py-6 w-full lg:px-48 md:px-12 px-4 content-center bg-secondary border">
             <div class="flex items-center gap-3">
-                <img src="{{ asset('favicon.svg') }}?v=3" alt="" class="h-10 w-10">
+                <img src="{{ \App\Models\BrandSetting::logoUrl() }}" alt="{{ \App\Models\BrandSetting::current()?->name ?? 'DaImperium' }}" class="h-10 w-10 object-contain">
                 <span class="italic font-semibold bg-left-bottom bg-no-repeat pb-4 bg-100%" style="background-image: url('{{ asset('img/Underline1.svg') }}');">
-                    DaImperium
+                    {{ \App\Models\BrandSetting::current()?->name ?? 'DaImperium' }}
                 </span>
 
             </div>

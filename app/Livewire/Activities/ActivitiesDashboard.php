@@ -80,6 +80,9 @@ class ActivitiesDashboard extends Component
             'overdue' => $milestones->where('dashboard_status', 'overdue')->count(),
             'pending' => $milestones->where('dashboard_status', 'pending')->count(),
         ];
+        $milestoneMetrics['completion'] = $milestoneMetrics['total'] > 0
+            ? (int) round(($milestoneMetrics['completed'] / $milestoneMetrics['total']) * 100)
+            : 0;
 
         return view('livewire.activities.activities-dashboard', [
             'metrics' => $metrics,
@@ -222,10 +225,36 @@ class ActivitiesDashboard extends Component
         }
 
         $base = [
-            'chart' => ['height' => '100%', 'toolbar' => ['show' => false], 'fontFamily' => 'Figtree, sans-serif'],
-            'dataLabels' => ['enabled' => true],
-            'grid' => ['borderColor' => '#CBD5E1'],
-            'tooltip' => ['theme' => 'light'],
+            'chart' => [
+                'height' => '100%',
+                'toolbar' => ['show' => false],
+                'fontFamily' => 'Figtree, sans-serif',
+                'foreColor' => '#64748B',
+                'background' => 'transparent',
+                'parentHeightOffset' => 0,
+                'animations' => ['enabled' => true, 'speed' => 450],
+            ],
+            'dataLabels' => [
+                'enabled' => true,
+                'style' => ['fontSize' => '11px', 'fontWeight' => 700],
+                'background' => ['enabled' => false],
+            ],
+            'grid' => [
+                'show' => true,
+                'borderColor' => '#E2E8F0',
+                'strokeDashArray' => 3,
+                'padding' => ['left' => 8, 'right' => 12, 'top' => 4, 'bottom' => 0],
+            ],
+            'tooltip' => ['theme' => 'light', 'shared' => true, 'intersect' => false],
+            'legend' => [
+                'show' => true,
+                'position' => 'top',
+                'horizontalAlign' => 'left',
+                'fontSize' => '12px',
+                'fontWeight' => 600,
+                'markers' => ['width' => 9, 'height' => 9, 'radius' => 9],
+                'itemMargin' => ['horizontal' => 10, 'vertical' => 4],
+            ],
         ];
 
         return [
@@ -238,8 +267,15 @@ class ActivitiesDashboard extends Component
                 'labels' => ['Completed', 'Overdue', 'Upcoming'],
                 'chart' => $base['chart'] + ['type' => 'donut'],
                 'colors' => ['#0284C7', '#F97316', '#FED7AA'],
-                'legend' => ['position' => 'bottom'],
-                'plotOptions' => ['pie' => ['donut' => ['size' => '62%', 'labels' => ['show' => true, 'total' => ['show' => true, 'label' => 'Activities']]]]],
+                'stroke' => ['width' => 3, 'colors' => ['#FFFFFF']],
+                'dataLabels' => ['enabled' => false],
+                'legend' => array_merge($base['legend'], ['position' => 'bottom', 'horizontalAlign' => 'center']),
+                'plotOptions' => ['pie' => ['expandOnClick' => false, 'donut' => ['size' => '68%', 'labels' => [
+                    'show' => true,
+                    'name' => ['show' => true, 'color' => '#64748B'],
+                    'value' => ['show' => true, 'fontSize' => '24px', 'fontWeight' => 700, 'color' => '#0F172A'],
+                    'total' => ['show' => true, 'label' => 'Activities', 'fontSize' => '12px', 'color' => '#64748B'],
+                ]]]],
             ]),
             'riskProjectChart' => array_merge($base, [
                 'series' => [
@@ -248,9 +284,15 @@ class ActivitiesDashboard extends Component
                 ],
                 'chart' => $base['chart'] + ['type' => 'bar', 'stacked' => true],
                 'colors' => ['#0284C7', '#F97316'],
-                'plotOptions' => ['bar' => ['horizontal' => true, 'borderRadius' => 4, 'barHeight' => '58%']],
-                'xaxis' => ['categories' => $riskProjects->pluck('name')->all(), 'labels' => ['formatter' => 'function(value) { return Math.round(value); }']],
-                'legend' => ['position' => 'top'],
+                'plotOptions' => ['bar' => ['horizontal' => true, 'borderRadius' => 4, 'borderRadiusApplication' => 'end', 'barHeight' => '52%']],
+                'dataLabels' => ['enabled' => false],
+                'xaxis' => [
+                    'categories' => $riskProjects->pluck('name')->all(),
+                    'tickAmount' => 5,
+                    'labels' => ['style' => ['fontSize' => '11px'], 'formatter' => 'function(value) { return Math.round(value); }'],
+                ],
+                'yaxis' => ['labels' => ['maxWidth' => 180, 'style' => ['fontSize' => '11px', 'fontWeight' => 600, 'colors' => ['#475569']]]],
+                'legend' => $base['legend'],
             ]),
             'weeklyTrendChart' => array_merge($base, [
                 'series' => [
@@ -260,16 +302,19 @@ class ActivitiesDashboard extends Component
                 ],
                 'chart' => $base['chart'] + ['type' => 'bar', 'stacked' => true],
                 'colors' => ['#0284C7', '#F97316', '#FED7AA'],
-                'plotOptions' => ['bar' => ['borderRadius' => 3, 'columnWidth' => '55%']],
-                'xaxis' => ['categories' => $weeks->pluck('label')->all()],
-                'legend' => ['position' => 'top'],
+                'plotOptions' => ['bar' => ['borderRadius' => 3, 'borderRadiusApplication' => 'end', 'columnWidth' => '48%']],
+                'dataLabels' => ['enabled' => false],
+                'xaxis' => ['categories' => $weeks->pluck('label')->all(), 'labels' => ['style' => ['fontSize' => '11px']]],
+                'yaxis' => ['min' => 0, 'forceNiceScale' => true, 'labels' => ['formatter' => 'function(value) { return Math.round(value); }']],
+                'legend' => $base['legend'],
             ]),
             'agingChart' => array_merge($base, [
                 'series' => [['name' => 'Overdue activities', 'data' => array_values($aging)]],
                 'chart' => $base['chart'] + ['type' => 'bar'],
                 'colors' => ['#FB923C'],
-                'plotOptions' => ['bar' => ['borderRadius' => 5, 'columnWidth' => '48%', 'distributed' => true]],
-                'xaxis' => ['categories' => array_keys($aging)],
+                'plotOptions' => ['bar' => ['borderRadius' => 5, 'borderRadiusApplication' => 'end', 'columnWidth' => '42%', 'distributed' => true]],
+                'xaxis' => ['categories' => array_keys($aging), 'labels' => ['style' => ['fontSize' => '11px', 'fontWeight' => 600]]],
+                'yaxis' => ['min' => 0, 'forceNiceScale' => true, 'labels' => ['formatter' => 'function(value) { return Math.round(value); }']],
                 'legend' => ['show' => false],
             ]),
             'milestoneStatusChart' => array_merge($base, [
@@ -281,8 +326,15 @@ class ActivitiesDashboard extends Component
                 'labels' => ['Completed', 'Overdue', 'Upcoming'],
                 'chart' => $base['chart'] + ['type' => 'donut'],
                 'colors' => ['#0284C7', '#F97316', '#FED7AA'],
-                'legend' => ['position' => 'bottom'],
-                'plotOptions' => ['pie' => ['donut' => ['size' => '62%', 'labels' => ['show' => true, 'total' => ['show' => true, 'label' => 'Milestones']]]]],
+                'stroke' => ['width' => 3, 'colors' => ['#FFFFFF']],
+                'dataLabels' => ['enabled' => false],
+                'legend' => array_merge($base['legend'], ['position' => 'bottom', 'horizontalAlign' => 'center']),
+                'plotOptions' => ['pie' => ['expandOnClick' => false, 'donut' => ['size' => '68%', 'labels' => [
+                    'show' => true,
+                    'name' => ['show' => true, 'color' => '#64748B'],
+                    'value' => ['show' => true, 'fontSize' => '24px', 'fontWeight' => 700, 'color' => '#0F172A'],
+                    'total' => ['show' => true, 'label' => 'Milestones', 'fontSize' => '12px', 'color' => '#64748B'],
+                ]]]],
             ]),
             'riskSummary' => [
                 'project' => $riskProjects->first()['name'] ?? null,

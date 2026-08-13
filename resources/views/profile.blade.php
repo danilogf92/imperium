@@ -20,7 +20,7 @@
         x-data
         x-on:profile-photo-updated.window="window.location.reload()">
         <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-            <section class="relative isolate overflow-hidden rounded-2xl bg-sky-600 shadow-lg">
+            <section class="module-accent-line relative isolate overflow-hidden rounded-2xl bg-sky-600 shadow-lg">
 
                 <div class="relative flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
                     <div class="flex min-w-0 flex-col items-center gap-5 text-center sm:flex-row sm:text-left">

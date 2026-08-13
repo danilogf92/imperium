@@ -95,7 +95,8 @@
     </style>
 
     <div class="mx-auto max-w-screen-2xl space-y-6">
-        <section class="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <section
+            class="module-accent-line relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <div class="border-b border-slate-200 px-5 py-4">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div class="min-w-0">
@@ -121,10 +122,22 @@
 
                     <div class="flex flex-wrap items-center gap-2">
                         @if ($canExportReport)
-                            <x-excel-export-button method="exportReport" />
+                            {{-- <x-excel-export-button method="exportReport" /> --}}
+
+                            <x-ui-button icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
+                                wire:click="exportReport" wire:loading.attr="disabled" wire:target="exportReport"
+                                data-no-global-loading>
+                                <span wire:loading.remove wire:target="exportReport">
+                                    {{ __('Export Excel') }}
+                                </span>
+
+                                <span wire:loading wire:target="exportReport">
+                                    {{ __('Generating...') }}
+                                </span>
+                            </x-ui-button>
                         @endif
 
-                        <a href="{{ route('projects.data', ['project' => $project->slug]) }}" wire:navigate
+                        {{-- <a href="{{ route('projects.data', ['project' => $project->slug]) }}" wire:navigate
                             class="project-dashboard-action inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-blue-500 hover:bg-blue-500 hover:text-white hover:shadow-md active:translate-y-0 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor"
                                 stroke-width="1.8">
@@ -132,14 +145,17 @@
                                     d="M12.5 15 7.5 10l5-5M8 10h8" />
                             </svg>
                             Back to data
-                        </a>
+                        </a> --}}
+
+                        <x-ui-button :href="route('projects.data', ['project' => $project->slug])" :text="__('Back to data')" icon="arrow-left" color="#7DB9F1"
+                            hover-opacity="0.80" text-color="#FFFFFF" wire:navigate />
 
                         @if ($hasOrders)
                             <a href="{{ route('projects.orders', ['project' => $project->slug]) }}" wire:navigate
                                 title="View project orders"
                                 class="project-dashboard-action back-to-projects-action inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2">
-                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none"
-                                    stroke="currentColor" stroke-width="1.8">
+                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                                    stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M4 3.5h12v13H4v-13Zm3 3h6m-6 3h6m-6 3h4" />
                                 </svg>
@@ -149,8 +165,8 @@
                             <span class="project-orders-tooltip-wrapper inline-flex" tabindex="0">
                                 <button type="button" disabled aria-disabled="true"
                                     class="project-dashboard-action back-to-projects-action project-orders-disabled inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold shadow-sm">
-                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none"
-                                        stroke="currentColor" stroke-width="1.8">
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                                        stroke-width="1.8">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M4 3.5h12v13H4v-13Zm3 3h6m-6 3h6m-6 3h4" />
                                     </svg>
@@ -167,33 +183,31 @@
 
             <div class="p-5">
                 <div class="overflow-x-auto">
-                <div class="flex min-w-max items-center gap-3">
-                    <x-dashboard-filter-dropdown label="Group by" model="searchData"
-                        :options="collect($columnNames)->map(fn ($columnName) => [
-                            'value' => $columnName,
-                            'label' => $this->formatText($columnName),
-                        ])"
-                        :selected="$searchData" default="area" />
+                    <div class="flex min-w-max items-center gap-3">
+                        <x-dashboard-filter-dropdown label="Group by" model="searchData" :options="collect($columnNames)->map(
+                            fn($columnName) => [
+                                'value' => $columnName,
+                                'label' => $this->formatText($columnName),
+                            ],
+                        )"
+                            :selected="$searchData" default="area" />
 
-                    <x-dashboard-filter-dropdown label="Financial value" model="investments"
-                        :options="[
+                        <x-dashboard-filter-dropdown label="Financial value" model="investments" :options="[
                             ['value' => 'global_price_euros', 'label' => 'Budgeted'],
                             ['value' => 'real_value_euros', 'label' => 'Real value (SAP)'],
                             ['value' => 'booked_euros', 'label' => 'Booked'],
                             ['value' => 'executed_euros', 'label' => 'Executed'],
                         ]"
-                        :selected="$investments" default="global_price_euros" />
+                            :selected="$investments" default="global_price_euros" />
 
-                    <x-dashboard-filter-dropdown label="Currency" model="dollarOrEuro"
-                        :options="[
+                        <x-dashboard-filter-dropdown label="Currency" model="dollarOrEuro" :options="[
                             ['value' => 'euro', 'label' => 'Euro (€)'],
                             ['value' => 'dollar', 'label' => 'Dollar ($)'],
                         ]"
-                        :selected="$dollarOrEuro" default="euro" />
+                            :selected="$dollarOrEuro" default="euro" />
 
-                    <x-clear-filters-button method="resetAll"
-                        :active="$searchData !== 'area' || $investments !== 'global_price_euros'" />
-                </div>
+                        <x-clear-filters-button method="resetAll" :active="$searchData !== 'area' || $investments !== 'global_price_euros'" />
+                    </div>
                 </div>
 
                 @php
@@ -210,17 +224,20 @@
                         Active filters
                     </span>
 
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
+                    <span
+                        class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
                         <span class="text-blue-400">Group by:</span>
                         {{ $this->formatText($searchData) }}
                     </span>
 
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                    <span
+                        class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
                         <span class="text-emerald-500">Value:</span>
                         {{ $financialFilterLabels[$investments] ?? $this->formatText($investments) }}
                     </span>
 
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700">
+                    <span
+                        class="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700">
                         <span class="text-violet-500">Currency:</span>
                         {{ $dollarOrEuro === 'dollar' ? 'Dollar ($)' : 'Euro (€)' }}
                     </span>
@@ -233,12 +250,32 @@
             $approved = in_array($project->state?->value, ['Execution', 'Finished'], true) ? $budgeted : 0;
             $available = $approved - $executed;
             $metrics = [
-                ['label' => 'Budgeted', 'value' => $currencySymbol . ' ' . number_format($budgeted, 2), 'color' => 'blue'],
-                ['label' => 'Approved', 'value' => $currencySymbol . ' ' . number_format($approved, 2), 'color' => 'slate'],
+                [
+                    'label' => 'Budgeted',
+                    'value' => $currencySymbol . ' ' . number_format($budgeted, 2),
+                    'color' => 'blue',
+                ],
+                [
+                    'label' => 'Approved',
+                    'value' => $currencySymbol . ' ' . number_format($approved, 2),
+                    'color' => 'slate',
+                ],
                 ['label' => 'Booked', 'value' => $currencySymbol . ' ' . number_format($booked, 2), 'color' => 'amber'],
-                ['label' => 'Executed', 'value' => $currencySymbol . ' ' . number_format($executed, 2), 'color' => 'emerald'],
-                ['label' => 'Real (SAP)', 'value' => $currencySymbol . ' ' . number_format($real_value, 2), 'color' => 'violet'],
-                ['label' => 'Available', 'value' => $currencySymbol . ' ' . number_format($available, 2), 'color' => 'cyan'],
+                [
+                    'label' => 'Executed',
+                    'value' => $currencySymbol . ' ' . number_format($executed, 2),
+                    'color' => 'emerald',
+                ],
+                [
+                    'label' => 'Real (SAP)',
+                    'value' => $currencySymbol . ' ' . number_format($real_value, 2),
+                    'color' => 'violet',
+                ],
+                [
+                    'label' => 'Available',
+                    'value' => $currencySymbol . ' ' . number_format($available, 2),
+                    'color' => 'cyan',
+                ],
                 ['label' => 'Progress', 'value' => number_format($percentage, 2) . '%', 'color' => 'rose'],
             ];
         @endphp
@@ -272,13 +309,17 @@
                                 <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="1.8">
                                     @if ($metric['label'] === 'Progress')
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5h15M6.75 16.5v-3m5.25 3V9m5.25 7.5V6" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M4.5 19.5h15M6.75 16.5v-3m5.25 3V9m5.25 7.5V6" />
                                     @elseif ($metric['label'] === 'Executed')
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m4.5 12.75 6 6 9-13.5" />
                                     @elseif ($metric['label'] === 'Real (SAP)')
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 6c0 1.657-3.358 3-7.5 3S4.5 7.657 4.5 6 7.858 3 12 3s7.5 1.343 7.5 3Zm0 0v12c0 1.657-3.358 3-7.5 3s-7.5-1.343-7.5-3V6" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M19.5 6c0 1.657-3.358 3-7.5 3S4.5 7.657 4.5 6 7.858 3 12 3s7.5 1.343 7.5 3Zm0 0v12c0 1.657-3.358 3-7.5 3s-7.5-1.343-7.5-3V6" />
                                     @else
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5.25H6.75A2.25 2.25 0 0 0 4.5 7.5v11.25A2.25 2.25 0 0 0 6.75 21h10.5a2.25 2.25 0 0 0 2.25-2.25V7.5a2.25 2.25 0 0 0-2.25-2.25H15M9 5.25V7.5h6V5.25" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9 5.25H6.75A2.25 2.25 0 0 0 4.5 7.5v11.25A2.25 2.25 0 0 0 6.75 21h10.5a2.25 2.25 0 0 0 2.25-2.25V7.5a2.25 2.25 0 0 0-2.25-2.25H15M9 5.25V7.5h6V5.25" />
                                     @endif
                                 </svg>
                             </span>
@@ -297,32 +338,67 @@
         <section class="grid gap-6 lg:grid-cols-2">
             @php
                 $charts = [
-                    ['name' => 'project-classification', 'title' => 'Project classification', 'type' => 'column', 'model' => $columnChartModel],
-                    ['name' => 'project-comparison', 'title' => 'Financial comparison', 'type' => 'column', 'model' => $multiColumnChartModel],
-                    ['name' => 'project-progress-percentage', 'title' => 'Project progress', 'type' => 'column', 'model' => $resumePercentageGraph],
-                    ['name' => 'project-financial-summary', 'title' => 'Financial summary', 'type' => 'column', 'model' => $resumeGraph],
-                    ['name' => 'project-distribution', 'title' => 'Investment distribution', 'type' => 'pie', 'model' => $pieChartModel],
-                    ['name' => 'project-real-balance', 'title' => 'Balance with real value', 'type' => 'pie', 'model' => $pieChartModelResume],
-                    ['name' => 'project-radar', 'title' => 'Investment radar', 'type' => 'radar', 'model' => $radarChartModel],
-                    ['name' => 'project-booked-balance', 'title' => 'Balance with booked value', 'type' => 'pie', 'model' => $pieChartModelResumeTwo],
+                    [
+                        'name' => 'project-classification',
+                        'title' => 'Project classification',
+                        'type' => 'column',
+                        'model' => $columnChartModel,
+                    ],
+                    [
+                        'name' => 'project-comparison',
+                        'title' => 'Financial comparison',
+                        'type' => 'column',
+                        'model' => $multiColumnChartModel,
+                    ],
+                    [
+                        'name' => 'project-progress-percentage',
+                        'title' => 'Project progress',
+                        'type' => 'column',
+                        'model' => $resumePercentageGraph,
+                    ],
+                    [
+                        'name' => 'project-financial-summary',
+                        'title' => 'Financial summary',
+                        'type' => 'column',
+                        'model' => $resumeGraph,
+                    ],
+                    [
+                        'name' => 'project-distribution',
+                        'title' => 'Investment distribution',
+                        'type' => 'pie',
+                        'model' => $pieChartModel,
+                    ],
+                    [
+                        'name' => 'project-real-balance',
+                        'title' => 'Balance with real value',
+                        'type' => 'pie',
+                        'model' => $pieChartModelResume,
+                    ],
+                    [
+                        'name' => 'project-radar',
+                        'title' => 'Investment radar',
+                        'type' => 'radar',
+                        'model' => $radarChartModel,
+                    ],
+                    [
+                        'name' => 'project-booked-balance',
+                        'title' => 'Balance with booked value',
+                        'type' => 'pie',
+                        'model' => $pieChartModelResumeTwo,
+                    ],
                 ];
             @endphp
 
             @foreach ($charts as $chart)
-                <x-dashboard-chart-card :title="$chart['title']"
-                    subtitle="Project {{ $project->pda_code }}"
+                <x-dashboard-chart-card :title="$chart['title']" subtitle="Project {{ $project->pda_code }}"
                     :filename="$project->pda_code . '-' . $chart['name']">
                     @if ($chart['type'] === 'column')
-                        <livewire:livewire-column-chart
-                            key="{{ $chart['model']->reactiveKey() }}"
+                        <livewire:livewire-column-chart key="{{ $chart['model']->reactiveKey() }}"
                             :column-chart-model="$chart['model']" />
                     @elseif ($chart['type'] === 'pie')
-                        <livewire:livewire-pie-chart
-                            key="{{ $chart['model']->reactiveKey() }}"
-                            :pie-chart-model="$chart['model']" />
+                        <livewire:livewire-pie-chart key="{{ $chart['model']->reactiveKey() }}" :pie-chart-model="$chart['model']" />
                     @else
-                        <livewire:livewire-radar-chart
-                            key="{{ $chart['model']->reactiveKey() }}"
+                        <livewire:livewire-radar-chart key="{{ $chart['model']->reactiveKey() }}"
                             :radar-chart-model="$chart['model']" />
                     @endif
                 </x-dashboard-chart-card>

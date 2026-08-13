@@ -25,9 +25,49 @@
 }
 
 @layer components {
+    .module-accent-line {
+        position: relative;
+        border-top-width: 2px !important;
+        border-top-style: solid !important;
+        border-top-color: var(--brand-accent, #7DB9F1) !important;
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+
+    .module-accent-line::before {
+        content: none;
+    }
+
+    .chart-image-export {
+        border-color: var(--brand-accent, #7DB9F1);
+        background-color: var(--brand-accent, #7DB9F1);
+    }
+
+    .chart-excel-export {
+        border-color: var(--brand-excel, #FDBA74);
+        background-color: var(--brand-excel, #FDBA74);
+        color: #7c2d12;
+    }
+
+    .generic-ui-button {
+        color: var(--ui-button-text, #ffffff);
+        background-color: var(--ui-button-bg, #2563eb);
+        --tw-ring-color: var(--ui-button-bg, #2563eb);
+    }
+
+    .generic-ui-button:hover {
+        color: var(--ui-button-text, #ffffff);
+        background-color: var(--ui-button-hover, #1d4ed8);
+    }
+
+    .generic-ui-button-opacity-hover:hover {
+        background-color: var(--ui-button-bg, #2563eb);
+        opacity: var(--ui-button-hover-opacity, 0.85);
+    }
+
     .soft-title-surface {
-        border-color: #e3edf4;
-        background-color: #f6f9fb;
+        border-color: #e2e8f0;
+        background-color: #ffffff;
     }
 
     .app-page-frame {
@@ -50,11 +90,18 @@
         margin-inline: auto;
     }
 
+    /* Shared module treatment based on the Projects layout. */
+    .unified-table-shell,
+    .dashboard-page-content section,
+    .dashboard-page-content header {
+        border-color: #e2e8f0;
+    }
+
     .dashboard-panel {
-        border: 1px solid #bae6fd;
+        border: 1px solid #e2e8f0;
         border-radius: 0.75rem;
         background-color: #ffffff;
-        box-shadow: 0 8px 24px -18px rgb(3 105 161 / 0.45);
+        box-shadow: 0 4px 14px rgb(15 23 42 / 0.07);
     }
 
     .dashboard-metrics-grid {

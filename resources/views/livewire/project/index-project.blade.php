@@ -7,15 +7,15 @@
             <livewire:project.alerts />
 
             {{-- Contenedor principal del módulo --}}
-            <div class="mx-auto min-w-0 max-w-full">
+            <div class="mx-auto min-w-0 max-w-full space-y-6">
 
                 {{-- Acciones --}}
-                <div class="mb-4">
+                <div>
                     <livewire:project.actions />
                 </div>
 
                 {{-- Filtros --}}
-                <div class="mb-4">
+                <div>
                     <livewire:project.filters />
                 </div>
 
