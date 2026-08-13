@@ -20,12 +20,7 @@
         x-data
         x-on:profile-photo-updated.window="window.location.reload()">
         <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-            <section class="relative isolate overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-blue-900 to-indigo-700 shadow-lg">
-                <div class="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl"></div>
-                <div class="pointer-events-none absolute -bottom-28 left-1/3 h-64 w-64 rounded-full bg-violet-400/20 blur-3xl"></div>
-                <div class="pointer-events-none absolute inset-0 opacity-10"
-                    style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 24px 24px;">
-                </div>
+            <section class="relative isolate overflow-hidden rounded-2xl bg-sky-600 shadow-lg">
 
                 <div class="relative flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
                     <div class="flex min-w-0 flex-col items-center gap-5 text-center sm:flex-row sm:text-left">

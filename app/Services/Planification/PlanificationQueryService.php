@@ -30,6 +30,7 @@ final class PlanificationQueryService
 
         $filterProjects = $this->access
             ->authorizedProjects()
+            ->where('state', '<>', ProjectStateEnum::Postponed->value)
             ->with('company:id,company_name')
             ->get([
                 'id',
@@ -44,7 +45,10 @@ final class PlanificationQueryService
             'projects' => $this->modalProjects(),
             'milestones' => $this->milestones(),
             'plantOptions' => $this->plantOptions($filterProjects),
-            'statusOptions' => ProjectStateEnum::values(),
+            'statusOptions' => array_values(array_filter(
+                ProjectStateEnum::values(),
+                fn (string $state): bool => $state !== ProjectStateEnum::Postponed->value
+            )),
             'creationYearOptions' => $this->creationYearOptions($filterProjects),
             'activityWeekOptions' => $this->calendarActivityWeekOptions(
                 $filterProjects,
@@ -60,6 +64,7 @@ final class PlanificationQueryService
     {
         $query = $this->access
             ->authorizedProjects()
+            ->where('state', '<>', ProjectStateEnum::Postponed->value)
             ->with([
                 'company:id,company_name',
                 'projectMilestones' => fn ($query) => $query
@@ -187,6 +192,7 @@ final class PlanificationQueryService
     {
         return ProjectOrderSort::apply($this->access
             ->authorizedProjects()
+            ->where('state', '<>', ProjectStateEnum::Postponed->value)
             ->withExists([
                 'projectMilestones as is_closed' => fn (Builder $query) => $query
                     ->whereHas(

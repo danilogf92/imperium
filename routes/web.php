@@ -4,6 +4,7 @@ use App\Http\Controllers\Data\RedirectToProjectDataController;
 use App\Http\Controllers\ExcelTemplateDownloadController;
 use App\Http\Controllers\ProjectChartExcelExportController;
 use App\Livewire\Data\IndexData;
+use App\Livewire\Activities\ActivitiesDashboard;
 use App\Livewire\Dashboard\Dashboard;
 use App\Livewire\Orders\Ordenes;
 use App\Livewire\Planification\Planification;
@@ -57,6 +58,9 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('/planification', Planification::class)
         ->name('planification');
+
+    Route::get('/activities', ActivitiesDashboard::class)
+        ->name('activities');
 
     Route::get('/resume', Resume::class)
         ->name('resume');

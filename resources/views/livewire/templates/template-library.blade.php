@@ -1,7 +1,7 @@
 <div class="dashboard-page-shell">
   <div class="dashboard-page-content">
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div class="border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-4 py-4 sm:px-6 sm:py-5">
+        <div class="soft-title-surface border-b px-4 py-4 sm:px-6 sm:py-5">
             <div class="flex items-center gap-4">
                 <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
                     <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"

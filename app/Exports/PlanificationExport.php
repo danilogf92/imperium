@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Enums\ProjectPermissionEnum;
+use App\Enums\ProjectStateEnum;
 use App\Models\Project;
 use App\Models\User;
 use App\Support\ProjectOrderSort;
@@ -36,6 +37,7 @@ class PlanificationExport
         });
 
         $projectsQuery = Project::query()
+            ->where('state', '<>', ProjectStateEnum::Postponed->value)
             ->with([
                 'company:id,company_name',
                 'projectMilestones' => fn ($query) => $query

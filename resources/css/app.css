@@ -16,9 +16,7 @@
         max-width: 100%;
         overflow-x: hidden;
         color: #0f172a;
-        background:
-            radial-gradient(circle at 10% 0%, rgb(37 99 235 / 0.10), transparent 30rem),
-            #f8fafc;
+        background: #f8fafc;
     }
 
     [x-cloak] {
@@ -27,12 +25,21 @@
 }
 
 @layer components {
+    .soft-title-surface {
+        border-color: #e3edf4;
+        background-color: #f6f9fb;
+    }
+
+    .app-page-frame {
+        background: #f1f5f9;
+    }
+
     .dashboard-page-shell {
         min-height: 100vh;
         width: 100%;
         max-width: 100%;
         overflow-x: hidden;
-        background-color: #f1f5f9;
+        background: #f1f5f9;
         padding: 1.5rem 1rem;
     }
 
@@ -44,10 +51,10 @@
     }
 
     .dashboard-panel {
-        border: 1px solid #e2e8f0;
+        border: 1px solid #bae6fd;
         border-radius: 0.75rem;
         background-color: #ffffff;
-        box-shadow: 0 1px 3px rgb(15 23 42 / 0.08);
+        box-shadow: 0 8px 24px -18px rgb(3 105 161 / 0.45);
     }
 
     .dashboard-metrics-grid {
@@ -64,7 +71,7 @@
         border-radius: 0.75rem;
         padding: 0.75rem;
         color: #fff;
-        background: linear-gradient(145deg, #0f172a, #164e63);
+        background: #075985;
         box-shadow: 0 20px 45px -12px rgb(15 23 42 / 0.55);
         font-size: 0.75rem;
         line-height: 1.5;
@@ -86,10 +93,7 @@
         overflow: hidden;
         border: 1px solid rgb(148 163 184 / 0.25);
         border-radius: 2rem;
-        background:
-            radial-gradient(circle at 75% 25%, rgb(96 165 250 / 0.95), transparent 25%),
-            radial-gradient(circle at 25% 75%, rgb(14 165 233 / 0.85), transparent 28%),
-            linear-gradient(135deg, #0f172a 0%, #1e3a8a 48%, #2563eb 100%);
+        background: #0ea5e9;
         box-shadow: 0 30px 70px -30px rgb(15 23 42 / 0.65);
     }
 
@@ -99,8 +103,7 @@
         inset: 12%;
         border: 1px solid rgb(255 255 255 / 0.35);
         border-radius: 1.25rem;
-        background:
-            linear-gradient(rgb(255 255 255 / 0.92), rgb(255 255 255 / 0.82));
+        background: #ffffff;
         box-shadow: 0 20px 40px rgb(15 23 42 / 0.25);
     }
 
@@ -111,9 +114,7 @@
         padding: 2.75rem 1.25rem;
         border-radius: 0.75rem;
         color: #1e3a8a;
-        background:
-            linear-gradient(90deg, #2563eb 0 58%, #dbeafe 58% 100%) 1.25rem 5.4rem / calc(100% - 2.5rem) 0.55rem no-repeat,
-            linear-gradient(90deg, #0ea5e9 0 76%, #e0f2fe 76% 100%) 1.25rem 7rem / calc(100% - 2.5rem) 0.55rem no-repeat;
+        background: #f0f9ff;
         font-family: Montserrat, sans-serif;
         font-size: clamp(0.65rem, 1.2vw, 0.85rem);
         font-weight: 800;
@@ -122,10 +123,8 @@
     }
 
     span[style*="Underline"] {
-        background-image: linear-gradient(transparent 65%, rgb(96 165 250 / 0.65) 65%) !important;
-        background-position: left bottom !important;
-        background-repeat: no-repeat !important;
-        background-size: 100% 0.75em !important;
+        background-image: none !important;
+        border-bottom: 0.35em solid rgb(125 211 252 / 0.65);
     }
 }
 

@@ -6,7 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
-        <meta name="theme-color" content="#2563eb">
+        <meta name="theme-color" content="#0ea5e9">
         <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}?v=3">
         <link rel="alternate icon" href="{{ asset('favicon.ico') }}?v=3">
 
@@ -20,12 +20,12 @@
     <body class="font-sans antialiased">
         <x-global-loading-overlay />
 
-        <div class="min-h-screen bg-gray-100">
+        <div class="app-page-frame min-h-screen">
             <livewire:layout.navigation />
 
             <!-- Page Heading -->
             @if (isset($header))
-                <header class="bg-white shadow">
+                <header class="border-b border-sky-100 bg-white shadow-sm">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>

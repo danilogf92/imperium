@@ -20,7 +20,7 @@
             padding: 0.85rem 1rem;
             border-bottom: 1px solid #e2e8f0;
             border-radius: 0.75rem 0.75rem 0 0;
-            background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
+            background: #f6f9fb;
         }
 
         .unified-table-scroll {

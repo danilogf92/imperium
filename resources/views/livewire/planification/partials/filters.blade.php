@@ -4,7 +4,7 @@
 
                 {{-- Cabecera del área de filtros --}}
                 <div
-                    class="flex flex-col items-start gap-3 bg-gradient-to-r from-blue-50 via-white to-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                    class="soft-title-surface flex flex-col items-start gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
 
                     <div class="flex items-center gap-3">
 

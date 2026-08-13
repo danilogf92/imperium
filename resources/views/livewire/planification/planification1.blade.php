@@ -59,7 +59,7 @@
 
             <div x-data="{ open: true }" class="border-b border-slate-200">
                 <div
-                    class="flex items-center justify-between bg-gradient-to-r from-blue-50 via-white to-white px-5 py-3">
+                    class="flex items-center justify-between bg-sky-50 px-5 py-3">
                     <div class="flex items-center gap-3">
                         <div
                             class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 shadow-sm">

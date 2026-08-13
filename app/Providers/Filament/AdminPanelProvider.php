@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Http\Middleware\SetUserLocale;
+use App\Models\BrandSetting;
 use App\Filament\Pages\Auth\Login;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -33,8 +34,8 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login(Login::class)
             ->favicon(asset('favicon.svg') . '?v=3')
-            ->brandName('DaImperium')
-            ->brandLogo(asset('favicon.svg') . '?v=3')
+            ->brandName(fn (): string => BrandSetting::current()?->name ?? 'DaImperium')
+            ->brandLogo(fn (): string => BrandSetting::logoUrl())
             ->brandLogoHeight('2.5rem')
             ->sidebarCollapsibleOnDesktop()
             ->userMenuItems([
@@ -43,39 +44,64 @@ class AdminPanelProvider extends PanelProvider
                     ->url(fn (): string => route('profile')),
             ])
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => Color::Sky,
+                'warning' => Color::Orange,
             ])
             ->renderHook(
                 PanelsRenderHook::STYLES_AFTER,
                 fn (): string => <<<'HTML'
                     <style>
                         .fi-sidebar {
-                            border-right: 1px solid #cbd5e1;
-                            background: #f8fafc;
-                            box-shadow: 6px 0 18px rgba(15, 23, 42, 0.06);
+                            border-right: 1px solid #bae6fd;
+                            background: #f0f9ff;
+                            box-shadow: 6px 0 18px rgba(3, 105, 161, 0.08);
                         }
 
                         .fi-sidebar-header,
                         .fi-sidebar-nav,
                         .fi-sidebar-footer {
-                            background: #f8fafc;
+                            background: #f0f9ff;
                         }
 
                         .fi-sidebar-group + .fi-sidebar-group {
                             margin-top: 0.75rem;
                             padding-top: 0.75rem;
-                            border-top: 1px solid #dbe3ec;
+                            border-top: 1px solid #bae6fd;
                         }
 
                         .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
-                            border: 1px solid #bfdbfe;
-                            background: #dbeafe;
-                            color: #1d4ed8;
-                            box-shadow: inset 3px 0 0 #2563eb;
+                            border: 1px solid #fdba74;
+                            background: #fff7ed;
+                            color: #075985;
+                            box-shadow: inset 3px 0 0 #fb923c;
                         }
 
                         .fi-sidebar-item:not(.fi-active) > .fi-sidebar-item-btn:hover {
-                            background: #eef2f7;
+                            background: #e0f2fe;
+                        }
+
+                        .fi-body {
+                            background: #f1f5f9;
+                        }
+
+                        .fi-section,
+                        .fi-ta-ctn,
+                        .fi-fo-field-wrp > div {
+                            border-color: #bae6fd;
+                        }
+
+                        .fi-section-header,
+                        .fi-ta-header,
+                        .fi-modal-header,
+                        .fi-wi-stats-overview-stat-description {
+                            border-color: #e3edf4;
+                            background-color: #f6f9fb;
+                        }
+
+                        .fi-section-content,
+                        .fi-ta-content,
+                        .fi-modal-content {
+                            background-color: #ffffff;
                         }
 
                         .dark .fi-sidebar,

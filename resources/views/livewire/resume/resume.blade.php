@@ -20,7 +20,7 @@
 
         <section x-data="{ open: true }" class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <div
-                class="flex flex-col items-start gap-3 border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                class="soft-title-surface flex flex-col items-start gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                 <div>
                     <div class="flex items-center gap-2">
                         <h2 class="font-semibold text-slate-900">{{ __('Resume filters') }}</h2>
@@ -159,7 +159,7 @@
 
         <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <div
-                class="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-blue-50 via-white to-white px-5 py-4">
+                class="soft-title-surface flex items-center justify-between border-b px-5 py-4">
                 <div>
                     <h2 class="font-semibold text-slate-900">{{ __('Annual detail') }}</h2>
                     <p class="mt-0.5 text-sm text-slate-500">{{ __('Financial values backing the stacked chart.') }}</p>

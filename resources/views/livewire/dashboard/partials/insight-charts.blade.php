@@ -1,5 +1,5 @@
 <section aria-labelledby="dashboard-insights-title" class="space-y-4">
-    <div class="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 via-white to-white px-5 py-4">
+    <div class="soft-title-surface rounded-xl border px-5 py-4">
         <p class="text-xs font-bold uppercase tracking-[0.16em] text-blue-600">Decision support</p>
         <h2 id="dashboard-insights-title" class="mt-1 text-lg font-bold text-slate-900">Portfolio insights</h2>
         <p class="mt-1 text-sm text-slate-500">

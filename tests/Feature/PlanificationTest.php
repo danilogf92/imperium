@@ -127,6 +127,21 @@ class PlanificationTest extends TestCase
             ->assertSee($project->pda_code);
     }
 
+    public function test_postponed_projects_are_never_available_in_planification(): void
+    {
+        [$user, $project] = $this->projectContext();
+        $project->update(['state' => 'Postponed']);
+
+        Livewire::actingAs($user)
+            ->test(Planification::class)
+            ->assertViewHas('plannedProjects', fn ($projects): bool => ! $projects
+                ->getCollection()
+                ->contains('id', $project->id))
+            ->assertViewHas('projects', fn ($projects): bool => ! $projects->contains('id', $project->id))
+            ->assertViewHas('statusOptions', fn (array $states): bool => ! in_array('Postponed', $states, true))
+            ->assertDontSee($project->name);
+    }
+
     /** @return array{User, Project} */
     private function projectContext(): array
     {
