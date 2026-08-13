@@ -10,6 +10,7 @@ use App\Livewire\Concerns\InteractsWithPerPagePreference;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
@@ -34,6 +35,9 @@ class Ordenes extends Component
 
     #[Url]
     public string $sortDir = 'asc';
+
+    #[Url]
+    public string $sortBy = 'order_no';
 
     #[Url(as: 'plant', except: [])]
     public array $plantFilter = [];
@@ -89,9 +93,23 @@ class Ordenes extends Component
         $this->resetPage();
     }
 
-    public function toggleSort(): void
+    public function setSortBy(string $column): void
     {
-        $this->sortDir = $this->sortDir === 'asc' ? 'desc' : 'asc';
+        $sortableColumns = [
+            'project', 'pda_code', 'plant', 'order_year', 'order_no', 'item_count', 'order_count',
+        ];
+
+        if (! in_array($column, $sortableColumns, true)) {
+            return;
+        }
+
+        if ($this->sortBy === $column) {
+            $this->sortDir = $this->sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortBy = $column;
+            $this->sortDir = 'desc';
+        }
+
         $this->resetPage();
     }
 
@@ -171,7 +189,7 @@ class Ordenes extends Component
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $orders = Data::query()
+        $ordersQuery = Data::query()
             ->join('projects', 'projects.id', '=', 'data.project_id')
             ->join('companies', 'companies.id', '=', 'projects.company_id')
             ->whereIn(
@@ -210,24 +228,63 @@ class Ordenes extends Component
                             ->orWhere('data.order_year', 'like', $term);
                     }
                 )
+            );
+
+        $totalOrders = DB::query()
+            ->fromSub(
+                (clone $ordersQuery)
+                    ->select('data.project_id', 'data.order_year', 'data.order_no')
+                    ->distinct(),
+                'filtered_orders'
             )
-            ->selectRaw(
-                'projects.id AS project_id, projects.name AS project_name, projects.slug AS project_slug, '
-                    .'projects.pda_code, companies.company_code, companies.company_name, '
-                    .'data.order_no, data.order_year, COUNT(*) AS item_count'
-            )
-            ->groupBy(
-                'projects.id',
-                'projects.name',
-                'projects.slug',
-                'projects.pda_code',
-                'companies.company_code',
-                'companies.company_name',
-                'data.order_year',
-                'data.order_no'
-            )
-            ->orderBy('data.order_year', 'desc')
-            ->orderBy('data.order_no', $this->sortDir)
+            ->count();
+
+        if ($this->project) {
+            $ordersQuery
+                ->selectRaw(
+                    'projects.id AS project_id, projects.name AS project_name, projects.slug AS project_slug, '
+                        .'projects.pda_code, companies.company_code, companies.company_name, '
+                        .'data.order_no, data.order_year, COUNT(*) AS item_count'
+                )
+                ->groupBy(
+                    'projects.id',
+                    'projects.name',
+                    'projects.slug',
+                    'projects.pda_code',
+                    'companies.company_code',
+                    'companies.company_name',
+                    'data.order_year',
+                    'data.order_no'
+                );
+        } else {
+            $ordersQuery
+                ->selectRaw(
+                    'projects.id AS project_id, projects.name AS project_name, projects.slug AS project_slug, '
+                        .'projects.pda_code, companies.company_code, companies.company_name, '
+                        ."MAX(data.order_year) AS order_year, COUNT(DISTINCT CONCAT(data.order_year, ':', data.order_no)) AS order_count"
+                )
+                ->groupBy(
+                    'projects.id',
+                    'projects.name',
+                    'projects.slug',
+                    'projects.pda_code',
+                    'companies.company_code',
+                    'companies.company_name'
+                );
+        }
+
+        $orders = $ordersQuery
+            ->orderBy(match ($this->sortBy) {
+                'project' => 'projects.name',
+                'pda_code' => 'projects.pda_code',
+                'plant' => 'companies.company_name',
+                'order_year' => $this->project ? 'data.order_year' : 'order_year',
+                'item_count' => $this->project ? 'item_count' : 'order_count',
+                'order_count' => 'order_count',
+                'order_no' => $this->project ? 'data.order_no' : 'projects.name',
+                default => 'projects.name',
+            }, $this->sortDir === 'desc' ? 'desc' : 'asc')
+            ->orderBy('projects.name')
             ->paginate($this->perPage);
 
         $optionQuery = Data::query()->join('projects', 'projects.id', '=', 'data.project_id')
@@ -240,6 +297,7 @@ class Ordenes extends Component
 
         return view('livewire.orders.ordenes', [
             'orders' => $orders,
+            'totalOrders' => $totalOrders,
             'plantOptions' => (clone $optionQuery)->select('companies.company_code', 'companies.company_name')
                 ->distinct()->orderBy('companies.company_name')->get()->map(fn ($company) => [
                     'value' => $company->company_code, 'label' => $company->company_name,

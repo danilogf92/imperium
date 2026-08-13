@@ -81,9 +81,6 @@
                 <livewire:profile.two-factor-authentication-form />
             </section>
 
-            <section class="rounded-2xl border border-red-200 bg-white p-6 shadow-sm sm:p-8">
-                <livewire:profile.delete-user-form />
-            </section>
         </div>
     </div>
 </x-app-layout>

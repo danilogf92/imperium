@@ -1,4 +1,4 @@
-@props(['label', 'model', 'options' => [], 'selected' => [], 'multiple' => false, 'default' => null, 'showSelection' => false, 'compact' => false, 'globalLoading' => true])
+@props(['label', 'model', 'options' => [], 'selected' => [], 'multiple' => false, 'default' => null, 'showSelection' => false, 'compact' => false, 'globalLoading' => true, 'closeOnSelect' => true])
 
 @php
     $optionList = collect($options)->values();
@@ -11,14 +11,15 @@
         : null;
 @endphp
 
-<div x-data="{ open: false, search: '' }" x-on:scroll.window="open = false" class="shrink-0">
+<div x-data="{ open: false, search: '' }" x-on:scroll.window="open = false; search = ''"
+    class="w-full sm:w-auto sm:shrink-0">
     <button x-ref="trigger" type="button"
         @click="open = !open; if (open) { $nextTick(() => { const rect = $refs.trigger.getBoundingClientRect(); const width = Math.min(288, window.innerWidth - 16); $refs.menu.style.width = `${width}px`; $refs.menu.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - width - 8))}px`; $refs.menu.style.top = `${rect.bottom + 8}px`; }); }"
         :class="open ? 'border-blue-500 ring-2 ring-blue-500/25 text-blue-700' : 'border-slate-300'"
         @class([
-            'inline-flex h-11 cursor-pointer items-center justify-between rounded-lg border bg-white text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 focus:outline-none',
-            'min-w-32 gap-3 px-3' => ! $compact,
-            'w-28 gap-1.5 px-2.5' => $compact,
+            'inline-flex h-12 w-full cursor-pointer items-center justify-between rounded-xl border bg-white text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/25 sm:h-11 sm:rounded-lg sm:w-auto',
+            'gap-3 px-4 sm:min-w-32 sm:px-3' => ! $compact,
+            'gap-1.5 px-3 sm:w-28 sm:px-2.5' => $compact,
         ])>
         <span @class(['truncate' => $compact])>{{ $selectedOptionLabel ? __($selectedOptionLabel) : __($label) }}</span>
         <span class="flex items-center gap-2">
@@ -36,8 +37,8 @@
     </button>
 
     <template x-teleport="body">
-        <div x-ref="menu" x-show="open" x-cloak @click.outside="open = false"
-            class="fixed z-[200] max-h-80 max-w-[calc(100vw-1rem)] overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+        <div x-ref="menu" x-show="open" x-cloak @click.outside="open = false; search = ''"
+            class="fixed z-[200] max-h-[70vh] max-w-[calc(100vw-1rem)] overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-2xl sm:max-h-80 sm:shadow-xl">
             <p class="px-2 pb-2 pt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __($label) }}
             </p>
 
@@ -64,13 +65,14 @@
                         @if ($multiple)
                             <input wire:model.live="{{ $model }}"
                                 @if ($globalLoading) data-global-loading @else data-no-global-loading @endif
+                                @if ($closeOnSelect) @change="open = false; search = ''" @endif
                                 type="checkbox" value="{{ $value }}"
                                 class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
                         @else
                             <input wire:model.live="{{ $model }}"
                                 @if ($globalLoading) data-global-loading @else data-no-global-loading @endif
                                 type="radio" value="{{ $value }}"
-                                @change="open = false"
+                                @change="open = false; search = ''"
                                 class="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500">
                         @endif
                         <span>{{ $translatedOptionLabel }}</span>

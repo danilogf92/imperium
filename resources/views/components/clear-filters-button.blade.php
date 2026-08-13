@@ -13,7 +13,7 @@
     title="{{ $active ? __('Clear all filters') : __('No filters applied') }}"
     aria-label="{{ $active ? __('Clear all filters') : __('No filters applied') }}"
     {{ $attributes->class([
-        'inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold shadow-sm transition duration-150 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2',
+        'inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold shadow-sm transition duration-150 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:h-11 sm:w-auto sm:shrink-0 sm:rounded-lg',
         'cursor-pointer border-red-600 bg-red-500 text-white hover:-translate-y-px hover:bg-red-400 hover:shadow-md active:translate-y-0 active:bg-red-600' => $active,
         'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400 shadow-none' => ! $active,
     ]) }}>

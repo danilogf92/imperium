@@ -114,7 +114,7 @@
             </div>
 
             <div class="unified-table-scroll">
-                <table class="unified-data-table"
+                <table class="unified-data-table cursor-pointer"
                     style="min-width: max(100%, {{ max(count($visibleColumns), 1) * 145 }}px)">
                     <thead class="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-700">
                         <tr>

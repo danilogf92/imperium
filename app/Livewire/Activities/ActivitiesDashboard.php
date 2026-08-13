@@ -3,8 +3,8 @@
 namespace App\Livewire\Activities;
 
 use App\Enums\ProjectStateEnum;
-use App\Models\ProjectWeeklyActivity;
 use App\Models\ProjectMilestone;
+use App\Models\ProjectWeeklyActivity;
 use App\Services\Planification\PlanificationAccessService;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
@@ -198,8 +198,7 @@ class ActivitiesDashboard extends Component
 
         $weeks = collect(range(7, 0))->map(function (int $offset) use ($today, $activities): array {
             $date = $today->startOfWeek()->subWeeks($offset);
-            $items = $activities->filter(fn (ProjectWeeklyActivity $activity): bool =>
-                $activity->week_year === (int) $date->isoWeekYear
+            $items = $activities->filter(fn (ProjectWeeklyActivity $activity): bool => $activity->week_year === (int) $date->isoWeekYear
                 && $activity->week_number === (int) $date->isoWeek
             );
 
@@ -281,21 +280,36 @@ class ActivitiesDashboard extends Component
                 ],
                 'labels' => ['Completed', 'Overdue', 'Upcoming'],
                 'chart' => $base['chart'] + ['type' => 'donut'],
-                'colors' => ['#2563EB', '#EA580C', '#F59E0B'],
-                'stroke' => ['width' => 3, 'colors' => ['#FFFFFF']],
+                'colors' => ['#22C55E', '#EF4444', '#38BDF8'],
+                'stroke' => ['show' => true, 'width' => 3, 'colors' => ['#FFFFFF'], 'lineCap' => 'round'],
+                'fill' => ['type' => 'gradient', 'gradient' => ['shade' => 'light', 'shadeIntensity' => 0.18, 'opacityFrom' => 1, 'opacityTo' => 0.88, 'stops' => [0, 85, 100]]],
                 'dataLabels' => [
                     'enabled' => true,
                     'formatter' => 'function(value, options) { const count = options.w.config.series[options.seriesIndex] || 0; return count > 0 ? count : ""; }',
                     'style' => ['fontSize' => '13px', 'fontWeight' => 800, 'colors' => ['#FFFFFF']],
-                    'dropShadow' => ['enabled' => true, 'opacity' => 0.35, 'blur' => 2],
+                    'dropShadow' => ['enabled' => true, 'opacity' => 0.35, 'blur' => 3, 'left' => 0, 'top' => 1],
                 ],
-                'legend' => array_merge($base['legend'], ['position' => 'bottom', 'horizontalAlign' => 'center']),
-                'plotOptions' => ['pie' => ['expandOnClick' => false, 'donut' => ['size' => '68%', 'labels' => [
+                'tooltip' => ['theme' => 'light', 'fillSeriesColor' => false, 'y' => ['formatter' => 'function(value) { return value + (value === 1 ? " activity" : " activities"); }']],
+                'legend' => array_merge($base['legend'], [
+                    'position' => 'bottom',
+                    'horizontalAlign' => 'center',
+                    'formatter' => 'function(name, options) { return name + "  " + options.w.globals.series[options.seriesIndex]; }',
+                    'markers' => ['width' => 10, 'height' => 10, 'radius' => 10],
+                ]),
+                'plotOptions' => ['pie' => ['expandOnClick' => false, 'customScale' => 0.94, 'donut' => ['size' => '74%', 'labels' => [
                     'show' => true,
-                    'name' => ['show' => true, 'color' => '#64748B'],
-                    'value' => ['show' => true, 'fontSize' => '24px', 'fontWeight' => 700, 'color' => '#0F172A'],
-                    'total' => ['show' => true, 'label' => 'Activities', 'fontSize' => '12px', 'color' => '#64748B'],
+                    'name' => ['show' => true, 'offsetY' => 18, 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B'],
+                    'value' => ['show' => true, 'offsetY' => -14, 'fontSize' => '30px', 'fontWeight' => 800, 'color' => '#0F172A', 'formatter' => 'function(value) { return Math.round(value); }'],
+                    'total' => ['show' => true, 'showAlways' => true, 'label' => 'Total activities', 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B', 'formatter' => 'function(options) { return options.globals.seriesTotals.reduce((total, value) => total + value, 0); }'],
                 ]]]],
+                'responsive' => [[
+                    'breakpoint' => 640,
+                    'options' => [
+                        'plotOptions' => ['pie' => ['customScale' => 0.88, 'donut' => ['size' => '72%']]],
+                        'dataLabels' => ['style' => ['fontSize' => '11px']],
+                        'legend' => ['fontSize' => '11px', 'itemMargin' => ['horizontal' => 7, 'vertical' => 4]],
+                    ],
+                ]],
             ]),
             'riskProjectChart' => array_merge($base, [
                 'series' => [
@@ -353,21 +367,36 @@ class ActivitiesDashboard extends Component
                 ],
                 'labels' => ['Completed', 'Overdue', 'Upcoming'],
                 'chart' => $base['chart'] + ['type' => 'donut'],
-                'colors' => ['#2563EB', '#EA580C', '#F59E0B'],
-                'stroke' => ['width' => 3, 'colors' => ['#FFFFFF']],
+                'colors' => ['#22C55E', '#EF4444', '#38BDF8'],
+                'stroke' => ['show' => true, 'width' => 3, 'colors' => ['#FFFFFF'], 'lineCap' => 'round'],
+                'fill' => ['type' => 'gradient', 'gradient' => ['shade' => 'light', 'shadeIntensity' => 0.18, 'opacityFrom' => 1, 'opacityTo' => 0.88, 'stops' => [0, 85, 100]]],
                 'dataLabels' => [
                     'enabled' => true,
                     'formatter' => 'function(value, options) { const count = options.w.config.series[options.seriesIndex] || 0; return count > 0 ? count : ""; }',
                     'style' => ['fontSize' => '13px', 'fontWeight' => 800, 'colors' => ['#FFFFFF']],
-                    'dropShadow' => ['enabled' => true, 'opacity' => 0.35, 'blur' => 2],
+                    'dropShadow' => ['enabled' => true, 'opacity' => 0.35, 'blur' => 3, 'left' => 0, 'top' => 1],
                 ],
-                'legend' => array_merge($base['legend'], ['position' => 'bottom', 'horizontalAlign' => 'center']),
-                'plotOptions' => ['pie' => ['expandOnClick' => false, 'donut' => ['size' => '68%', 'labels' => [
+                'tooltip' => ['theme' => 'light', 'fillSeriesColor' => false, 'y' => ['formatter' => 'function(value) { return value + (value === 1 ? " milestone" : " milestones"); }']],
+                'legend' => array_merge($base['legend'], [
+                    'position' => 'bottom',
+                    'horizontalAlign' => 'center',
+                    'formatter' => 'function(name, options) { return name + "  " + options.w.globals.series[options.seriesIndex]; }',
+                    'markers' => ['width' => 10, 'height' => 10, 'radius' => 10],
+                ]),
+                'plotOptions' => ['pie' => ['expandOnClick' => false, 'customScale' => 0.94, 'donut' => ['size' => '74%', 'labels' => [
                     'show' => true,
-                    'name' => ['show' => true, 'color' => '#64748B'],
-                    'value' => ['show' => true, 'fontSize' => '24px', 'fontWeight' => 700, 'color' => '#0F172A'],
-                    'total' => ['show' => true, 'label' => 'Milestones', 'fontSize' => '12px', 'color' => '#64748B'],
+                    'name' => ['show' => true, 'offsetY' => 18, 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B'],
+                    'value' => ['show' => true, 'offsetY' => -14, 'fontSize' => '30px', 'fontWeight' => 800, 'color' => '#0F172A', 'formatter' => 'function(value) { return Math.round(value); }'],
+                    'total' => ['show' => true, 'showAlways' => true, 'label' => 'Total milestones', 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B', 'formatter' => 'function(options) { return options.globals.seriesTotals.reduce((total, value) => total + value, 0); }'],
                 ]]]],
+                'responsive' => [[
+                    'breakpoint' => 640,
+                    'options' => [
+                        'plotOptions' => ['pie' => ['customScale' => 0.88, 'donut' => ['size' => '72%']]],
+                        'dataLabels' => ['style' => ['fontSize' => '11px']],
+                        'legend' => ['fontSize' => '11px', 'itemMargin' => ['horizontal' => 7, 'vertical' => 4]],
+                    ],
+                ]],
             ]),
             'riskSummary' => [
                 'project' => $riskProjects->first()['name'] ?? null,

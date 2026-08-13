@@ -185,7 +185,7 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="unified-data-table">
+                <table class="unified-data-table cursor-pointer">
                     <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
                         <tr>
                             <th class="whitespace-nowrap px-4 py-3 text-left">Year</th>

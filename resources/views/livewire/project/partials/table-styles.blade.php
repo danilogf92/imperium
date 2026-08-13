@@ -7,7 +7,7 @@
                 }
 
                 .default-columns-button:hover {
-                    background-color: #64748b;
+                    background-color: #C78592;
                     transform: translateY(-1px);
                     box-shadow: 0 6px 14px rgba(15, 23, 42, 0.2);
                 }

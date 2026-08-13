@@ -7,7 +7,6 @@
                             <tr wire:key="project-row-{{ $project->id }}"
                                 @if (in_array((int) $project->company_id, $updateCompanyIds, true)) x-on:click="if (!$event.target.closest('a, button, input, select, textarea, [role=button]')) $dispatch('open-project-edit', { projectId: {{ $project->id }} })" @endif
                                 @class([
-                                    'border-b border-gray-200 bg-white transition hover:bg-gray-50',
                                     'cursor-pointer' => in_array(
                                         (int) $project->company_id,
                                         $updateCompanyIds,

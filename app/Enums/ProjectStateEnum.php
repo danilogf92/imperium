@@ -33,7 +33,7 @@ enum ProjectStateEnum: string
             self::Planning => '#FEF3C7',
             self::Execution => '#DBEAFE',
             self::Finished => '#D1FAE5',
-            self::Postponed => '#F3F4F6',
+            self::Postponed => '#A67165',
         };
     }
 
@@ -44,7 +44,7 @@ enum ProjectStateEnum: string
             self::Planning => '#92400E',
             self::Execution => '#1E40AF',
             self::Finished => '#065F46',
-            self::Postponed => '#374151',
+            self::Postponed => '#EDE9FE',
         };
     }
 }

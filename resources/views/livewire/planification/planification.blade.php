@@ -1,4 +1,5 @@
 <div class="dashboard-page-shell">
+    <x-unified-table-theme />
 
     {{-- ================================================================
         ENCABEZADO

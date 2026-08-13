@@ -1,4 +1,29 @@
-<div class="dashboard-page-shell">
+<div class="activities-dashboard dashboard-page-shell">
+    <style>
+        @media (max-width: 639px) {
+            .activities-dashboard .dashboard-page-content {
+                gap: 1rem;
+            }
+
+            .activities-dashboard .activities-chart-grid {
+                gap: 1rem;
+            }
+
+            .activities-dashboard .dashboard-chart-card { height: 27rem !important; }
+
+            .activities-dashboard .dashboard-chart-card.activities-risk-chart {
+                height: 31rem !important;
+            }
+
+            .activities-dashboard .dashboard-metrics-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .activities-dashboard .dashboard-metrics-grid article {
+                min-height: 7rem;
+            }
+        }
+    </style>
     <div class="dashboard-page-content space-y-6">
         <header class="module-accent-line dashboard-panel relative overflow-hidden">
             <div class="flex flex-col gap-5 bg-white px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
@@ -40,7 +65,7 @@
         </header>
 
         <section class="dashboard-metrics-grid">
-            @foreach ([['label' => 'Total activities', 'value' => $metrics['total'], 'accent' => 'border-sky-200', 'icon' => 'bg-sky-100 text-sky-700'], ['label' => 'Completed', 'value' => $metrics['completed'], 'accent' => 'border-sky-200', 'icon' => 'bg-sky-100 text-sky-700'], ['label' => 'Overdue', 'value' => $metrics['overdue'], 'accent' => 'border-orange-200', 'icon' => 'bg-orange-100 text-orange-700'], ['label' => 'Upcoming', 'value' => $metrics['pending'], 'accent' => 'border-orange-200', 'icon' => 'bg-orange-100 text-orange-700'], ['label' => 'Completion', 'value' => $metrics['completion'] . '%', 'accent' => 'border-sky-200', 'icon' => 'bg-sky-600 text-white']] as $metric)
+            @foreach ([['label' => 'Total activities', 'value' => $metrics['total'], 'accent' => 'border-blue-200', 'icon' => 'bg-blue-100 text-blue-700', 'path' => 'M9 5h6M9 9h6m-6 4h4m-7 8h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z'], ['label' => 'Completed', 'value' => $metrics['completed'], 'accent' => 'border-emerald-200', 'icon' => 'bg-emerald-100 text-emerald-700', 'path' => 'm5 12 4 4L19 6'], ['label' => 'Overdue', 'value' => $metrics['overdue'], 'accent' => 'border-red-200', 'icon' => 'bg-red-100 text-red-700', 'path' => 'M12 8v5m0 3h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.75 3h15.7a2 2 0 0 0 1.75-3L13.7 3.9a2 2 0 0 0-3.4 0Z'], ['label' => 'Upcoming', 'value' => $metrics['pending'], 'accent' => 'border-cyan-200', 'icon' => 'bg-cyan-100 text-cyan-700', 'path' => 'M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'], ['label' => 'Completion', 'value' => $metrics['completion'] . '%', 'accent' => 'border-violet-200', 'icon' => 'bg-violet-100 text-violet-700', 'path' => 'M4 19V9m6 10V5m6 14v-7m4 7H2']] as $metric)
                 <article class="rounded-xl border {{ $metric['accent'] }} bg-white p-4 shadow-sm">
                     <div class="flex items-start justify-between gap-3">
                         <div>
@@ -48,18 +73,26 @@
                             </p>
                             <p class="mt-2 text-3xl font-black text-sky-950">{{ $metric['value'] }}</p>
                         </div>
-                        <span class="flex h-9 w-9 items-center justify-center rounded-lg {{ $metric['icon'] }}"><span
-                                class="h-2.5 w-2.5 rounded-full bg-current"></span></span>
+                        <span class="flex h-10 w-10 items-center justify-center rounded-lg {{ $metric['icon'] }}">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $metric['path'] }}" />
+                            </svg>
+                        </span>
                     </div>
                 </article>
             @endforeach
         </section>
 
         <section class="dashboard-metrics-grid">
-            @foreach ([['label' => 'Total milestones', 'value' => $milestoneMetrics['total'], 'color' => 'text-sky-900'], ['label' => 'Completed milestones', 'value' => $milestoneMetrics['completed'], 'color' => 'text-sky-700'], ['label' => 'Overdue milestones', 'value' => $milestoneMetrics['overdue'], 'color' => 'text-orange-700'], ['label' => 'Upcoming milestones', 'value' => $milestoneMetrics['pending'], 'color' => 'text-orange-600'], ['label' => 'Milestone completion', 'value' => $milestoneMetrics['completion'] . '%', 'color' => 'text-blue-700']] as $metric)
+            @foreach ([['label' => 'Total milestones', 'value' => $milestoneMetrics['total'], 'color' => 'text-blue-800', 'icon' => 'bg-blue-100 text-blue-700'], ['label' => 'Completed milestones', 'value' => $milestoneMetrics['completed'], 'color' => 'text-emerald-700', 'icon' => 'bg-emerald-100 text-emerald-700'], ['label' => 'Overdue milestones', 'value' => $milestoneMetrics['overdue'], 'color' => 'text-red-700', 'icon' => 'bg-red-100 text-red-700'], ['label' => 'Upcoming milestones', 'value' => $milestoneMetrics['pending'], 'color' => 'text-cyan-700', 'icon' => 'bg-cyan-100 text-cyan-700'], ['label' => 'Milestone completion', 'value' => $milestoneMetrics['completion'] . '%', 'color' => 'text-violet-700', 'icon' => 'bg-violet-100 text-violet-700']] as $metric)
                 <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500">{{ $metric['label'] }}</p>
-                    <p class="mt-2 text-3xl font-black {{ $metric['color'] }}">{{ $metric['value'] }}</p>
+                    <div class="flex items-start justify-between gap-3">
+                        <div><p class="text-xs font-bold uppercase tracking-wide text-slate-500">{{ $metric['label'] }}</p>
+                            <p class="mt-2 text-3xl font-black {{ $metric['color'] }}">{{ $metric['value'] }}</p></div>
+                        <span class="flex h-10 w-10 items-center justify-center rounded-lg {{ $metric['icon'] }}">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3 4 7v6c0 4.5 3.2 7.4 8 8 4.8-.6 8-3.5 8-8V7l-8-4Zm-3 9 2 2 4-4" /></svg>
+                        </span>
+                    </div>
                 </article>
             @endforeach
         </section>
@@ -90,8 +123,8 @@
                 </div>
             </section>
 
-            <section class="grid gap-5 xl:grid-cols-2">
-                <x-dashboard-chart-card title="Activity health" filename="activity-health"
+            <section class="activities-chart-grid grid gap-5 xl:grid-cols-2">
+                <x-dashboard-chart-card class="activities-health-chart" title="Activity health" filename="activity-health"
                     subtitle="Completed, overdue and upcoming activities"
                     height="27rem">
                     <x-dashboard-apex-chart :options="$statusChart"
@@ -100,7 +133,7 @@
                         time.</x-slot>
                 </x-dashboard-chart-card>
 
-                <x-dashboard-chart-card title="Milestone health" filename="milestone-health"
+                <x-dashboard-chart-card class="activities-health-chart" title="Milestone health" filename="milestone-health"
                     subtitle="Completed, overdue and upcoming milestones" height="27rem">
                     <x-dashboard-apex-chart :options="$milestoneStatusChart"
                         chart-key="milestones-status-{{ md5(json_encode($milestoneStatusChart)) }}" />
@@ -108,7 +141,7 @@
                         before routine activities.</x-slot>
                 </x-dashboard-chart-card>
 
-                <x-dashboard-chart-card class="xl:col-span-2" title="Projects requiring corrective action"
+                <x-dashboard-chart-card class="activities-risk-chart xl:col-span-2" title="Projects requiring corrective action"
                     filename="overdue-commitments-by-project"
                     subtitle="Combined overdue activities and milestones, ranked by operational exposure"
                     height="32rem">
