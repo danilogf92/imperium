@@ -296,16 +296,16 @@ class ActivitiesDashboard extends Component
                     'formatter' => 'function(name, options) { return name + "  " + options.w.globals.series[options.seriesIndex]; }',
                     'markers' => ['width' => 10, 'height' => 10, 'radius' => 10],
                 ]),
-                'plotOptions' => ['pie' => ['expandOnClick' => false, 'customScale' => 0.94, 'donut' => ['size' => '74%', 'labels' => [
+                'plotOptions' => ['pie' => ['expandOnClick' => false, 'customScale' => 0.9, 'donut' => ['size' => '58%', 'labels' => [
                     'show' => true,
-                    'name' => ['show' => true, 'offsetY' => 18, 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B'],
-                    'value' => ['show' => true, 'offsetY' => -14, 'fontSize' => '30px', 'fontWeight' => 800, 'color' => '#0F172A', 'formatter' => 'function(value) { return Math.round(value); }'],
+                    'name' => ['show' => true, 'offsetY' => -8, 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B'],
+                    'value' => ['show' => true, 'offsetY' => 8, 'fontSize' => '28px', 'fontWeight' => 800, 'color' => '#0F172A', 'formatter' => 'function(value) { return Math.round(value); }'],
                     'total' => ['show' => true, 'showAlways' => true, 'label' => 'Total activities', 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B', 'formatter' => 'function(options) { return options.globals.seriesTotals.reduce((total, value) => total + value, 0); }'],
                 ]]]],
                 'responsive' => [[
                     'breakpoint' => 640,
                     'options' => [
-                        'plotOptions' => ['pie' => ['customScale' => 0.88, 'donut' => ['size' => '72%']]],
+                        'plotOptions' => ['pie' => ['customScale' => 0.84, 'donut' => ['size' => '56%']]],
                         'dataLabels' => ['style' => ['fontSize' => '11px']],
                         'legend' => ['fontSize' => '11px', 'itemMargin' => ['horizontal' => 7, 'vertical' => 4]],
                     ],
@@ -383,16 +383,16 @@ class ActivitiesDashboard extends Component
                     'formatter' => 'function(name, options) { return name + "  " + options.w.globals.series[options.seriesIndex]; }',
                     'markers' => ['width' => 10, 'height' => 10, 'radius' => 10],
                 ]),
-                'plotOptions' => ['pie' => ['expandOnClick' => false, 'customScale' => 0.94, 'donut' => ['size' => '74%', 'labels' => [
+                'plotOptions' => ['pie' => ['expandOnClick' => false, 'customScale' => 0.9, 'donut' => ['size' => '58%', 'labels' => [
                     'show' => true,
-                    'name' => ['show' => true, 'offsetY' => 18, 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B'],
-                    'value' => ['show' => true, 'offsetY' => -14, 'fontSize' => '30px', 'fontWeight' => 800, 'color' => '#0F172A', 'formatter' => 'function(value) { return Math.round(value); }'],
+                    'name' => ['show' => true, 'offsetY' => -8, 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B'],
+                    'value' => ['show' => true, 'offsetY' => 8, 'fontSize' => '28px', 'fontWeight' => 800, 'color' => '#0F172A', 'formatter' => 'function(value) { return Math.round(value); }'],
                     'total' => ['show' => true, 'showAlways' => true, 'label' => 'Total milestones', 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B', 'formatter' => 'function(options) { return options.globals.seriesTotals.reduce((total, value) => total + value, 0); }'],
                 ]]]],
                 'responsive' => [[
                     'breakpoint' => 640,
                     'options' => [
-                        'plotOptions' => ['pie' => ['customScale' => 0.88, 'donut' => ['size' => '72%']]],
+                        'plotOptions' => ['pie' => ['customScale' => 0.84, 'donut' => ['size' => '56%']]],
                         'dataLabels' => ['style' => ['fontSize' => '11px']],
                         'legend' => ['fontSize' => '11px', 'itemMargin' => ['horizontal' => 7, 'vertical' => 4]],
                     ],

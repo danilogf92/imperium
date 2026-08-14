@@ -2,11 +2,11 @@
     <style>
         :root {
             /*
-                 |--------------------------------------------------------------------------
-                 | Unified table theme
-                 |--------------------------------------------------------------------------
-                 | Cambia los colores globales de las tablas únicamente aquí.
-                 */
+                                                                         |--------------------------------------------------------------------------
+                                                                         | Unified table theme
+                                                                         |--------------------------------------------------------------------------
+                                                                         | Cambia los colores globales de las tablas únicamente aquí.
+                                                                         */
             --unified-table-row-bg: #ffffff;
             --unified-table-row-even-bg: #f1f5f9;
             --unified-table-row-hover: #dbeafe;
@@ -130,12 +130,12 @@
         }
 
         /*
-             |--------------------------------------------------------------------------
-             | Sticky cells
-             |--------------------------------------------------------------------------
-             | Las celdas sticky necesitan su propio background porque, por estar
-             | posicionadas, pueden ocultar el background aplicado directamente al <tr>.
-             */
+                                                                     |--------------------------------------------------------------------------
+                                                                     | Sticky cells
+                                                                     |--------------------------------------------------------------------------
+                                                                     | Las celdas sticky necesitan su propio background porque, por estar
+                                                                     | posicionadas, pueden ocultar el background aplicado directamente al <tr>.
+                                                                     */
         .unified-data-table tbody tr .planification-sticky-cell {
             background-color: var(--unified-table-row-bg);
             transition: background-color 140ms ease;

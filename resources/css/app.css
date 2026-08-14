@@ -217,7 +217,8 @@
     .unified-data-table thead th,
     .unified-data-table tbody td,
     .unified-data-table tbody th {
-        padding: 0.55rem 0.65rem;
+        padding-block: 0.55rem;
+        padding-inline: 0;
     }
 
     .unified-table-pagination {

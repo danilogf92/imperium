@@ -38,7 +38,6 @@
                 .project-table>thead>tr>th {
                     min-width: 0;
                     overflow: hidden;
-                    padding: 0.3rem 0.3rem !important;
                     text-overflow: ellipsis;
                     font-size: 0.68rem !important;
                     line-height: 0.95rem !important;
@@ -48,7 +47,6 @@
                 .project-table>tbody>tr:not(.project-empty-row)>td {
                     min-width: 0;
                     overflow: hidden;
-                    padding: 0.25rem 0.3rem !important;
                     text-overflow: ellipsis;
                     font-size: 0.75rem !important;
                     line-height: 1rem !important;

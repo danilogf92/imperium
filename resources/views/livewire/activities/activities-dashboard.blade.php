@@ -127,16 +127,30 @@
                 <x-dashboard-chart-card class="activities-health-chart" title="Activity health" filename="activity-health"
                     subtitle="Completed, overdue and upcoming activities"
                     height="27rem">
-                    <x-dashboard-apex-chart :options="$statusChart"
-                        chart-key="activities-status-{{ md5(json_encode($statusChart)) }}" />
-                    <x-slot name="footer">A growing orange segment signals that planned work is not being closed on
+                    @if (array_sum($statusChart['series']) > 0)
+                        <x-dashboard-apex-chart :options="$statusChart"
+                            chart-key="activities-status-{{ md5(json_encode($statusChart)) }}" />
+                    @else
+                        <div class="flex h-full flex-col items-center justify-center gap-2 text-center text-slate-500">
+                            <span class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-xl">0</span>
+                            <p class="text-sm font-semibold">No activities available</p>
+                        </div>
+                    @endif
+                    <x-slot name="footer">A growing red segment signals that planned work is not being closed on
                         time.</x-slot>
                 </x-dashboard-chart-card>
 
                 <x-dashboard-chart-card class="activities-health-chart" title="Milestone health" filename="milestone-health"
                     subtitle="Completed, overdue and upcoming milestones" height="27rem">
-                    <x-dashboard-apex-chart :options="$milestoneStatusChart"
-                        chart-key="milestones-status-{{ md5(json_encode($milestoneStatusChart)) }}" />
+                    @if (array_sum($milestoneStatusChart['series']) > 0)
+                        <x-dashboard-apex-chart :options="$milestoneStatusChart"
+                            chart-key="milestones-status-{{ md5(json_encode($milestoneStatusChart)) }}" />
+                    @else
+                        <div class="flex h-full flex-col items-center justify-center gap-2 text-center text-slate-500">
+                            <span class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-xl">0</span>
+                            <p class="text-sm font-semibold">No milestones available</p>
+                        </div>
+                    @endif
                     <x-slot name="footer">Overdue milestones can affect the project sequence and should be reviewed
                         before routine activities.</x-slot>
                 </x-dashboard-chart-card>
