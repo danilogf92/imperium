@@ -11,7 +11,8 @@
         : null;
 @endphp
 
-<div x-data="{ open: false, search: '' }" x-on:scroll.window="open = false; search = ''"
+<div wire:key="dashboard-filter-{{ $model }}-{{ md5(json_encode($selectedValues)) }}"
+    x-data="{ open: false, search: '' }" x-on:scroll.window="open = false; search = ''"
     class="w-full sm:w-auto sm:shrink-0">
     <button x-ref="trigger" type="button"
         @click="open = !open; if (open) { $nextTick(() => { const rect = $refs.trigger.getBoundingClientRect(); const width = Math.min(288, window.innerWidth - 16); $refs.menu.style.width = `${width}px`; $refs.menu.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - width - 8))}px`; $refs.menu.style.top = `${rect.bottom + 8}px`; }); }"
@@ -37,7 +38,8 @@
     </button>
 
     <template x-teleport="body">
-        <div x-ref="menu" x-show="open" x-cloak @click.outside="open = false; search = ''"
+        <div x-ref="menu" x-show="open" x-cloak data-dashboard-filter-menu
+            @click.outside="open = false; search = ''"
             class="fixed z-[200] max-h-[70vh] max-w-[calc(100vw-1rem)] overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-2xl sm:max-h-80 sm:shadow-xl">
             <p class="px-2 pb-2 pt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __($label) }}
             </p>
@@ -66,12 +68,12 @@
                             <input wire:model.live="{{ $model }}"
                                 @if ($globalLoading) data-global-loading @else data-no-global-loading @endif
                                 @if ($closeOnSelect) @change="open = false; search = ''" @endif
-                                type="checkbox" value="{{ $value }}"
+                                type="checkbox" value="{{ $value }}" autocomplete="off"
                                 class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
                         @else
                             <input wire:model.live="{{ $model }}"
                                 @if ($globalLoading) data-global-loading @else data-no-global-loading @endif
-                                type="radio" value="{{ $value }}"
+                                type="radio" value="{{ $value }}" autocomplete="off"
                                 @change="open = false; search = ''"
                                 class="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500">
                         @endif
