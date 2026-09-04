@@ -205,6 +205,7 @@ final class PlanificationQueryService
             ->withSum('data as data_budgeted_euros', 'global_price_euros'))
             ->get([
                 'id',
+                'company_id',
                 'name',
                 'forecast_start_date',
             ]);

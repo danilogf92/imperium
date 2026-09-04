@@ -2,6 +2,7 @@
 
 namespace App\Services\Planification;
 
+use App\Enums\ProjectPermissionEnum;
 use App\Models\Milestone;
 use App\Models\Project;
 use App\Models\ProjectMilestone;
@@ -19,7 +20,7 @@ final class PlanificationMilestoneService
     public function prepareCreateAt(int $projectId, int $year, int $month): array
     {
         $project = $this->access
-            ->authorizedProjects()
+            ->authorizedProjects(ProjectPermissionEnum::Update)
             ->findOrFail($projectId);
 
         $this->ensureProjectIsOpen($project);
@@ -49,7 +50,7 @@ final class PlanificationMilestoneService
     public function editData(int $projectMilestoneId): array
     {
         $item = $this->access
-            ->authorizedProjectMilestone($projectMilestoneId);
+            ->authorizedProjectMilestone($projectMilestoneId, ProjectPermissionEnum::Update);
 
         return [
             'editingId' => $item->id,
@@ -65,7 +66,7 @@ final class PlanificationMilestoneService
     public function deletePreview(int $projectMilestoneId): array
     {
         $item = $this->access
-            ->authorizedProjectMilestone($projectMilestoneId);
+            ->authorizedProjectMilestone($projectMilestoneId, ProjectPermissionEnum::Delete);
 
         return [
             'id' => $item->id,
@@ -76,7 +77,7 @@ final class PlanificationMilestoneService
     public function save(array $validated, ?int $editingId): ProjectMilestone
     {
         $project = $this->access
-            ->authorizedProjects()
+            ->authorizedProjects(ProjectPermissionEnum::Update)
             ->find($validated['projectId']);
 
         if (! $project) {
@@ -113,7 +114,7 @@ final class PlanificationMilestoneService
 
         return DB::transaction(function () use ($project, $validated, $editingId): ProjectMilestone {
             $item = $editingId
-                ? $this->access->authorizedProjectMilestone($editingId)
+                ? $this->access->authorizedProjectMilestone($editingId, ProjectPermissionEnum::Update)
                 : new ProjectMilestone(['project_id' => $project->id]);
 
             $item->fill([
@@ -145,7 +146,7 @@ final class PlanificationMilestoneService
     {
         DB::transaction(function () use ($projectMilestoneId): void {
             $item = $this->access
-                ->authorizedProjectMilestone($projectMilestoneId);
+                ->authorizedProjectMilestone($projectMilestoneId, ProjectPermissionEnum::Delete);
 
             $projectId = $item->project_id;
 

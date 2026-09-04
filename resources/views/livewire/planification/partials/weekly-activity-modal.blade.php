@@ -24,30 +24,34 @@
                 @foreach ($weekActivities as $activity)
                     <div wire:key="weekly-activity-{{ $activity['id'] }}"
                         class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-                        <button type="button"
-                            wire:click="toggleWeeklyActivityExecuted({{ $activity['id'] }})"
+                        <button type="button" @if ($canEditActivity) wire:click="toggleWeeklyActivityExecuted({{ $activity['id'] }})" @else disabled @endif
                             data-no-global-loading
-                            title="{{ $activity['executed'] ? 'Executed — click to change' : 'Not executed — click to mark as executed' }}"
+                            title="{{ $canEditActivity ? ($activity['executed'] ? 'Executed — click to change' : 'Not executed — click to mark as executed') : ($activity['executed'] ? 'Executed' : 'Not executed') }}"
                             class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-base font-bold
-                                cursor-pointer {{ $activity['executed'] ? 'border-green-600 bg-green-600 text-white' : ($activityWeekClosed ? 'border-red-600 bg-red-600 text-white hover:bg-red-500' : 'border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-100') }}">
+                                {{ $canEditActivity ? 'cursor-pointer' : 'cursor-default' }} {{ $activity['executed'] ? 'border-green-600 bg-green-600 text-white' : ($activityWeekClosed ? 'border-red-600 bg-red-600 text-white hover:bg-red-500' : 'border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-100') }}">
                             {{ $activity['executed'] ? '✓' : ($activityWeekClosed ? '×' : '○') }}
                         </button>
                         <p class="min-w-0 flex-1 whitespace-pre-line text-sm text-slate-700">{{ $activity['activity'] }}</p>
-                        <button type="button" wire:click="editWeeklyActivity({{ $activity['id'] }})"
+                        @if ($canEditActivity)
+                            <button type="button" wire:click="editWeeklyActivity({{ $activity['id'] }})"
                             data-no-global-loading title="Edit activity"
                             class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-500">
                             ✎
-                        </button>
-                        <button type="button" wire:click="requestDeleteWeeklyActivity({{ $activity['id'] }})"
+                            </button>
+                        @endif
+                        @if ($canDeleteActivity)
+                            <button type="button" wire:click="requestDeleteWeeklyActivity({{ $activity['id'] }})"
                             data-no-global-loading title="Delete activity"
                             class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-red-600 text-white hover:bg-red-500">
                             ×
-                        </button>
+                            </button>
+                        @endif
                     </div>
                 @endforeach
             </div>
         @endif
 
+        @if ($canEditActivity)
         <label class="block">
             <span class="mb-2 block text-sm font-semibold text-slate-700">
                 {{ $activityEditingId ? 'Edit activity' : 'Add another activity' }}
@@ -63,6 +67,7 @@
                 <p class="mt-2 text-sm font-medium text-red-600">{{ $message }}</p>
             @enderror
         </label>
+        @endif
 
     </x-slot>
 
@@ -72,12 +77,14 @@
                 class="inline-flex h-10 cursor-pointer items-center rounded-lg bg-red-500 px-4 text-sm font-semibold text-white hover:bg-red-600">
                 Cancel
             </button>
+            @if ($canEditActivity)
             <button type="button" wire:click="saveWeeklyActivity" data-no-global-loading
                 wire:loading.attr="disabled" wire:target="saveWeeklyActivity"
                 class="inline-flex h-10 cursor-pointer items-center rounded-lg bg-cyan-600 px-4 text-sm font-semibold text-white hover:bg-cyan-700 disabled:cursor-wait disabled:opacity-60">
                 <span wire:loading.remove wire:target="saveWeeklyActivity">{{ $activityEditingId ? 'Update activity' : 'Add activity' }}</span>
                 <span wire:loading wire:target="saveWeeklyActivity">Saving...</span>
             </button>
+            @endif
         </div>
     </x-slot>
 </x-dialog-modal>

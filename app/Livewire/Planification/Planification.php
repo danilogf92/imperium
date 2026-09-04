@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Planification;
 
+use App\Enums\ProjectPermissionEnum;
 use App\Services\Planification\PlanificationAccessService;
 use App\Services\Planification\PlanificationMilestoneService;
 use App\Services\Planification\PlanificationQueryService;
@@ -67,6 +68,8 @@ class Planification extends Component
     public string $pendingActivityDeleteLabel = '';
     public string $milestoneExecutionFilter = '';
     public string $activityExecutionFilter = '';
+    public bool $canEditActivity = false;
+    public bool $canDeleteActivity = false;
 
     public function updatedProjectId(PlanificationAccessService $access): void
     {
@@ -186,8 +189,9 @@ class Planification extends Component
         $this->resetPage();
     }
 
-    public function openCreate(): void
+    public function openCreate(PlanificationAccessService $access): void
     {
+        abort_unless($access->can(ProjectPermissionEnum::Update), 403);
         $this->resetValidation();
 
         $this->reset([
@@ -292,6 +296,8 @@ class Planification extends Component
         $this->activityWeekNumber = (int) $date->isoWeek;
         $this->weeklyActivity = '';
         $this->activityEditingId = null;
+        $this->canEditActivity = $access->canForProject(ProjectPermissionEnum::Update, $project->id);
+        $this->canDeleteActivity = $access->canForProject(ProjectPermissionEnum::Delete, $project->id);
         $this->loadWeekActivities();
         $this->resetValidation('weeklyActivity');
         $this->showActivityModal = true;
@@ -305,12 +311,15 @@ class Planification extends Component
             'activityProjectId', 'weeklyActivity', 'activityEditingId', 'weekActivities',
             'pendingActivityDeleteId', 'pendingActivityDeleteLabel',
         ]);
+        $this->canEditActivity = false;
+        $this->canDeleteActivity = false;
         $this->resetValidation('weeklyActivity');
         $this->dispatch('close-modal', 'weekly-project-activity');
     }
 
     public function saveWeeklyActivity(PlanificationAccessService $access): void
     {
+        abort_unless($access->canForProject(ProjectPermissionEnum::Update, (int) $this->activityProjectId), 403);
         $validated = $this->validate(['weeklyActivity' => ['required', 'string', 'max:5000']]);
         $project = $access->authorizedProjects()->findOrFail($this->activityProjectId);
         $activity = $this->activityEditingId
@@ -326,8 +335,9 @@ class Planification extends Component
         $this->loadWeekActivities();
     }
 
-    public function editWeeklyActivity(int $activityId): void
+    public function editWeeklyActivity(int $activityId, PlanificationAccessService $access): void
     {
+        abort_unless($access->canForProject(ProjectPermissionEnum::Update, (int) $this->activityProjectId), 403);
         $activity = ProjectWeeklyActivity::query()->whereKey($activityId)
             ->where('project_id', $this->activityProjectId)->firstOrFail();
         $this->activityEditingId = $activity->id;
@@ -335,8 +345,9 @@ class Planification extends Component
         $this->resetValidation('weeklyActivity');
     }
 
-    public function requestDeleteWeeklyActivity(int $activityId): void
+    public function requestDeleteWeeklyActivity(int $activityId, PlanificationAccessService $access): void
     {
+        abort_unless($access->canForProject(ProjectPermissionEnum::Delete, (int) $this->activityProjectId), 403);
         $activity = ProjectWeeklyActivity::query()->whereKey($activityId)
             ->where('project_id', $this->activityProjectId)->firstOrFail();
         $this->pendingActivityDeleteId = $activity->id;
@@ -348,9 +359,10 @@ class Planification extends Component
         $this->reset(['pendingActivityDeleteId', 'pendingActivityDeleteLabel']);
     }
 
-    public function confirmDeleteWeeklyActivity(): void
+    public function confirmDeleteWeeklyActivity(PlanificationAccessService $access): void
     {
         abort_unless($this->pendingActivityDeleteId, 404);
+        abort_unless($access->canForProject(ProjectPermissionEnum::Delete, (int) $this->activityProjectId), 403);
         $activityId = $this->pendingActivityDeleteId;
         ProjectWeeklyActivity::query()->whereKey($activityId)
             ->where('project_id', $this->activityProjectId)->firstOrFail()->delete();
@@ -361,7 +373,7 @@ class Planification extends Component
         $this->loadWeekActivities();
     }
 
-    public function render(PlanificationQueryService $queries): View
+    public function render(PlanificationQueryService $queries, PlanificationAccessService $access): View
     {
         $data = $queries->viewData([
             'search' => $this->search,
@@ -378,6 +390,9 @@ class Planification extends Component
         return view('livewire.planification.planification', [
             ...$data,
             'fixedColumnOptions' => self::COLUMN_OPTIONS,
+            'canUpdatePlanification' => $access->can(ProjectPermissionEnum::Update),
+            'editableCompanyIds' => $access->allowedCompanyIds(ProjectPermissionEnum::Update)->pluck('companies.id')->all(),
+            'deletableCompanyIds' => $access->allowedCompanyIds(ProjectPermissionEnum::Delete)->pluck('companies.id')->all(),
         ])->layout('layouts.app');
     }
 
@@ -388,7 +403,10 @@ class Planification extends Component
     {
         $activity = ProjectWeeklyActivity::query()->whereKey($activityId)
             ->where('project_id', $this->activityProjectId)
-            ->whereHas('project', fn ($query) => $query->whereIn('company_id', $access->allowedCompanyIds()))
+            ->whereHas('project', fn ($query) => $query->whereIn(
+                'company_id',
+                $access->allowedCompanyIds(ProjectPermissionEnum::Update)
+            ))
             ->firstOrFail();
         $activity->update(['executed_at' => $activity->executed_at ? null : now()]);
         $this->loadWeekActivities();

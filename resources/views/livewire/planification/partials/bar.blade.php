@@ -91,7 +91,9 @@
             {{ __('Add milestone') }}
         </button> --}}
 
-        <x-ui-button :text="__('Add milestone')" icon="plus" color="#EBB352" hover-opacity="0.80" text-color="#FFFFFF"
-            wire:click="openCreate" data-no-global-loading />
+        @if ($canUpdatePlanification)
+            <x-ui-button :text="__('Add milestone')" icon="plus" color="#EBB352" hover-opacity="0.80" text-color="#FFFFFF"
+                wire:click="openCreate" data-no-global-loading />
+        @endif
     </div>
 </div>

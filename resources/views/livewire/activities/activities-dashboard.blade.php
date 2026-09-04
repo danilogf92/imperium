@@ -9,7 +9,9 @@
                 gap: 1rem;
             }
 
-            .activities-dashboard .dashboard-chart-card { height: 27rem !important; }
+            .activities-dashboard .dashboard-chart-card {
+                height: 27rem !important;
+            }
 
             .activities-dashboard .dashboard-chart-card.activities-risk-chart {
                 height: 31rem !important;
@@ -36,9 +38,10 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">Planification control
+                        <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-600">Planification control
                             center</p>
-                        <h1 class="text-2xl font-bold text-sky-950">Activities & milestones dashboard</h1>
+                        {{-- <h1 class="text-2xl font-bold text-sky-950">Activities & milestones dashboard</h1> --}}
+                        <h1 class="text-2xl font-bold text-blue-600">Activities & milestones dashboard</h1>
                         <p class="mt-1 text-sm text-slate-600">Identify delayed commitments and projects that require
                             corrective action.</p>
                     </div>
@@ -65,16 +68,23 @@
         </header>
 
         <section class="dashboard-metrics-grid">
-            @foreach ([['label' => 'Total activities', 'value' => $metrics['total'], 'accent' => 'border-blue-200', 'icon' => 'bg-blue-100 text-blue-700', 'path' => 'M9 5h6M9 9h6m-6 4h4m-7 8h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z'], ['label' => 'Completed', 'value' => $metrics['completed'], 'accent' => 'border-emerald-200', 'icon' => 'bg-emerald-100 text-emerald-700', 'path' => 'm5 12 4 4L19 6'], ['label' => 'Overdue', 'value' => $metrics['overdue'], 'accent' => 'border-red-200', 'icon' => 'bg-red-100 text-red-700', 'path' => 'M12 8v5m0 3h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.75 3h15.7a2 2 0 0 0 1.75-3L13.7 3.9a2 2 0 0 0-3.4 0Z'], ['label' => 'Upcoming', 'value' => $metrics['pending'], 'accent' => 'border-cyan-200', 'icon' => 'bg-cyan-100 text-cyan-700', 'path' => 'M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'], ['label' => 'Completion', 'value' => $metrics['completion'] . '%', 'accent' => 'border-violet-200', 'icon' => 'bg-violet-100 text-violet-700', 'path' => 'M4 19V9m6 10V5m6 14v-7m4 7H2']] as $metric)
-                <article class="rounded-xl border {{ $metric['accent'] }} bg-white p-4 shadow-sm">
+            @foreach ([
+        ['label' => 'Total activities', 'value' => $metrics['total'], 'accent' => 'border-blue-200', 'icon' => 'bg-blue-100 text-blue-700', 'path' => 'M9 5h6M9 9h6m-6 4h4m-7 8h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z'],
+        ['label' => 'Completed', 'value' => $metrics['completed'], 'accent' => 'border-emerald-200', 'icon' => 'bg-emerald-100 text-emerald-700', 'path' => 'm5 12 4 4L19 6'],
+        ['label' => 'Overdue', 'value' => $metrics['overdue'], 'accent' => 'border-red-200', 'icon' => 'bg-red-100 text-red-700', 'path' => 'M12 8v5m0 3h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.75 3h15.7a2 2 0 0 0 1.75-3L13.7 3.9a2 2 0 0 0-3.4 0Z'],
+        ['label' => 'On time', 'value' => $metrics['pending'], 'accent' => 'border-cyan-200', 'icon' => 'bg-cyan-100 text-cyan-700', 'path' => 'M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
+        ['label' => 'Completion', 'value' => $metrics['completion'] . '%', 'accent' => 'border-violet-200', 'icon' => 'bg-violet-100 text-violet-700', 'path' => 'M4 19V9m6 10V5m6 14v-7m4 7H2'],
+    ] as $metric)
+                <article class="{{ $metric['accent'] }} rounded-xl border bg-white p-4 shadow-sm">
                     <div class="flex items-start justify-between gap-3">
                         <div>
                             <p class="text-xs font-bold uppercase tracking-wide text-slate-500">{{ $metric['label'] }}
                             </p>
                             <p class="mt-2 text-3xl font-black text-sky-950">{{ $metric['value'] }}</p>
                         </div>
-                        <span class="flex h-10 w-10 items-center justify-center rounded-lg {{ $metric['icon'] }}">
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <span class="{{ $metric['icon'] }} flex h-10 w-10 items-center justify-center rounded-lg">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="{{ $metric['path'] }}" />
                             </svg>
                         </span>
@@ -87,10 +97,17 @@
             @foreach ([['label' => 'Total milestones', 'value' => $milestoneMetrics['total'], 'color' => 'text-blue-800', 'icon' => 'bg-blue-100 text-blue-700'], ['label' => 'Completed milestones', 'value' => $milestoneMetrics['completed'], 'color' => 'text-emerald-700', 'icon' => 'bg-emerald-100 text-emerald-700'], ['label' => 'Overdue milestones', 'value' => $milestoneMetrics['overdue'], 'color' => 'text-red-700', 'icon' => 'bg-red-100 text-red-700'], ['label' => 'Upcoming milestones', 'value' => $milestoneMetrics['pending'], 'color' => 'text-cyan-700', 'icon' => 'bg-cyan-100 text-cyan-700'], ['label' => 'Milestone completion', 'value' => $milestoneMetrics['completion'] . '%', 'color' => 'text-violet-700', 'icon' => 'bg-violet-100 text-violet-700']] as $metric)
                 <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                     <div class="flex items-start justify-between gap-3">
-                        <div><p class="text-xs font-bold uppercase tracking-wide text-slate-500">{{ $metric['label'] }}</p>
-                            <p class="mt-2 text-3xl font-black {{ $metric['color'] }}">{{ $metric['value'] }}</p></div>
-                        <span class="flex h-10 w-10 items-center justify-center rounded-lg {{ $metric['icon'] }}">
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3 4 7v6c0 4.5 3.2 7.4 8 8 4.8-.6 8-3.5 8-8V7l-8-4Zm-3 9 2 2 4-4" /></svg>
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">{{ $metric['label'] }}
+                            </p>
+                            <p class="{{ $metric['color'] }} mt-2 text-3xl font-black">{{ $metric['value'] }}</p>
+                        </div>
+                        <span class="{{ $metric['icon'] }} flex h-10 w-10 items-center justify-center rounded-lg">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 3 4 7v6c0 4.5 3.2 7.4 8 8 4.8-.6 8-3.5 8-8V7l-8-4Zm-3 9 2 2 4-4" />
+                            </svg>
                         </span>
                     </div>
                 </article>
@@ -101,38 +118,51 @@
             <section class="rounded-xl border border-orange-200 bg-orange-50 p-4 shadow-sm">
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wide text-orange-700">Management focus</p>
-                        @if ($riskSummary['project'])
-                            <p class="mt-1 text-sm text-slate-700"><b
-                                    class="text-orange-900">{{ $riskSummary['project'] }}</b> requires corrective
-                                action: <b>{{ $riskSummary['activities'] }}</b> overdue
-                                {{ Str::plural('activity', $riskSummary['activities']) }} and
-                                <b>{{ $riskSummary['milestones'] }}</b> overdue
-                                {{ Str::plural('milestone', $riskSummary['milestones']) }}.
-                            </p>
-                        @else
-                            <p class="mt-1 text-sm font-semibold text-sky-800">There are no overdue activities or
-                                milestones in the current selection.</p>
-                        @endif
+                        <p class="text-xs font-bold uppercase tracking-wide text-blue-700">Management focus</p>
+                        <div class="mt-3 space-y-3">
+                            @forelse ($topOverdueActivities->groupBy(fn ($activity) => $activity->planned_month->format('Y-m')) as $monthActivities)
+                                <p class="text-xs font-bold uppercase tracking-wide text-blue-700">
+                                    {{ $monthActivities->first()->planned_month->translatedFormat('F Y') }}
+                                </p>
+                                @foreach ($monthActivities as $activity)
+                                    <div class="rounded-lg border border-orange-200 bg-white p-3 shadow-sm">
+                                        <div class="flex flex-wrap items-start justify-between gap-2">
+                                            <div class="min-w-0">
+                                                <p class="whitespace-pre-line text-sm font-semibold text-slate-800">
+                                                    {{ $activity->activity }}</p>
+                                                <a href="{{ route('projects.dashboard', $activity->project) }}"
+                                                    class="mt-1 block text-xs font-bold text-sky-700 hover:text-orange-700">
+                                                    {{ $activity->project->name }}@if ($activity->project->pda_code)
+                                                        · PDA {{ $activity->project->pda_code }}
+                                                    @endif
+                                                </a>
+                                            </div>
+                                            <span
+                                                class="shrink-0 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-bold text-blue-800">
+                                                {{ $activity->months_overdue }}
+                                                {{ Str::plural('month', $activity->months_overdue) }} overdue
+                                            </span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @empty
+                                <p class="text-sm font-semibold text-sky-800">There are no overdue activities.</p>
+                            @endforelse
+                        </div>
                     </div>
-                    @if ($riskSummary['critical'] > 0)
-                        <span
-                            class="shrink-0 rounded-lg bg-white px-3 py-2 text-xs font-bold text-orange-800 shadow-sm">{{ $riskSummary['critical'] }}
-                            overdue for 8+ weeks</span>
-                    @endif
                 </div>
             </section>
 
             <section class="activities-chart-grid grid gap-5 xl:grid-cols-2">
-                <x-dashboard-chart-card class="activities-health-chart" title="Activity health" filename="activity-health"
-                    subtitle="Completed, overdue and upcoming activities"
-                    height="27rem">
+                <x-dashboard-chart-card class="activities-health-chart" title="Activity health"
+                    filename="activity-health" subtitle="Completed, overdue and upcoming activities" height="27rem">
                     @if (array_sum($statusChart['series']) > 0)
                         <x-dashboard-apex-chart :options="$statusChart"
                             chart-key="activities-status-{{ md5(json_encode($statusChart)) }}" />
                     @else
                         <div class="flex h-full flex-col items-center justify-center gap-2 text-center text-slate-500">
-                            <span class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-xl">0</span>
+                            <span
+                                class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-xl">0</span>
                             <p class="text-sm font-semibold">No activities available</p>
                         </div>
                     @endif
@@ -140,14 +170,15 @@
                         time.</x-slot>
                 </x-dashboard-chart-card>
 
-                <x-dashboard-chart-card class="activities-health-chart" title="Milestone health" filename="milestone-health"
-                    subtitle="Completed, overdue and upcoming milestones" height="27rem">
+                <x-dashboard-chart-card class="activities-health-chart" title="Milestone health"
+                    filename="milestone-health" subtitle="Completed, overdue and upcoming milestones" height="27rem">
                     @if (array_sum($milestoneStatusChart['series']) > 0)
                         <x-dashboard-apex-chart :options="$milestoneStatusChart"
                             chart-key="milestones-status-{{ md5(json_encode($milestoneStatusChart)) }}" />
                     @else
                         <div class="flex h-full flex-col items-center justify-center gap-2 text-center text-slate-500">
-                            <span class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-xl">0</span>
+                            <span
+                                class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-xl">0</span>
                             <p class="text-sm font-semibold">No milestones available</p>
                         </div>
                     @endif
@@ -155,13 +186,14 @@
                         before routine activities.</x-slot>
                 </x-dashboard-chart-card>
 
-                <x-dashboard-chart-card class="activities-risk-chart xl:col-span-2" title="Projects requiring corrective action"
-                    filename="overdue-commitments-by-project"
+                <x-dashboard-chart-card class="activities-risk-chart xl:col-span-2"
+                    title="Projects requiring corrective action" filename="overdue-commitments-by-project"
                     subtitle="Combined overdue activities and milestones, ranked by operational exposure"
                     height="32rem">
                     <x-dashboard-apex-chart :options="$riskProjectChart"
                         chart-key="activities-risk-projects-{{ md5(json_encode($riskProjectChart)) }}" />
-                    <x-slot name="footer">Projects at the top concentrate the largest overdue workload and should be reviewed first.</x-slot>
+                    <x-slot name="footer">Projects at the top concentrate the largest overdue workload and should be
+                        reviewed first.</x-slot>
                 </x-dashboard-chart-card>
 
                 <x-dashboard-chart-card title="Eight-week execution trend" filename="weekly-activity-trend"
@@ -213,7 +245,7 @@
                         </div>
                         <span class="text-xs font-semibold text-slate-500">{{ $item->due_date->format('M Y') }}</span>
                         <span
-                            class="rounded-full px-3 py-1 text-xs font-bold {{ $isOverdue ? 'bg-orange-100 text-orange-800' : 'bg-sky-50 text-sky-700' }}">
+                            class="{{ $isOverdue ? 'bg-orange-100 text-orange-800' : 'bg-sky-50 text-sky-700' }} rounded-full px-3 py-1 text-xs font-bold">
                             {{ $isOverdue ? abs((int) $days) . ' days overdue' : (int) $days . ' days remaining' }}
                         </span>
                     </div>
@@ -256,8 +288,9 @@
                                 @endif
                             </div>
                             <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-semibold text-slate-600">
-                                <span>{{ $item['completed'] }} completed</span><span>{{ $item['overdue'] }}
-                                    overdue</span><span>{{ $item['pending'] }} upcoming</span>
+                                <span>{{ $item['completed'] }} completed</span>
+                                <span>{{ $item['overdue'] }} overdue</span>
+                                <span>{{ $item['pending'] }} upcoming</span>
                             </div>
                         </div>
                     @empty
@@ -330,7 +363,7 @@
                     <div
                         class="grid gap-3 border-l-4 border-transparent p-4 transition hover:border-orange-300 hover:bg-sky-50/50 sm:grid-cols-[1fr_auto] sm:items-center">
                         <div class="flex min-w-0 gap-3"><span
-                                class="mt-1.5 h-3 w-3 shrink-0 rounded-full {{ $style['marker'] }}"></span>
+                                class="{{ $style['marker'] }} mt-1.5 h-3 w-3 shrink-0 rounded-full"></span>
                             <div class="min-w-0">
                                 <p class="whitespace-pre-line text-sm text-slate-800">{{ $activity->activity }}</p><a
                                     href="{{ route('projects.dashboard', $activity->project) }}"
@@ -344,7 +377,7 @@
                         <div class="flex items-center gap-3 pl-6 sm:pl-0"><span
                                 class="text-xs text-slate-500">W{{ str_pad($activity->week_number, 2, '0', STR_PAD_LEFT) }}
                                 · {{ $activity->week_year }}</span><span
-                                class="rounded-full px-2.5 py-1 text-xs font-bold {{ $style['badge'] }}">{{ $style['label'] }}</span>
+                                class="{{ $style['badge'] }} rounded-full px-2.5 py-1 text-xs font-bold">{{ $style['label'] }}</span>
                         </div>
                     </div>
                 @empty

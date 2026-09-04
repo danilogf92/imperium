@@ -37,7 +37,11 @@ class ActivitiesDashboard extends Component
     public function render(PlanificationAccessService $access): View
     {
         $today = CarbonImmutable::today();
+        [$lastYear, $lastWeek] = $this->currentMonthLastWeek($today);
+        $metrics = $this->activityMetrics($access, $today);
+        $topOverdueActivities = $this->topOverdueActivities($access, $today);
         $activities = $this->activityQuery($access)
+            ->where(fn (Builder $query) => $this->whereOnOrBeforeWeek($query, $lastYear, $lastWeek))
             ->get()
             ->map(function (ProjectWeeklyActivity $activity) use ($today): ProjectWeeklyActivity {
                 $activity->setAttribute('dashboard_status', $this->activityStatus($activity, $today));
@@ -60,16 +64,6 @@ class ActivitiesDashboard extends Component
                 return $milestone;
             });
 
-        $metrics = [
-            'total' => $activities->count(),
-            'completed' => $activities->where('dashboard_status', 'completed')->count(),
-            'overdue' => $activities->where('dashboard_status', 'overdue')->count(),
-            'pending' => $activities->where('dashboard_status', 'pending')->count(),
-        ];
-        $metrics['completion'] = $metrics['total'] > 0
-            ? (int) round(($metrics['completed'] / $metrics['total']) * 100)
-            : 0;
-
         $filtered = $this->status === 'all'
             ? $activities
             : $activities->where('dashboard_status', $this->status);
@@ -88,6 +82,7 @@ class ActivitiesDashboard extends Component
             'metrics' => $metrics,
             'milestoneMetrics' => $milestoneMetrics,
             ...$charts,
+            'topOverdueActivities' => $topOverdueActivities,
             'topProjects' => $this->topProjects($activities),
             'urgentMilestones' => $milestones
                 ->whereIn('dashboard_status', ['overdue', 'pending'])
@@ -149,22 +144,68 @@ class ActivitiesDashboard extends Component
             return 'completed';
         }
 
-        $weekEnd = CarbonImmutable::now()
+        $plannedMonth = CarbonImmutable::now()
             ->setISODate($activity->week_year, $activity->week_number)
-            ->endOfWeek()
-            ->startOfDay();
+            ->startOfWeek()
+            ->startOfMonth();
 
-        return $today->isAfter($weekEnd) ? 'overdue' : 'pending';
+        return $plannedMonth->isBefore($today->startOfMonth()) ? 'overdue' : 'pending';
+    }
+
+    private function activityMetrics(PlanificationAccessService $access, CarbonImmutable $today): array
+    {
+        $query = $this->activityQuery($access);
+        [$cutoffYear, $cutoffWeek] = $this->currentMonthWeekCutoff($today);
+        [$lastYear, $lastWeek] = $this->currentMonthLastWeek($today);
+        $plannedThroughCurrentMonth = fn (Builder $query) => $this->whereOnOrBeforeWeek($query, $lastYear, $lastWeek);
+        $total = (clone $query)->where($plannedThroughCurrentMonth)->count();
+        $completed = (clone $query)->where($plannedThroughCurrentMonth)->whereNotNull('executed_at')->count();
+        $overdue = (clone $query)->whereNull('executed_at')
+            ->where(fn (Builder $query) => $this->whereBeforeWeek($query, $cutoffYear, $cutoffWeek))
+            ->count();
+
+        return [
+            'total' => $total,
+            'completed' => $completed,
+            'overdue' => $overdue,
+            'pending' => $total - $completed - $overdue,
+            'completion' => $total > 0 ? (int) round(($completed / $total) * 100) : 0,
+        ];
+    }
+
+    private function topOverdueActivities(PlanificationAccessService $access, CarbonImmutable $today): Collection
+    {
+        [$cutoffYear, $cutoffWeek] = $this->currentMonthWeekCutoff($today);
+
+        return $this->activityQuery($access)
+            ->whereNull('executed_at')
+            ->where(fn (Builder $query) => $this->whereBeforeWeek($query, $cutoffYear, $cutoffWeek))
+            ->orderBy('week_year')
+            ->orderBy('week_number')
+            ->orderBy('id')
+            ->limit(5)
+            ->get()
+            ->map(function (ProjectWeeklyActivity $activity) use ($today): ProjectWeeklyActivity {
+                $plannedMonth = CarbonImmutable::now()
+                    ->setISODate($activity->week_year, $activity->week_number)
+                    ->startOfWeek()
+                    ->startOfMonth()
+                    ->locale('en');
+
+                $activity->setAttribute('planned_month', $plannedMonth);
+                $activity->setAttribute('months_overdue', max(1, (int) $plannedMonth->diffInMonths($today->startOfMonth())));
+
+                return $activity;
+            })
+            ->values();
     }
 
     private function topProjects(Collection $activities): Collection
     {
         return $activities->groupBy('project_id')
             ->map(function (Collection $items): array {
-                $project = $items->first()->project;
-
                 return [
-                    'project' => $project,
+                    'project' => $items->first()->project,
                     'total' => $items->count(),
                     'completed' => $items->where('dashboard_status', 'completed')->count(),
                     'overdue' => $items->where('dashboard_status', 'overdue')->count(),
@@ -174,6 +215,41 @@ class ActivitiesDashboard extends Component
             ->sortByDesc('total')
             ->take($this->topLimit)
             ->values();
+    }
+
+    private function currentMonthWeekCutoff(CarbonImmutable $today): array
+    {
+        $firstDay = $today->startOfMonth();
+        $firstWeekStartingInMonth = $firstDay->startOfWeek();
+
+        if ($firstWeekStartingInMonth->isBefore($firstDay)) {
+            $firstWeekStartingInMonth = $firstWeekStartingInMonth->addWeek();
+        }
+
+        return [(int) $firstWeekStartingInMonth->isoWeekYear, (int) $firstWeekStartingInMonth->isoWeek];
+    }
+
+    private function whereBeforeWeek(Builder $query, int $year, int $week): void
+    {
+        $query->where('week_year', '<', $year)
+            ->orWhere(fn (Builder $query) => $query
+                ->where('week_year', $year)
+                ->where('week_number', '<', $week));
+    }
+
+    private function currentMonthLastWeek(CarbonImmutable $today): array
+    {
+        $lastWeekStartingInMonth = $today->endOfMonth()->startOfWeek();
+
+        return [(int) $lastWeekStartingInMonth->isoWeekYear, (int) $lastWeekStartingInMonth->isoWeek];
+    }
+
+    private function whereOnOrBeforeWeek(Builder $query, int $year, int $week): void
+    {
+        $query->where('week_year', '<', $year)
+            ->orWhere(fn (Builder $query) => $query
+                ->where('week_year', $year)
+                ->where('week_number', '<=', $week));
     }
 
     private function chartData(Collection $activities, Collection $milestones, CarbonImmutable $today): array
@@ -402,6 +478,7 @@ class ActivitiesDashboard extends Component
                 'project' => $riskProjects->first()['name'] ?? null,
                 'activities' => $riskProjects->first()['activities'] ?? 0,
                 'milestones' => $riskProjects->first()['milestones'] ?? 0,
+                'projects' => $riskProjects->take(3)->values()->all(),
                 'critical' => $aging['8+ weeks'],
             ],
         ];

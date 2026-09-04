@@ -74,7 +74,7 @@
                         </option>
 
                         @foreach ($projects as $project)
-                            <option value="{{ $project->id }}" @disabled(!$editingId && $project->is_closed)>
+                            <option value="{{ $project->id }}" @disabled(!$editingId && ($project->is_closed || !in_array($project->company_id, $editableCompanyIds, true)))>
                                 {{ $project->name }}
                                 {{ $project->is_closed ? ' (Closed)' : '' }}
                             </option>

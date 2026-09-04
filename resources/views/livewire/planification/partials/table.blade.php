@@ -94,6 +94,8 @@
                                     (float) ($currency === 'eur'
                                         ? $plannedProject->data_budgeted_euros ?? 0
                                         : $plannedProject->data_budgeted ?? 0);
+                                $canUpdateProject = in_array($plannedProject->company_id, $editableCompanyIds, true);
+                                $canDeleteProject = in_array($plannedProject->company_id, $deletableCompanyIds, true);
                                 $currencySymbol = $currency === 'eur' ? '€' : '$';
                             @endphp
                             <tr wire:key="planned-project-{{ $plannedProject->id }}" class="group min-h-10 ">
@@ -194,7 +196,7 @@
                                                     x-on:blur="tooltipOpen = false"
                                                     aria-describedby="activity-tooltip-{{ $plannedProject->id }}-{{ $week['offset'] }}"
                                                 @else
-                                                    title="{{ __('Add activity') }}" @endif
+                                                    title="{{ __($canUpdateProject ? 'Add activity' : 'View activities') }}" @endif
                                                     class="inline-flex max-w-full cursor-pointer items-center gap-1.5 rounded-lg border border-cyan-500 bg-cyan-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-px hover:bg-cyan-500 hover:shadow-md">
                                                     @if ($weeklyActivity)
                                                         <span
@@ -203,9 +205,9 @@
                                                             {{ $allActivitiesExecuted ? '✓' : ($weekExpired ? '×' : '○') }}
                                                         </span>
                                                     @endif
-                                                    <span class="text-base leading-none">+</span>
+                                                    <span class="text-base leading-none">{{ $canUpdateProject ? '+' : 'i' }}</span>
                                                     <span
-                                                        class="truncate">{{ $weeklyActivity ? $weeklyActivitiesForWeek->count() . ' activities' : 'Add activity' }}</span>
+                                                        class="truncate">{{ $weeklyActivity ? $weeklyActivitiesForWeek->count() . ' activities' : ($canUpdateProject ? 'Add activity' : 'View activities') }}</span>
                                                 </button>
                                                 @if ($weeklyActivity)
                                                     <button type="button" data-no-global-loading
@@ -322,21 +324,21 @@
                                                                 {{ $milestoneExecuted ? '✓' : ($milestoneExpired ? '×' : '○') }}
                                                             </span>
                                                         @endif
-                                                        <button type="button"
-                                                            wire:click="editMilestone({{ $item->id }})"
-                                                            data-no-global-loading
-                                                            class="px-1.5 py-0.5 text-xs font-semibold leading-4 hover:bg-black/10"
-                                                            title="Edit {{ $item->milestone->name }}">
-                                                            {{ $milestoneText }}
-                                                        </button>
-                                                        <button type="button"
-                                                            wire:click="requestDeleteMilestone({{ $item->id }})"
-                                                            data-no-global-loading
-                                                            class="border-l border-white/30 px-1 py-0.5 text-xs leading-4 hover:bg-black/20"
-                                                            title="Remove milestone">×</button>
+                                                        @if ($canUpdateProject)
+                                                            <button type="button" wire:click="editMilestone({{ $item->id }})"
+                                                                data-no-global-loading class="px-1.5 py-0.5 text-xs font-semibold leading-4 hover:bg-black/10"
+                                                                title="Edit {{ $item->milestone->name }}">{{ $milestoneText }}</button>
+                                                        @else
+                                                            <span class="px-1.5 py-0.5 text-xs font-semibold leading-4">{{ $milestoneText }}</span>
+                                                        @endif
+                                                        @if ($canDeleteProject)
+                                                            <button type="button" wire:click="requestDeleteMilestone({{ $item->id }})"
+                                                                data-no-global-loading class="border-l border-white/30 px-1 py-0.5 text-xs leading-4 hover:bg-black/20"
+                                                                title="Remove milestone">×</button>
+                                                        @endif
                                                     </span>
                                                 @endforeach
-                                                @if ($cellCanCreate)
+                                                @if ($cellCanCreate && $canUpdateProject)
                                                     <button type="button"
                                                         wire:click="openCreateAt({{ $plannedProject->id }}, {{ $year }}, {{ $monthNumber }})"
                                                         data-no-global-loading
