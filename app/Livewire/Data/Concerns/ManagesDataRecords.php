@@ -134,7 +134,6 @@ trait ManagesDataRecords
         });
 
         $this->closeEditModal();
-        $this->resetPage();
 
         $this->dispatch(
             'alert',
@@ -172,7 +171,6 @@ trait ManagesDataRecords
         );
 
         $this->closeEditModal();
-        $this->resetPage();
 
         $this->dispatch(
             'alert',
@@ -244,7 +242,6 @@ trait ManagesDataRecords
         }
 
         $this->closeDeleteModal();
-        $this->resetPage();
 
         $this->dispatch(
             'alert',

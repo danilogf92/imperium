@@ -114,6 +114,14 @@
                     )"
                         :selected="$classificationFilter" multiple compact :global-loading="false" />
 
+                    <x-dashboard-filter-dropdown label="Justifications" model="justificationFilter" :options="collect($justificationOptions)->map(
+                        fn($justification) => [
+                            'value' => $justification->value,
+                            'label' => $justification->value,
+                        ],
+                    )"
+                        :selected="$justificationFilter" multiple compact :global-loading="false" />
+
                     <div class="w-24 shrink-0">
                         <label for="resume-currency" class="sr-only">Currency</label>
                         <select id="resume-currency" wire:model.live="currency" data-no-global-loading

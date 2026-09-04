@@ -5,6 +5,7 @@ namespace App\Livewire\Resume;
 use App\Enums\InvestmentClassificationEnum;
 use App\Enums\InvestmentEnum;
 use App\Enums\ProjectPermissionEnum;
+use App\Enums\ProjectJustificationEnum;
 use App\Enums\ProjectStateEnum;
 use App\Exports\ProjectResumeExport;
 use App\Models\Project;
@@ -32,6 +33,8 @@ class Resume extends Component
 
     public array $classificationFilter = [];
 
+    public array $justificationFilter = [];
+
     public string $currency = 'euro';
 
     public function mount(): void
@@ -48,6 +51,7 @@ class Resume extends Component
             'stateFilter',
             'investmentFilter',
             'classificationFilter',
+            'justificationFilter',
             'currency',
         ]);
     }
@@ -143,6 +147,7 @@ class Resume extends Component
             'stateOptions' => $this->reportableStateOptions(),
             'investmentOptions' => InvestmentEnum::cases(),
             'classificationOptions' => InvestmentClassificationEnum::cases(),
+            'justificationOptions' => ProjectJustificationEnum::cases(),
             'canExport' => auth()->user()
                 ?->companiesForPermissionQuery(ProjectPermissionEnum::Export)
                 ->exists() ?? false,
@@ -259,6 +264,10 @@ class Resume extends Component
             ->when(
                 $this->classificationFilter !== [],
                 fn (Builder $query) => $query->whereIn('classification_of_investments', $this->classificationFilter)
+            )
+            ->when(
+                $this->justificationFilter !== [],
+                fn (Builder $query) => $query->whereIn('justification', $this->justificationFilter)
             );
     }
 
@@ -293,6 +302,7 @@ class Resume extends Component
             || $this->stateFilter !== []
             || $this->investmentFilter !== []
             || $this->classificationFilter !== []
+            || $this->justificationFilter !== []
             || $this->currency !== 'euro';
     }
 
@@ -305,6 +315,7 @@ class Resume extends Component
             'States' => $this->stateFilter === [] ? 'All' : implode(', ', $this->stateFilter),
             'Investments' => $this->investmentFilter === [] ? 'All' : implode(', ', $this->investmentFilter),
             'Classifications' => $this->classificationFilter === [] ? 'All' : implode(', ', $this->classificationFilter),
+            'Justifications' => $this->justificationFilter === [] ? 'All' : implode(', ', $this->justificationFilter),
             'Currency' => $this->currency === 'dollar' ? 'USD' : 'EUR',
         ];
     }
