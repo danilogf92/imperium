@@ -47,8 +47,8 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/data', RedirectToProjectDataController::class)
         ->name('data');
 
-    Route::get('/task', TaskTable::class)
-        ->name('task');
+    // Route::get('/task', TaskTable::class)
+    //     ->name('task');
 
     Route::get('/orders', Ordenes::class)
         ->name('orders');

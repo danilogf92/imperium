@@ -142,6 +142,42 @@ class PlanificationTest extends TestCase
             ->assertDontSee($project->name);
     }
 
+    public function test_project_allocation_indicator_and_dashboard_link_follow_total_milestone_percentages(): void
+    {
+        [$user, $project] = $this->projectContext();
+        $component = Livewire::actingAs($user)->test(Planification::class)
+            ->assertSee('href="'.route('projects.dashboard', $project->slug).'"', false)
+            ->assertSee('Allocated budget: 0%')
+            ->assertSee('bg-orange-100 text-orange-700 ring-orange-200', false);
+
+        foreach ([['PO', 50, 1, 50], ['WBS', 20, 2, 70], ['WBS', 29.99, 3, 99.99], ['WBS', 0.01, 4, 100]] as [$code, $percentage, $month, $total]) {
+            $component->set('projectId', $project->id)
+                ->set('milestoneId', Milestone::where('code', $code)->value('id'))
+                ->set('month', $month)
+                ->set('cycleYear', 2026)
+                ->set('percentage', (string) $percentage)
+                ->call('saveMilestone')
+                ->assertHasNoErrors()
+                ->assertSee('Allocated budget: '.$total.'%')
+                ->assertSee($total < 100
+                    ? 'bg-orange-100 text-orange-700 ring-orange-200'
+                    : 'bg-emerald-100 text-emerald-700 ring-emerald-200', false);
+        }
+
+        $item = $project->projectMilestones()->first();
+        $item->update(['executed_at' => now()]);
+        $component->set('milestoneExecutionFilter', 'completed')
+            ->assertSee('Allocated budget: 100%')
+            ->assertViewHas('plannedProjects', fn ($projects) =>
+                (float) $projects->first()->allocated_percentage === 100.0
+                && $projects->first()->projectMilestones->count() === 1);
+
+        $item->update(['percentage' => 40]);
+        $component->call('$refresh')
+            ->assertSee('Allocated budget: 90%')
+            ->assertSee('bg-orange-100 text-orange-700 ring-orange-200', false);
+    }
+
     /** @return array{User, Project} */
     private function projectContext(): array
     {

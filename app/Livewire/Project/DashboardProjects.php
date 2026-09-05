@@ -7,74 +7,81 @@ use App\Exports\ProjectDetailDashboardExport;
 use App\Models\Data;
 use App\Models\Project;
 use App\Models\UserPreference;
-use App\Support\ChartValueFormatter;
-use App\Services\Project\ProjectSupplierChartService;
 use App\Services\Project\ProjectExecutiveInsightService;
+use App\Services\Project\ProjectSupplierChartService;
+use App\Support\ChartValueFormatter;
 use Asantibanez\LivewireCharts\Facades\LivewireCharts;
 use Asantibanez\LivewireCharts\Models\ColumnChartModel;
 use Asantibanez\LivewireCharts\Models\PieChartModel;
 use Asantibanez\LivewireCharts\Models\RadarChartModel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Livewire\WithPagination;
-
-
-
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Storage;
+use Livewire\WithPagination;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class DashboardProjects extends Component
 {
-    use WithPagination;
     use WithFileUploads;
+    use WithPagination;
 
     private const CURRENCY_PREFERENCE_PREFIX = 'projects.dashboard.currency.';
-    
+
     public $resumeColors = [
         'Budgeted' => '#5BCA5A',
         'Executed' => '#CC5555',
-        'Booked' => '#FFA500',
-        'Real' => '#800080',
+        'Assigned' => '#FFA500',
+        'Booked (Real SAP)' => '#800080',
     ];
 
     public $resume = [
-        "Budgeted",
-        "Executed",
-        "Booked",
-        "Real",
+        'Budgeted',
+        'Executed',
+        'Assigned',
+        'Booked (Real SAP)',
     ];
 
     public $resumePie = [
-        'Real',
+        'Booked (Real SAP)',
         'Rest',
-        'Booked'
+        'Assigned',
     ];
 
     public $resumePieColors = [
-        'Real' => '#5BCA5A',
+        'Booked (Real SAP)' => '#5BCA5A',
         'Rest' => '#CC5555',
-        'Booked' => '#5BCA5A'
+        'Assigned' => '#5BCA5A',
 
     ];
 
     public $project;
+
     public $firstRun = true;
+
     public $total = 0;
+
     public $columnNames;
+
     public $searchData = 'area';
+
     public $investments = 'global_price_euros';
+
     public $percentage = 0;
+
     public $real_value = 0;
+
     public $rateValue = 1;
 
     public $rateConvertion = 1;
 
-    public $dollarOrEuro = "euro";
+    public $dollarOrEuro = 'euro';
 
     public $budgeted = 0;
+
     public $booked = 0;
+
     public $executed = 0;
 
     public $graph;
@@ -134,7 +141,7 @@ class DashboardProjects extends Component
         $this->budgeted = $this->total;
 
         if ($this->total != 0) {
-            //$this->percentage = round($this->booked / $this->total * 100, 2);
+            // $this->percentage = round($this->booked / $this->total * 100, 2);
             $this->percentage = round($this->safeDivide($this->executed, $this->total) * 100, 2);
         } else {
             $this->percentage = 0;
@@ -182,8 +189,7 @@ class DashboardProjects extends Component
     public function render(
         ProjectSupplierChartService $supplierCharts,
         ProjectExecutiveInsightService $executiveInsights
-    )
-    {
+    ) {
         $area = Data::query()
             ->where('project_id', $this->project->id)
             ->select($this->searchData)
@@ -197,12 +203,12 @@ class DashboardProjects extends Component
             ->sortByDesc('total')
             ->values();
 
-        $title = "Resume_" . (($this->dollarOrEuro === "euro") ? "€" : "$");
+        $title = 'Resume_'.(($this->dollarOrEuro === 'euro') ? '€' : '$');
 
         $graph = $this->radarDataGraph($area);
         $this->graph = $area;
-        
-        //dd($area);
+
+        // dd($area);
 
         return view('livewire.project.dashboard-projects')
             ->with([
@@ -218,10 +224,10 @@ class DashboardProjects extends Component
                 'radarChartModel' => $graph,
                 'columnChartModel' => $this->classificationBudgetRealGraph(),
                 'resumeGraph' => $this->columnDataGraphTwo($this->createResumeGraph(), $title),
-                'resumePercentageGraph' => $this->columnDataGraphTwo($this->createResumeGraph("%"), "Resume %", true),
+                'resumePercentageGraph' => $this->columnDataGraphTwo($this->createResumeGraph('%'), 'Resume %', true),
                 'pieChartModel' => $this->pieDataGraph($area, $this->rateConvertion),
-                'pieChartModelResume' => $this->pieDataGraphTwo($this->createResumePieGraph(), $this->rateConvertion, "Account Balance With Real Value"),
-                'pieChartModelResumeTwo' => $this->pieDataGraphTwo($this->createResumePieGraphTwo(), $this->rateConvertion, "Account Balance With Booked"),
+                'pieChartModelResume' => $this->pieDataGraphTwo($this->createResumePieGraph(), $this->rateConvertion, 'Account Balance With Booked (Real SAP)'),
+                'pieChartModelResumeTwo' => $this->pieDataGraphTwo($this->createResumePieGraphTwo(), $this->rateConvertion, 'Account Balance With Assigned'),
                 'multiColumnChartModel' => $this->multicolumnDataGraph(),
                 ...$supplierCharts->build(
                     $this->project->id,
@@ -256,7 +262,7 @@ class DashboardProjects extends Component
             403
         );
 
-        return (new ProjectDetailDashboardExport())->download(
+        return (new ProjectDetailDashboardExport)->download(
             $this->project,
             $this->searchData,
             $this->investments,
@@ -272,6 +278,15 @@ class DashboardProjects extends Component
 
     private function valueTitle(): string
     {
+        $label = match ($this->investments) {
+            'booked_euros' => 'Assigned',
+            'real_value_euros' => 'Booked (Real SAP)',
+            default => null,
+        };
+        if ($label !== null) {
+            return $label.($this->dollarOrEuro === 'dollar' ? ' (USD)' : ' (EUR)');
+        }
+
         $value = $this->dollarOrEuro === 'dollar'
             ? str_replace('_euros', '_dollars', $this->investments)
             : str_replace('_dollars', '_euros', $this->investments);
@@ -309,7 +324,7 @@ class DashboardProjects extends Component
     {
         $value = Data::where('project_id', $this->project->id)->sum($value);
 
-        if ($this->dollarOrEuro === "dollar") {
+        if ($this->dollarOrEuro === 'dollar') {
             return round($value * $this->rateConvertion, 2);
         } else {
             return round($value, 2);
@@ -349,14 +364,14 @@ class DashboardProjects extends Component
                     return $multiColumnChartModel
                         ->addSeriesColumn($type, 'Budgeted', $budgetedValue)
                         ->addSeriesColumn($type, 'Executed', $executedValue)
-                        ->addSeriesColumn($type, 'Booked', $bookedValue)
-                        ->addSeriesColumn($type, 'Real', $realValue);
+                        ->addSeriesColumn($type, 'Assigned', $bookedValue)
+                        ->addSeriesColumn($type, 'Booked (Real SAP)', $realValue);
                 },
                 LivewireCharts::multiColumnChartModel()
                     ->setAnimated($this->firstRun)
                     ->withOnColumnClickEventName('onColumnClick')
                     // ->setTitle('Comparison')
-                    ->setTitle("Resume for " . $this->groupTitle())
+                    ->setTitle('Resume for '.$this->groupTitle())
                     ->stacked()
                     ->withGrid()
                     ->withDataLabels()
@@ -375,14 +390,14 @@ class DashboardProjects extends Component
     {
         if ($this->dollarOrEuro === 'euro') {
             $titulo = $this->valueTitle();
-            $label = "Investment €";
+            $label = 'Investment €';
         } else {
             $titulo = $this->valueTitle();
-            $label = "Investment $";
+            $label = 'Investment $';
         }
 
         $radarChartModel = LivewireCharts::radarChartModel()
-            ->setTitle($this->groupTitle() . " -> " . $this->valueTitle())
+            ->setTitle($this->groupTitle().' -> '.$this->valueTitle())
             ->setAnimated($this->firstRun)
             ->withOnPointClickEvent('onPointClick')
             ->withGrid()
@@ -396,6 +411,7 @@ class DashboardProjects extends Component
                 $radarChartModel->addSeries($label, $element[$this->searchData], $this->convertAndUpdate($element['total']));
             }
         }
+
         return $radarChartModel;
     }
 
@@ -454,72 +470,74 @@ class DashboardProjects extends Component
         }
 
         $pieChartModel =
-            (new PieChartModel())
+            (new PieChartModel)
             // ->setTitle($this->searchData . " " . $this->investments)
-            ->setTitle($this->groupTitle() . " -> " . $this->valueTitle())
-            ->setAnimated($this->firstRun)
-            ->setLegendVisibility(true)
-            ->withOnSliceClickEvent('onSliceClick')
-            ->withGrid()
-            ->withDataLabels()
-            ->withLegend()
-            ->setType('donut')
-            ->setJsonConfig($this->moneyPieChartConfig());
+                ->setTitle($this->groupTitle().' -> '.$this->valueTitle())
+                ->setAnimated($this->firstRun)
+                ->setLegendVisibility(true)
+                ->withOnSliceClickEvent('onSliceClick')
+                ->withGrid()
+                ->withDataLabels()
+                ->withLegend()
+                ->setType('donut')
+                ->setJsonConfig($this->moneyPieChartConfig());
 
         foreach ($data as $element) {
             if ($this->validateNumber($element['total']) && $element[$this->searchData] != null) {
                 $pieChartModel->addSlice($element[$this->searchData], round($element['total'] * $rate, 2), $this->generateColor());
             }
         }
+
         return $pieChartModel;
     }
 
     public function pieDataGraphTwo($data, $rate, $title)
     {
         $pieChartModel =
-            (new PieChartModel())
+            (new PieChartModel)
             // ->setTitle($this->searchData . " " . $this->investments)
-            ->setTitle($title)
-            ->setAnimated($this->firstRun)
-            ->setLegendVisibility(true)
-            ->withOnSliceClickEvent('onSliceClick')
-            ->withGrid()
-            ->withDataLabels()
-            ->withLegend()
-            ->setType('donut')
-            ->setJsonConfig($this->moneyPieChartConfig());
+                ->setTitle($title)
+                ->setAnimated($this->firstRun)
+                ->setLegendVisibility(true)
+                ->withOnSliceClickEvent('onSliceClick')
+                ->withGrid()
+                ->withDataLabels()
+                ->withLegend()
+                ->setType('donut')
+                ->setJsonConfig($this->moneyPieChartConfig());
 
         foreach ($data as $element) {
             if ($this->validateNumberNew($element['total']) && $element['label'] != null) {
                 $pieChartModel->addSlice($element['label'], round($element['total'] * $rate, 2), $this->resumePieColors[$element['label']]);
             }
         }
+
         return $pieChartModel;
     }
 
     public function columnDataGraph($data, $title)
     {
         $columnChartModel =
-            (new ColumnChartModel())
+            (new ColumnChartModel)
             // ->addColumn('Total', $this->total, $this->generateColor())
-            ->withOnColumnClickEventName('onColumnClick')
+                ->withOnColumnClickEventName('onColumnClick')
             // ->setTitle($this->searchData . " " . $this->investments)
             // ->setTitle("Clasification for " . $this->textTransform($this->searchData))
-            ->setTitle($this->textTransform($title))
-            ->setAnimated($this->firstRun)
-            ->setLegendVisibility(true)
-            ->setOpacity(1)
-            ->disableShades()
-            ->withGrid()
-            ->withDataLabels()
-            ->withLegend()
-            ->legendPositionTop()
-            ->setDataLabelsEnabled(true)
-            ->setJsonConfig($this->moneyChartConfig('yaxis'));
+                ->setTitle($this->textTransform($title))
+                ->setAnimated($this->firstRun)
+                ->setLegendVisibility(true)
+                ->setOpacity(1)
+                ->disableShades()
+                ->withGrid()
+                ->withDataLabels()
+                ->withLegend()
+                ->legendPositionTop()
+                ->setDataLabelsEnabled(true)
+                ->setJsonConfig($this->moneyChartConfig('yaxis'));
 
         foreach ($data as $element) {
             if ($this->validateNumber($element['total']) && $element[$this->searchData] != null) {
-                $columnChartModel->addColumn($element[$this->searchData], round((float)$element['total'], 2), $this->generateColor());
+                $columnChartModel->addColumn($element[$this->searchData], round((float) $element['total'], 2), $this->generateColor());
             }
         }
 
@@ -529,27 +547,27 @@ class DashboardProjects extends Component
     public function columnDataGraphTwo($data, $title, bool $percentage = false)
     {
         $columnChartModel =
-            (new ColumnChartModel())
-            ->withOnColumnClickEventName('onColumnClick')
-            ->setTitle($this->textTransform($title))
-            ->setAnimated($this->firstRun)
-            ->setLegendVisibility(true)
-            ->setOpacity(1)
-            ->disableShades()
-            ->withGrid()
-            ->withDataLabels()
-            ->withLegend()
-            ->legendPositionTop()
-            ->setDataLabelsEnabled(true)
-            ->setJsonConfig(
-                $percentage
-                    ? $this->percentChartConfig('yaxis')
-                    : $this->moneyChartConfig('yaxis')
-            );
+            (new ColumnChartModel)
+                ->withOnColumnClickEventName('onColumnClick')
+                ->setTitle($this->textTransform($title))
+                ->setAnimated($this->firstRun)
+                ->setLegendVisibility(true)
+                ->setOpacity(1)
+                ->disableShades()
+                ->withGrid()
+                ->withDataLabels()
+                ->withLegend()
+                ->legendPositionTop()
+                ->setDataLabelsEnabled(true)
+                ->setJsonConfig(
+                    $percentage
+                        ? $this->percentChartConfig('yaxis')
+                        : $this->moneyChartConfig('yaxis')
+                );
 
         foreach ($data as $element) {
             if ($this->validateNumber($element['total']) && $element['label'] != null) {
-                $columnChartModel->addColumn($element['label'], round((float)$element['total'], 2), $this->resumeColors[$element['label']]);
+                $columnChartModel->addColumn($element['label'], round((float) $element['total'], 2), $this->resumeColors[$element['label']]);
             }
         }
 
@@ -564,22 +582,23 @@ class DashboardProjects extends Component
         $azul = str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
         // Combina los valores para obtener el color completo en formato hexadecimal
         $colorHexadecimal = "#$rojo$verde$azul";
+
         return $colorHexadecimal;
     }
 
     public function validateNumber($number)
     {
-        return (is_numeric($number) && !is_nan($number) && $number > 0);
+        return is_numeric($number) && ! is_nan($number) && $number > 0;
     }
 
     public function validateNumberNew($number)
     {
-        return (is_numeric($number) && !is_nan($number));
+        return is_numeric($number) && ! is_nan($number);
     }
 
     public function convertAndUpdate($value)
     {
-        return round(((float)$value * $this->rateConvertion), 2);
+        return round(((float) $value * $this->rateConvertion), 2);
     }
 
     public function textTransform($cadena)
@@ -587,12 +606,13 @@ class DashboardProjects extends Component
         $palabras = explode('_', $cadena);
         $palabrasCapitalizadas = array_map('ucfirst', $palabras);
         $resultado = implode(' ', $palabrasCapitalizadas);
+
         return $resultado;
     }
 
     public function createResumeGraph($percentage = null)
     {
-        if (!$percentage) {
+        if (! $percentage) {
             $conversion = 1;
         } else {
             if (($this->total > 0)) {
@@ -604,21 +624,21 @@ class DashboardProjects extends Component
 
         return [
             [
-                "label" => "Budgeted",
-                "total" => round($this->budgeted * $conversion, 2)
+                'label' => 'Budgeted',
+                'total' => round($this->budgeted * $conversion, 2),
             ],
             [
-                "label" => "Executed",
-                "total" =>  round($this->executed * $conversion, 2)
+                'label' => 'Executed',
+                'total' => round($this->executed * $conversion, 2),
             ],
             [
-                "label" => "Booked",
-                "total" => round($this->booked * $conversion, 2)
+                'label' => 'Assigned',
+                'total' => round($this->booked * $conversion, 2),
             ],
             [
-                "label" => "Real",
-                "total" => round($this->real_value * $conversion, 2)
-            ]
+                'label' => 'Booked (Real SAP)',
+                'total' => round($this->real_value * $conversion, 2),
+            ],
         ];
     }
 
@@ -629,21 +649,21 @@ class DashboardProjects extends Component
 
         return [
             [
-                "label" => "Real",
-                "total" => round(
+                'label' => 'Booked (Real SAP)',
+                'total' => round(
                     $this->safeDivide($this->real_value * $conversion, $rateConvertion),
                     2
-                )
+                ),
             ],
             [
-                "label" => "Rest",
-                "total" => round(
+                'label' => 'Rest',
+                'total' => round(
                     $this->safeDivide(
                         ($this->budgeted - $this->real_value) * $conversion,
                         $rateConvertion
                     ),
                     2
-                )
+                ),
             ],
         ];
     }
@@ -666,10 +686,10 @@ class DashboardProjects extends Component
 
                 return $chart
                     ->addSeriesColumn($group, 'Budgeted', $this->convertAndUpdate($data->budgeted_value))
-                    ->addSeriesColumn($group, 'Real Value', $this->convertAndUpdate($data->real_value));
+                    ->addSeriesColumn($group, 'Booked (Real SAP)', $this->convertAndUpdate($data->real_value));
             },
             LivewireCharts::multiColumnChartModel()
-                ->setTitle("Budgeted vs Real Value by {$this->groupTitle()}")
+                ->setTitle("Budgeted vs Booked (Real SAP) by {$this->groupTitle()}")
                 ->setAnimated($this->firstRun)
                 ->withOnColumnClickEventName('onColumnClick')
                 ->stacked()
@@ -690,21 +710,21 @@ class DashboardProjects extends Component
 
         return [
             [
-                "label" => "Booked",
-                "total" => round(
+                'label' => 'Assigned',
+                'total' => round(
                     $this->safeDivide($this->booked, $rateConvertion) * $conversion,
                     2
-                )
+                ),
             ],
             [
-                "label" => "Rest",
-                "total" => round(
+                'label' => 'Rest',
+                'total' => round(
                     $this->safeDivide(
                         $this->budgeted - $this->booked,
                         $rateConvertion
                     ) * $conversion,
                     2
-                )
+                ),
             ],
         ];
     }

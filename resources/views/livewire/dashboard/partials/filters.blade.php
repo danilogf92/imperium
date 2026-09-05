@@ -1,7 +1,7 @@
 <section class="module-accent-line relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
     <div class="border-b border-slate-200 px-5 py-4">
         <h2 class="font-semibold text-slate-900">
-            {{ __('Dashboard filters') }}
+            {{ __($filterTitle ?? 'Dashboard filters') }}
         </h2>
     </div>
 
@@ -80,16 +80,18 @@
                 multiple
             />
 
-            <x-dashboard-filter-dropdown
-                label="Currency"
-                model="currency"
-                :options="[
-                    ['value' => 'euro', 'label' => 'Euro'],
-                    ['value' => 'dollar', 'label' => 'Dollar ($)'],
-                ]"
-                :selected="$currency"
-                default="euro"
-            />
+            @if ($showCurrency ?? true)
+                <x-dashboard-filter-dropdown
+                    label="Currency"
+                    model="currency"
+                    :options="[
+                        ['value' => 'euro', 'label' => 'Euro'],
+                        ['value' => 'dollar', 'label' => 'Dollar ($)'],
+                    ]"
+                    :selected="$currency"
+                    default="euro"
+                />
+            @endif
 
             <x-clear-filters-button
                 method="resetAll"

@@ -67,6 +67,8 @@
             </div>
         </header>
 
+        @include('livewire.dashboard.partials.filters', ['showCurrency' => false, 'filterTitle' => 'Activities filters'])
+
         <section class="dashboard-metrics-grid">
             @foreach ([
         ['label' => 'Total activities', 'value' => $metrics['total'], 'accent' => 'border-blue-200', 'icon' => 'bg-blue-100 text-blue-700', 'path' => 'M9 5h6M9 9h6m-6 4h4m-7 8h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z'],

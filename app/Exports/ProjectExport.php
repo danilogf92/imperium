@@ -6,6 +6,7 @@ use App\Enums\ProjectPermissionEnum;
 use App\Models\Data;
 use App\Models\Project;
 use App\Models\User;
+use App\Support\Project\ProjectTableDefinition;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -18,6 +19,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class ProjectExport
 {
     private const HEADERS = [
+        ...ProjectTableDefinition::COLUMN_OPTIONS,
         'id' => 'ID', 'order' => 'Order', 'plant' => 'Plant', 'pda_code' => 'PDA Code',
         'forecast_start_year' => 'Forecast Start Year',
         'forecast_start_date' => 'Forecast Start Date', 'investments' => 'Investments',
@@ -34,23 +36,22 @@ class ProjectExport
         'created_at' => 'Created At', 'updated_at' => 'Updated At',
     ];
 
-    private const DEFAULT_COLUMNS = [
-        'id', 'order', 'plant', 'pda_code', 'forecast_start_year', 'forecast_start_date', 'investments', 'state',
-        'budgeted_euros', 'forecast_end_date', 'real_euros', 'rate',
-    ];
-
     public function download(User $user, array $filters = []): BinaryFileResponse
     {
         $columns = array_values(array_intersect(
-            ($filters['columns'] ?? []) ?: self::DEFAULT_COLUMNS,
-            array_keys(self::HEADERS)
+            ($filters['columns'] ?? []) ?: ProjectTableDefinition::DEFAULT_COLUMNS,
+            array_diff(array_keys(self::HEADERS), ['actions'])
         ));
         $query = Project::query()
             ->with(['company:id,company_code,company_name', 'creator:id,name', 'responsible:id,name'])
             ->withSum('data as budgeted_euros', 'global_price_euros')
             ->withSum('data as real_euros', 'real_value_euros')
+            ->withSum('data as executed_euros', 'executed_euros')
+            ->withSum('data as booked_euros', 'booked_euros')
             ->withSum('data as budgeted_dollars', 'global_price')
             ->withSum('data as real_dollars', 'real_value')
+            ->withSum('data as executed_dollars', 'executed_dollars')
+            ->withSum('data as booked', 'booked')
             ->whereIn('company_id', $user->companiesForPermissionQuery(ProjectPermissionEnum::Export)
                 ->select('companies.id')->reorder())
             ->when(filled($filters['search'] ?? ''), function (Builder $query) use ($filters): void {
@@ -82,14 +83,16 @@ class ProjectExport
         } elseif (($filters['sortBy'] ?? 'order') === 'order') {
             $this->applyNaturalOrder($query, $filters['sortDir'] ?? 'ASC');
         } else {
-            $sortBy = in_array($filters['sortBy'] ?? 'order', array_keys(self::HEADERS), true)
-                ? ($filters['sortBy'] === 'classification' ? 'classification_of_investments' : $filters['sortBy'])
+            $requestedSort = ($filters['sortBy'] ?? '') === 'classification'
+                ? 'classification_of_investments' : ($filters['sortBy'] ?? 'order');
+            $sortBy = in_array($requestedSort, ProjectTableDefinition::SORTABLE_COLUMNS, true)
+                ? $requestedSort
                 : 'order';
             $query->orderBy($sortBy, strtoupper($filters['sortDir'] ?? 'ASC') === 'ASC' ? 'ASC' : 'DESC');
         }
 
         $projects = $query->get();
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Projects');
         $sheet->fromArray(array_map(fn (string $column) => self::HEADERS[$column], $columns), null, 'A1');
@@ -129,6 +132,7 @@ class ProjectExport
             'links' => route('projects.data', ['project' => $project->slug]),
             'upload_pda' => filled($project->upload_pda) ? 'Yes' : 'No',
             'handover_certificate' => filled($project->handover_certificate_path) ? 'Yes' : 'No',
+            'project_ideas' => filled($project->project_idea_path) ? 'Yes' : 'No',
             'state', 'investments', 'justification' => $project->{$column}?->value,
             'classification' => $project->classification_of_investments?->value,
             'plant' => $project->company?->company_name,

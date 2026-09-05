@@ -2,9 +2,13 @@
 
 namespace App\Livewire\Activities;
 
-use App\Enums\ProjectStateEnum;
+use App\Enums\InvestmentClassificationEnum;
+use App\Enums\InvestmentEnum;
+use App\Enums\ProjectJustificationEnum;
+use App\Livewire\Dashboard\Concerns\InteractsWithDashboardFilters;
 use App\Models\ProjectMilestone;
 use App\Models\ProjectWeeklyActivity;
+use App\Services\Dashboard\DashboardQueryService;
 use App\Services\Planification\PlanificationAccessService;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
@@ -14,6 +18,14 @@ use Livewire\Component;
 
 class ActivitiesDashboard extends Component
 {
+    use InteractsWithDashboardFilters;
+
+    public function mount(DashboardQueryService $queries): void
+    {
+        abort_unless(auth()->check(), 403);
+        $this->years = $queries->availableYears(auth()->user());
+    }
+
     public string $status = 'all';
 
     public string $search = '';
@@ -36,6 +48,7 @@ class ActivitiesDashboard extends Component
 
     public function render(PlanificationAccessService $access): View
     {
+        $this->sanitizeFilters();
         $today = CarbonImmutable::today();
         [$lastYear, $lastWeek] = $this->currentMonthLastWeek($today);
         $metrics = $this->activityMetrics($access, $today);
@@ -79,6 +92,11 @@ class ActivitiesDashboard extends Component
             : 0;
 
         return view('livewire.activities.activities-dashboard', [
+            'companies' => auth()->user()->availableCompanies(),
+            'stateOptions' => $this->reportableStateOptions(),
+            'classificationOptions' => InvestmentClassificationEnum::cases(),
+            'investmentOptions' => InvestmentEnum::cases(),
+            'justificationOptions' => ProjectJustificationEnum::cases(),
             'metrics' => $metrics,
             'milestoneMetrics' => $milestoneMetrics,
             ...$charts,
@@ -104,7 +122,7 @@ class ActivitiesDashboard extends Component
         return ProjectWeeklyActivity::query()
             ->whereHas('project', fn (Builder $query) => $query
                 ->whereIn('company_id', $access->allowedCompanyIds())
-                ->where('state', '<>', ProjectStateEnum::Postponed->value))
+                ->whereIn('projects.id', $this->filteredProjectIds()))
             ->with('project:id,name,slug,pda_code,company_id')
             ->when(trim($this->search) !== '', function (Builder $query): void {
                 $term = '%'.trim($this->search).'%';
@@ -122,7 +140,7 @@ class ActivitiesDashboard extends Component
         return ProjectMilestone::query()
             ->whereHas('project', fn (Builder $query) => $query
                 ->whereIn('company_id', $access->allowedCompanyIds())
-                ->where('state', '<>', ProjectStateEnum::Postponed->value))
+                ->whereIn('projects.id', $this->filteredProjectIds()))
             ->with([
                 'project:id,name,slug,pda_code,company_id',
                 'milestone:id,name,code,color,view_color',
@@ -136,6 +154,13 @@ class ActivitiesDashboard extends Component
                             ->where('name', 'like', $term)->orWhere('pda_code', 'like', $term));
                 });
             });
+    }
+
+    private function filteredProjectIds(): Builder
+    {
+        return app(DashboardQueryService::class)
+            ->projectQuery(auth()->user(), $this->filters())
+            ->select('projects.id');
     }
 
     private function activityStatus(ProjectWeeklyActivity $activity, CarbonImmutable $today): string

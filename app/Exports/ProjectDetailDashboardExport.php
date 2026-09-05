@@ -115,21 +115,22 @@ class ProjectDetailDashboardExport
         $metrics = [
             ['Budgeted', $rows->sum('global_price_euros') * $conversionRate],
             ['Executed', $rows->sum('executed_euros') * $conversionRate],
-            ['Booked', $rows->sum('booked_euros') * $conversionRate],
-            ['Real', $rows->sum('real_value_euros') * $conversionRate],
+            ['Assigned', $rows->sum('booked_euros') * $conversionRate],
+            ['Booked (Real SAP)', $rows->sum('real_value_euros') * $conversionRate],
+            ['Committed', ($rows->sum('booked_euros') - $rows->sum('real_value_euros')) * $conversionRate],
         ];
         $sheet->fromArray(['Metric', "Value ({$symbol})"], null, 'D4');
         $sheet->fromArray($metrics, null, 'D5');
 
         $this->styleHeader($sheet, 'D4:E4');
-        $sheet->getStyle('D5:E8')->getBorders()->getBottom()
+        $sheet->getStyle('D5:E9')->getBorders()->getBottom()
             ->setBorderStyle(Border::BORDER_THIN)
             ->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('E2E8F0'));
-        $sheet->getStyle('E5:E8')->getNumberFormat()->setFormatCode($this->moneyFormat($symbol));
+        $sheet->getStyle('E5:E9')->getNumberFormat()->setFormatCode($this->moneyFormat($symbol));
         $sheet->getStyle('A4:A8')->getFont()->setBold(true)->getColor()->setRGB(self::DARK_BLUE);
         $sheet->getColumnDimension('A')->setWidth(20);
         $sheet->getColumnDimension('B')->setWidth(46);
-        $sheet->getColumnDimension('D')->setWidth(20);
+        $sheet->getColumnDimension('D')->setWidth(28);
         $sheet->getColumnDimension('E')->setWidth(22);
     }
 
@@ -147,8 +148,13 @@ class ProjectDetailDashboardExport
             ->map(fn ($items) => $items->sum($valueColumn) * $conversionRate)
             ->sortDesc();
 
+        $valueLabel = match ($valueColumn) {
+            'booked_euros' => 'Assigned',
+            'real_value_euros' => 'Booked (Real SAP)',
+            default => Str::headline($valueColumn),
+        };
         $sheet->fromArray([
-            [Str::headline($groupColumn), Str::headline($valueColumn)." ({$symbol})"],
+            [Str::headline($groupColumn), $valueLabel." ({$symbol})"],
             ...$groups->map(fn ($value, $label) => [$label, $value])->values()->all(),
         ], null, 'A1');
 
@@ -156,7 +162,7 @@ class ProjectDetailDashboardExport
         $this->styleHeader($sheet, 'A1:B1');
         $sheet->getStyle("B2:B{$lastRow}")->getNumberFormat()->setFormatCode($this->moneyFormat($symbol));
         $sheet->getColumnDimension('A')->setWidth(42);
-        $sheet->getColumnDimension('B')->setWidth(24);
+        $sheet->getColumnDimension('B')->setWidth(28);
         $sheet->setAutoFilter("A1:B{$lastRow}");
         $sheet->freezePane('A2');
     }
@@ -170,7 +176,7 @@ class ProjectDetailDashboardExport
         $symbol = $currency === 'dollar' ? '$' : '€';
         $headers = [
             'Area', 'Group 1', 'Group 2', 'Description', 'Classification', 'Item Type',
-            'Stage', 'Supplier', 'Order No.', 'Budgeted', 'Executed', 'Booked', 'Real',
+            'Stage', 'Supplier', 'Order No.', 'Budgeted', 'Executed', 'Assigned', 'Booked (Real SAP)', 'Committed',
         ];
         $sheet->fromArray($headers, null, 'A1');
 
@@ -190,18 +196,21 @@ class ProjectDetailDashboardExport
                 (float) $row->executed_euros * $conversionRate,
                 (float) $row->booked_euros * $conversionRate,
                 (float) $row->real_value_euros * $conversionRate,
+                ((float) $row->booked_euros - (float) $row->real_value_euros) * $conversionRate,
             ], null, "A{$rowNumber}");
             $rowNumber++;
         }
 
         $lastRow = max(2, $rowNumber - 1);
-        $this->styleHeader($sheet, 'A1:M1');
-        $sheet->getStyle("J2:M{$lastRow}")->getNumberFormat()->setFormatCode($this->moneyFormat($symbol));
+        $this->styleHeader($sheet, 'A1:N1');
+        $sheet->getStyle("J2:N{$lastRow}")->getNumberFormat()->setFormatCode($this->moneyFormat($symbol));
         $sheet->getDefaultColumnDimension()->setWidth(18);
         $sheet->getColumnDimension('D')->setWidth(48);
         $sheet->getColumnDimension('E')->setWidth(28);
         $sheet->getColumnDimension('H')->setWidth(28);
-        $sheet->setAutoFilter("A1:M{$lastRow}");
+        $sheet->getColumnDimension('L')->setWidth(28);
+        $sheet->getColumnDimension('M')->setWidth(28);
+        $sheet->setAutoFilter("A1:N{$lastRow}");
         $sheet->freezePane('A2');
     }
 

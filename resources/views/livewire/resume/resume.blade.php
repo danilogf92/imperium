@@ -6,7 +6,7 @@
                 <div>
                     <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
                         {{ __('Portfolio analytics') }}</p>
-                    <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">{{ __('Annual project resume') }}
+                    <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">{{ __('Project resume') }}
                     </h1>
                     <p class="mt-1 text-sm text-slate-500">
                         {{ __('Executive financial summary by project forecast start year.') }}
@@ -150,10 +150,10 @@
                 style="display: grid; grid-template-columns: repeat(4, minmax(210px, 1fr)); min-width: 840px;">
                 @foreach ([['label' => 'Projects', 'value' => $totals['projects'], 'money' => false, 'accent' => 'bg-indigo-500', 'text' => 'text-indigo-600'], ['label' => 'Approved', 'value' => $totals['approved'], 'money' => true, 'accent' => 'bg-blue-500', 'text' => 'text-blue-600'], ['label' => 'Booked', 'value' => $totals['booked'], 'money' => true, 'accent' => 'bg-amber-500', 'text' => 'text-amber-600'], ['label' => 'Available', 'value' => $totals['available'], 'money' => true, 'accent' => $totals['available'] < 0 ? 'bg-red-500' : 'bg-emerald-500', 'text' => $totals['available'] < 0 ? 'text-red-600' : 'text-emerald-600']] as $metric)
                     <article class="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                        <span class="absolute inset-y-0 left-0 w-1 {{ $metric['accent'] }}"></span>
+                        <span class="{{ $metric['accent'] }} absolute inset-y-0 left-0 w-1"></span>
                         <div class="flex items-center gap-3">
                             <span
-                                class="inline-flex h-10 w-10 shrink-0 items-center justify-center {{ $metric['text'] }}">
+                                class="{{ $metric['text'] }} inline-flex h-10 w-10 shrink-0 items-center justify-center">
                                 <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="1.8" aria-hidden="true">
                                     @if ($metric['label'] === 'Projects')

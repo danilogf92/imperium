@@ -85,7 +85,8 @@ final class PlanificationQueryService
                     }),
             ])
             ->withSum('data as data_budgeted', 'global_price')
-            ->withSum('data as data_budgeted_euros', 'global_price_euros');
+            ->withSum('data as data_budgeted_euros', 'global_price_euros')
+            ->withSum('projectMilestones as allocated_percentage', 'percentage');
 
         $this->applyFilters($query, $filters, $activityWeeks);
 

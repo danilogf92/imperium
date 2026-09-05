@@ -19,7 +19,7 @@ final class ProjectSupplierChartService
         $executed = $this->supplierValues($projectId, 'executed_euros', $conversion);
 
         return [
-            'projectBookedBySupplierChart' => $this->chart($booked, 'Booked by supplier', $currency),
+            'projectBookedBySupplierChart' => $this->chart($booked, 'Assigned by supplier', $currency),
             'projectExecutedBySupplierChart' => $this->chart($executed, 'Executed by supplier', $currency),
             'hasProjectBookedSupplierData' => $booked !== [],
             'hasProjectExecutedSupplierData' => $executed !== [],

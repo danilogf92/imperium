@@ -32,8 +32,12 @@
             'updated_at',
             'budgeted_euros',
             'real_euros',
+            'executed_euros',
+            'booked_euros',
             'budgeted_dollars',
             'real_dollars',
+            'executed_dollars',
+            'booked',
             'actions',
         ];
     @endphp

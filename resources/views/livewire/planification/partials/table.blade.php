@@ -9,15 +9,19 @@
                     'actual_week' => 160,
                     'next_week' => 160,
                 ];
+
                 $visibleFixedColumns = collect(array_keys($fixedColumnOptions))
                     ->filter(fn($column) => in_array($column, $visibleColumns, true))
                     ->values();
+
                 $fixedOffsets = [];
                 $fixedWidth = 0;
+
                 foreach ($visibleFixedColumns as $column) {
                     $fixedOffsets[$column] = $fixedWidth;
                     $fixedWidth += $fixedWidths[$column];
                 }
+
             @endphp
             <div class="planification-table-scroll unified-table-scroll overflow-x-auto overscroll-x-contain">
                 <table class="unified-data-table cursor-pointer"
@@ -35,6 +39,7 @@
                     </colgroup>
                     <thead class="sticky top-0 z-20 shadow-sm">
                         <tr class="bg-[#7DB9F1] text-slate-900">
+
                             @foreach ($visibleFixedColumns->filter(fn($column) => !in_array($column, ['actual_week', 'next_week'], true)) as $column)
                                 <th rowspan="2"
                                     class="sticky z-30 border-r border-blue-300 bg-[#7DB9F1] px-2 py-2 text-[10px] font-bold uppercase tracking-wide"
@@ -42,6 +47,7 @@
                                     {{ __($fixedColumnOptions[$column]) }}
                                 </th>
                             @endforeach
+
                             @foreach ($activityWeeks as $week)
                                 @php $activityColumn = $week['offset'] === 0 ? 'actual_week' : 'next_week'; @endphp
                                 @if (in_array($activityColumn, $visibleColumns, true))
@@ -55,20 +61,20 @@
                                     </th>
                                 @endif
                             @endforeach
+
                             @foreach ($timelineYears as $year)
                                 <th colspan="12"
-                                    class="border-r-2 border-blue-300 px-2 py-1.5 text-center text-sm font-bold {{ (int) $year === now()->year ? 'bg-blue-300' : '' }}">
+                                    class="{{ (int) $year === now()->year ? 'bg-blue-300' : '' }} border-r-2 border-blue-300 px-2 py-1.5 text-center text-sm font-bold">
                                     {{ $year }}
                                 </th>
                             @endforeach
+
                         </tr>
                         <tr class="bg-blue-200 text-slate-900">
                             @foreach ($timelineYears as $year)
                                 @foreach (['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'] as $monthLabel)
                                     <th
-                                        class="w-48 border-r border-blue-300 px-1 py-1.5 text-center text-xs font-semibold
-                                        {{ (int) $year === now()->year && $loop->iteration === now()->month ? '!border-x-2 !border-x-blue-500 !bg-[#7DB9F1] text-slate-900' : '' }}
-                                        {{ $loop->last ? 'border-r-2 border-blue-300' : '' }}">
+                                        class="{{ (int) $year === now()->year && $loop->iteration === now()->month ? '!border-x-2 !border-x-blue-500 !bg-[#7DB9F1] text-slate-900' : '' }} {{ $loop->last ? 'border-r-2 border-blue-300' : '' }} w-48 border-r border-blue-300 px-1 py-1.5 text-center text-xs font-semibold">
                                         {{ $monthLabel }}
                                     </th>
                                 @endforeach
@@ -98,13 +104,15 @@
                                 $canDeleteProject = in_array($plannedProject->company_id, $deletableCompanyIds, true);
                                 $currencySymbol = $currency === 'eur' ? '€' : '$';
                             @endphp
-                            <tr wire:key="planned-project-{{ $plannedProject->id }}" class="group min-h-10 ">
+                            <tr wire:key="planned-project-{{ $plannedProject->id }}" class="group min-h-10">
+
                                 @if (in_array('forecast_year', $visibleColumns, true))
                                     <td style="left: {{ $fixedOffsets['forecast_year'] }}px"
                                         class="planification-sticky-cell sticky z-10 w-24 border-b border-r border-gray-200 px-2 py-1.5 text-center text-xs font-medium text-slate-700">
                                         {{ $plannedProject->forecast_start_date?->year }}
                                     </td>
                                 @endif
+
                                 @if (in_array('plant', $visibleColumns, true))
                                     <td style="left: {{ $fixedOffsets['plant'] }}px"
                                         class="planification-sticky-cell sticky z-10 w-40 border-b border-r border-gray-200 px-2 py-1.5 text-xs text-slate-700">
@@ -113,6 +121,7 @@
                                         </div>
                                     </td>
                                 @endif
+
                                 @if (in_array('pda_code', $visibleColumns, true))
                                     <td style="left: {{ $fixedOffsets['pda_code'] }}px"
                                         class="planification-sticky-cell sticky z-10 w-40 border-b border-r border-gray-200 px-2 py-1.5 text-xs font-semibold text-slate-700">
@@ -121,17 +130,96 @@
                                         </div>
                                     </td>
                                 @endif
-                                @if (in_array('name', $visibleColumns, true))
-                                    <td style="left: {{ $fixedOffsets['name'] }}px"
+
+                                {{-- @if (in_array('name', $visibleColumns, true))
+                                    @php
+                                        $allocatedPercentage = round(
+                                            (float) ($plannedProject->allocated_percentage ?? 0),
+                                            2,
+                                        );
+                                        $allocationComplete = $allocatedPercentage >= 100;
+                                        $allocationLabel =
+                                            rtrim(rtrim(number_format($allocatedPercentage, 2, '.', ''), '0'), '.') .
+                                            '%';
+                                    @endphp
+                                    <td style="left: {{ $fixedOffsets['name'] }}px; background-color: {{ $allocationComplete ? '#D1FAE5' : '#FFEDD5' }} !important"
                                         class="planification-sticky-cell sticky z-10 w-64 border-b border-r border-gray-200 px-4 py-1.5 align-middle">
                                         <div class="flex items-center gap-2">
-                                            <div class="line-clamp-2 text-xs font-medium leading-tight text-gray-900"
+                                            <span @class([
+                                                'inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[7px] font-bold tabular-nums ring-1',
+                                                'bg-emerald-100 text-emerald-700 ring-emerald-200' => $allocationComplete,
+                                                'bg-orange-100 text-orange-700 ring-orange-200' => !$allocationComplete,
+                                            ])
+                                                title="{{ __('Allocated budget: :percentage', ['percentage' => $allocationLabel]) }}"
+                                                aria-label="{{ __('Allocated budget: :percentage', ['percentage' => $allocationLabel]) }}">
+                                                {{ $allocationLabel }}
+                                            </span>
+                                            <a href="{{ route('projects.dashboard', $plannedProject->slug) }}"
+                                                wire:navigate @class([
+                                                    'line-clamp-2 min-w-0 text-xs font-semibold leading-tight hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
+                                                    'text-emerald-700' => $allocationComplete,
+                                                    'text-orange-700' => !$allocationComplete,
+                                                ])
                                                 title="{{ $plannedProject->name }}">
                                                 {{ $plannedProject->name }}
-                                            </div>
+                                            </a>
+                                        </div>
+                                    </td>
+                                @endif --}}
+
+                                @if (in_array('name', $visibleColumns, true))
+                                    @php
+                                        $allocatedPercentage = round(
+                                            (float) ($plannedProject->allocated_percentage ?? 0),
+                                            2,
+                                        );
+
+                                        $allocationComplete = $allocatedPercentage >= 100;
+
+                                        $allocationLabel =
+                                            rtrim(rtrim(number_format($allocatedPercentage, 2, '.', ''), '0'), '.') .
+                                            '%';
+                                    @endphp
+
+                                    <td style="
+            left: {{ $fixedOffsets['name'] }}px;
+            background-color: {{ $allocationComplete ? '#D1FAE5' : '#FFEDD5' }} !important;
+        "
+                                        class="planification-sticky-cell sticky z-10 w-64 border-b border-r border-gray-200 px-4 py-1.5 align-middle">
+                                        <div class="flex items-center gap-3">
+
+                                            {{-- Porcentaje de presupuesto asignado --}}
+                                            <span @class([
+                                                'inline-flex shrink-0 items-center justify-center rounded-full font-bold tabular-nums ring-1',
+                                                'bg-emerald-100 text-emerald-700 ring-emerald-300' => $allocationComplete,
+                                                'bg-orange-100 text-orange-700 ring-orange-300' => !$allocationComplete,
+                                            ]) style="width: 28px; height: 28px; padding: 0; font-size: {{ strlen($allocationLabel) > 4 ? '6.5' : '8' }}px; line-height: 1; white-space: nowrap; letter-spacing: -0.2px;"
+                                                title="{{ __('Allocated budget: :percentage', [
+                                                    'percentage' => $allocationLabel,
+                                                ]) }}"
+                                                aria-label="{{ __('Allocated budget: :percentage', [
+                                                    'percentage' => $allocationLabel,
+                                                ]) }}">
+                                                {{ $allocationLabel }}
+                                            </span>
+
+                                            {{-- Nombre del proyecto --}}
+                                            <a href="{{ route('projects.dashboard', $plannedProject->slug) }}"
+                                                wire:navigate @class([
+                                                    'line-clamp-2 min-w-0 text-xs font-semibold leading-tight',
+                                                    'hover:underline',
+                                                    'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
+                                                    'text-emerald-700' => $allocationComplete,
+                                                    'text-orange-700' => !$allocationComplete,
+                                                ])
+                                                title="{{ $plannedProject->name }}">
+                                                {{ $plannedProject->name }}
+                                            </a>
+
                                         </div>
                                     </td>
                                 @endif
+
                                 @if (in_array('budgeted', $visibleColumns, true))
                                     <td style="left: {{ $fixedOffsets['budgeted'] }}px"
                                         class="planification-sticky-cell sticky z-10 w-36 border-b border-r border-gray-200 px-2 py-1.5 text-right text-xs font-bold text-slate-800">
@@ -200,12 +288,12 @@
                                                     class="inline-flex max-w-full cursor-pointer items-center gap-1.5 rounded-lg border border-cyan-500 bg-cyan-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-px hover:bg-cyan-500 hover:shadow-md">
                                                     @if ($weeklyActivity)
                                                         <span
-                                                            class="inline-flex h-5 w-5 items-center justify-center rounded-full font-bold
-                                                        {{ $allActivitiesExecuted ? 'bg-green-500 text-white' : ($weekExpired ? 'bg-red-500 text-white' : 'bg-amber-100 text-amber-700') }}">
+                                                            class="{{ $allActivitiesExecuted ? 'bg-green-500 text-white' : ($weekExpired ? 'bg-red-500 text-white' : 'bg-amber-100 text-amber-700') }} inline-flex h-5 w-5 items-center justify-center rounded-full font-bold">
                                                             {{ $allActivitiesExecuted ? '✓' : ($weekExpired ? '×' : '○') }}
                                                         </span>
                                                     @endif
-                                                    <span class="text-base leading-none">{{ $canUpdateProject ? '+' : 'i' }}</span>
+                                                    <span
+                                                        class="text-base leading-none">{{ $canUpdateProject ? '+' : 'i' }}</span>
                                                     <span
                                                         class="truncate">{{ $weeklyActivity ? $weeklyActivitiesForWeek->count() . ' activities' : ($canUpdateProject ? 'Add activity' : 'View activities') }}</span>
                                                 </button>
@@ -242,7 +330,7 @@
                                                                             </span>
                                                                         @else
                                                                             <span
-                                                                                class="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold {{ $weekExpired ? 'bg-red-400/20 text-red-200' : 'bg-amber-300/20 text-amber-100' }}">
+                                                                                class="{{ $weekExpired ? 'bg-red-400/20 text-red-200' : 'bg-amber-300/20 text-amber-100' }} inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold">
                                                                                 <span
                                                                                     aria-hidden="true">{{ $weekExpired ? '×' : '○' }}</span>
                                                                                 Not executed
@@ -277,10 +365,7 @@
                                                     $cellPosition >= $firstPlannedPosition);
                                         @endphp
                                         <td
-                                            class="w-48 border-b border-r border-gray-200 px-1 py-1 text-center align-middle
-                                    {{ $monthNumber === 12 ? 'border-r-2 border-r-blue-200' : '' }}
-                                    {{ !$cellCanCreate ? 'bg-slate-100/80' : '' }}
-                                    {{ (int) $year === now()->year && $monthNumber === now()->month ? '!border-x-2 !border-x-cyan-400 !bg-cyan-100' : '' }}">
+                                            class="{{ $monthNumber === 12 ? 'border-r-2 border-r-blue-200' : '' }} {{ !$cellCanCreate ? 'bg-slate-100/80' : '' }} {{ (int) $year === now()->year && $monthNumber === now()->month ? '!border-x-2 !border-x-cyan-400 !bg-cyan-100' : '' }} w-48 border-b border-r border-gray-200 px-1 py-1 text-center align-middle">
                                             <div
                                                 class="flex min-h-6 flex-wrap content-center justify-center gap-1 overflow-visible">
                                                 @foreach ($yearItems->where('month', $monthNumber) as $item)
@@ -319,21 +404,25 @@
                                                         @if (!$milestoneIsFuture)
                                                             <span
                                                                 title="{{ $milestoneExecuted ? 'Executed' : ($milestoneExpired ? 'Not executed' : 'Pending execution') }}"
-                                                                class="m-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold leading-none shadow-sm ring-1 ring-white/40
-                                                                    {{ $milestoneExecuted ? 'bg-green-600 text-white' : ($milestoneExpired ? 'bg-red-600 text-white' : 'bg-white/20') }}">
+                                                                class="{{ $milestoneExecuted ? 'bg-green-600 text-white' : ($milestoneExpired ? 'bg-red-600 text-white' : 'bg-white/20') }} m-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold leading-none shadow-sm ring-1 ring-white/40">
                                                                 {{ $milestoneExecuted ? '✓' : ($milestoneExpired ? '×' : '○') }}
                                                             </span>
                                                         @endif
                                                         @if ($canUpdateProject)
-                                                            <button type="button" wire:click="editMilestone({{ $item->id }})"
-                                                                data-no-global-loading class="px-1.5 py-0.5 text-xs font-semibold leading-4 hover:bg-black/10"
+                                                            <button type="button"
+                                                                wire:click="editMilestone({{ $item->id }})"
+                                                                data-no-global-loading
+                                                                class="px-1.5 py-0.5 text-xs font-semibold leading-4 hover:bg-black/10"
                                                                 title="Edit {{ $item->milestone->name }}">{{ $milestoneText }}</button>
                                                         @else
-                                                            <span class="px-1.5 py-0.5 text-xs font-semibold leading-4">{{ $milestoneText }}</span>
+                                                            <span
+                                                                class="px-1.5 py-0.5 text-xs font-semibold leading-4">{{ $milestoneText }}</span>
                                                         @endif
                                                         @if ($canDeleteProject)
-                                                            <button type="button" wire:click="requestDeleteMilestone({{ $item->id }})"
-                                                                data-no-global-loading class="border-l border-white/30 px-1 py-0.5 text-xs leading-4 hover:bg-black/20"
+                                                            <button type="button"
+                                                                wire:click="requestDeleteMilestone({{ $item->id }})"
+                                                                data-no-global-loading
+                                                                class="border-l border-white/30 px-1 py-0.5 text-xs leading-4 hover:bg-black/20"
                                                                 title="Remove milestone">×</button>
                                                         @endif
                                                     </span>

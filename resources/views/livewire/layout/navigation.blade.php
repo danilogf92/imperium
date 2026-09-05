@@ -61,9 +61,6 @@ new class extends Component {
                         {{ __('Templates') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('task')" :active="request()->routeIs('task')" wire:navigate>
-                        {{ __('Task') }}
-                    </x-nav-link>
                 </div>
             </div>
 
@@ -153,9 +150,6 @@ new class extends Component {
                 {{ __('Templates') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('task')" :active="request()->routeIs('task')" wire:navigate>
-                {{ __('Task') }}
-            </x-responsive-nav-link>
         </div>
 
         <!-- Responsive Settings Options -->

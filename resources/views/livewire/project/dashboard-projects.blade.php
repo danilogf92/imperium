@@ -194,8 +194,8 @@
 
                         <x-dashboard-filter-dropdown label="Financial value" model="investments" :options="[
                             ['value' => 'global_price_euros', 'label' => 'Budgeted'],
-                            ['value' => 'real_value_euros', 'label' => 'Real value (SAP)'],
-                            ['value' => 'booked_euros', 'label' => 'Booked'],
+                            ['value' => 'real_value_euros', 'label' => 'Booked (Real SAP)'],
+                            ['value' => 'booked_euros', 'label' => 'Assigned'],
                             ['value' => 'executed_euros', 'label' => 'Executed'],
                         ]"
                             :selected="$investments" default="global_price_euros" />
@@ -213,8 +213,8 @@
                 @php
                     $financialFilterLabels = [
                         'global_price_euros' => 'Budgeted',
-                        'real_value_euros' => 'Real value (SAP)',
-                        'booked_euros' => 'Booked',
+                        'real_value_euros' => 'Booked (Real SAP)',
+                        'booked_euros' => 'Assigned',
                         'executed_euros' => 'Executed',
                     ];
                 @endphp
@@ -260,16 +260,25 @@
                     'value' => $currencySymbol . ' ' . number_format($approved, 2),
                     'color' => 'slate',
                 ],
-                ['label' => 'Booked', 'value' => $currencySymbol . ' ' . number_format($booked, 2), 'color' => 'amber'],
                 [
                     'label' => 'Executed',
                     'value' => $currencySymbol . ' ' . number_format($executed, 2),
                     'color' => 'emerald',
                 ],
                 [
-                    'label' => 'Real (SAP)',
+                    'label' => 'Assigned',
+                    'value' => $currencySymbol . ' ' . number_format($booked, 2),
+                    'color' => 'amber',
+                ],
+                [
+                    'label' => 'Booked (Real SAP)',
                     'value' => $currencySymbol . ' ' . number_format($real_value, 2),
                     'color' => 'violet',
+                ],
+                [
+                    'label' => 'Committed',
+                    'value' => $currencySymbol . ' ' . number_format($booked - $real_value, 2),
+                    'color' => 'amber',
                 ],
                 [
                     'label' => 'Available',
@@ -280,11 +289,23 @@
             ];
         @endphp
 
-        <section class="overflow-x-auto pb-1">
-            <div class="gap-4"
-                style="display: grid; grid-template-columns: repeat({{ count($metrics) }}, minmax(190px, 1fr)); min-width: {{ count($metrics) * 190 }}px;">
+        <style>
+            .project-summary-metrics {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+            @media (min-width: 640px) {
+                .project-summary-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+            }
+            @media (min-width: 1200px) {
+                .project-summary-metrics { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+            }
+        </style>
+        <section>
+            <div class="project-summary-metrics">
                 @foreach ($metrics as $metric)
-                    <article class="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <article class="relative min-w-0 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
                         <span @class([
                             'absolute inset-y-0 left-0 w-1',
                             'bg-blue-500' => $metric['color'] === 'blue',
@@ -295,9 +316,9 @@
                             'bg-slate-500' => $metric['color'] === 'slate',
                             'bg-rose-500' => $metric['color'] === 'rose',
                         ])></span>
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-1">
                             <span @class([
-                                'inline-flex h-10 w-10 shrink-0 items-center justify-center',
+                                'inline-flex h-5 w-5 shrink-0 items-center justify-center',
                                 'text-blue-600' => $metric['color'] === 'blue',
                                 'text-amber-600' => $metric['color'] === 'amber',
                                 'text-cyan-600' => $metric['color'] === 'cyan',
@@ -306,7 +327,7 @@
                                 'text-slate-600' => $metric['color'] === 'slate',
                                 'text-rose-600' => $metric['color'] === 'rose',
                             ])>
-                                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="1.8">
                                     @if ($metric['label'] === 'Progress')
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -314,7 +335,7 @@
                                     @elseif ($metric['label'] === 'Executed')
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="m4.5 12.75 6 6 9-13.5" />
-                                    @elseif ($metric['label'] === 'Real (SAP)')
+                                    @elseif ($metric['label'] === 'Booked (Real SAP)')
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M19.5 6c0 1.657-3.358 3-7.5 3S4.5 7.657 4.5 6 7.858 3 12 3s7.5 1.343 7.5 3Zm0 0v12c0 1.657-3.358 3-7.5 3s-7.5-1.343-7.5-3V6" />
                                     @else
@@ -323,9 +344,10 @@
                                     @endif
                                 </svg>
                             </span>
-                            <p class="whitespace-nowrap text-sm font-medium text-slate-500">{{ $metric['label'] }}</p>
+                            <p class="min-w-0 font-medium leading-tight text-slate-500" style="font-size: 11px;">{{ $metric['label'] }}
+                            </p>
                         </div>
-                        <p class="mt-2 whitespace-nowrap text-2xl font-bold tracking-tight text-slate-900">
+                        <p class="mt-2 font-bold tracking-tight text-slate-900" style="font-size: clamp(11px, 1vw, 16px); line-height: 1.2; overflow-wrap: anywhere;">
                             {{ $metric['value'] }}
                         </p>
                     </article>
@@ -370,7 +392,7 @@
                     ],
                     [
                         'name' => 'project-real-balance',
-                        'title' => 'Balance with real value',
+                        'title' => 'Balance with Booked (Real SAP)',
                         'type' => 'pie',
                         'model' => $pieChartModelResume,
                     ],
@@ -382,7 +404,7 @@
                     ],
                     [
                         'name' => 'project-booked-balance',
-                        'title' => 'Balance with booked value',
+                        'title' => 'Balance with Assigned',
                         'type' => 'pie',
                         'model' => $pieChartModelResumeTwo,
                     ],

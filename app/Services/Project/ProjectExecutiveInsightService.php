@@ -99,6 +99,7 @@ final class ProjectExecutiveInsightService
     {
         $weeks = collect([0, 1])->map(function (int $offset): array {
             $date = CarbonImmutable::now()->startOfWeek()->addWeeks($offset);
+
             return ['year' => $date->isoWeekYear, 'week' => $date->isoWeek, 'label' => $offset ? 'Next week' : 'Actual week'];
         });
         $rows = ProjectWeeklyActivity::query()->where('project_id', $projectId)
@@ -130,8 +131,8 @@ final class ProjectExecutiveInsightService
     private function alerts(Project $project, array $financial, array $activities, array $milestones): array
     {
         return collect([
-            $financial['booked'] > $financial['budgeted'] && $financial['budgeted'] > 0 ? ['level' => 'danger', 'text' => 'Booked value exceeds the project budget.'] : null,
-            $financial['real'] > $financial['budgeted'] && $financial['budgeted'] > 0 ? ['level' => 'danger', 'text' => 'Real value exceeds the project budget.'] : null,
+            $financial['booked'] > $financial['budgeted'] && $financial['budgeted'] > 0 ? ['level' => 'danger', 'text' => 'Assigned exceeds the project budget.'] : null,
+            $financial['real'] > $financial['budgeted'] && $financial['budgeted'] > 0 ? ['level' => 'danger', 'text' => 'Booked (Real SAP) exceeds the project budget.'] : null,
             $financial['executed'] > $financial['budgeted'] && $financial['budgeted'] > 0 ? [
                 'level' => 'danger',
                 'text' => 'Executed value exceeds budget by '.number_format($financial['executed'] - $financial['budgeted'], 2).'.',
