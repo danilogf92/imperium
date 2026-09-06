@@ -10,7 +10,9 @@ class ExcelTemplateDownloadController
 {
     public function __invoke(ExcelTemplate $excelTemplate): StreamedResponse
     {
-        abort_unless($excelTemplate->is_active, 404);
+        abort_unless(auth()->check(), 403);
+        abort_unless(ExcelTemplate::query()->active()->visibleTo(auth()->user())
+            ->whereKey($excelTemplate->id)->exists(), 404);
 
         $disk = Storage::disk($excelTemplate->disk);
         abort_unless($disk->exists($excelTemplate->file_path), 404, 'Template file not found.');
@@ -18,7 +20,7 @@ class ExcelTemplateDownloadController
         return $disk->download(
             $excelTemplate->file_path,
             $excelTemplate->original_file_name,
-            ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+            ['Content-Type' => ExcelTemplate::FILE_TYPES[$excelTemplate->fileType()] ?? 'application/octet-stream']
         );
     }
 }

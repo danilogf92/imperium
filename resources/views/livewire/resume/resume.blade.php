@@ -139,16 +139,18 @@
         @php
             $totals = [
                 'projects' => $rows->sum('project_count'),
+                'budgeted' => $rows->sum('budgeted'),
                 'approved' => $rows->sum('approved'),
                 'booked' => $rows->sum('booked'),
+                'committed' => $rows->sum('committed'),
                 'available' => $rows->sum('available'),
             ];
         @endphp
 
         <section class="overflow-x-auto pb-1">
             <div class="gap-4"
-                style="display: grid; grid-template-columns: repeat(4, minmax(210px, 1fr)); min-width: 840px;">
-                @foreach ([['label' => 'Projects', 'value' => $totals['projects'], 'money' => false, 'accent' => 'bg-indigo-500', 'text' => 'text-indigo-600'], ['label' => 'Approved', 'value' => $totals['approved'], 'money' => true, 'accent' => 'bg-blue-500', 'text' => 'text-blue-600'], ['label' => 'Booked', 'value' => $totals['booked'], 'money' => true, 'accent' => 'bg-amber-500', 'text' => 'text-amber-600'], ['label' => 'Available', 'value' => $totals['available'], 'money' => true, 'accent' => $totals['available'] < 0 ? 'bg-red-500' : 'bg-emerald-500', 'text' => $totals['available'] < 0 ? 'text-red-600' : 'text-emerald-600']] as $metric)
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 175px), 1fr));">
+                @foreach ([['label' => 'Projects', 'value' => $totals['projects'], 'money' => false, 'accent' => 'bg-indigo-500', 'text' => 'text-indigo-600'], ['label' => 'Budgeted', 'value' => $totals['budgeted'], 'money' => true, 'accent' => 'bg-sky-500', 'text' => 'text-sky-600'], ['label' => 'Approved', 'value' => $totals['approved'], 'money' => true, 'accent' => 'bg-blue-500', 'text' => 'text-blue-600'], ['label' => 'Booked (Real SAP)', 'value' => $totals['booked'], 'money' => true, 'accent' => 'bg-amber-500', 'text' => 'text-amber-600'], ['label' => 'Committed', 'value' => $totals['committed'], 'money' => true, 'accent' => 'bg-orange-500', 'text' => 'text-orange-600'], ['label' => 'Available', 'value' => $totals['available'], 'money' => true, 'accent' => $totals['available'] < 0 ? 'bg-red-500' : 'bg-emerald-500', 'text' => $totals['available'] < 0 ? 'text-red-600' : 'text-emerald-600']] as $metric)
                     <article class="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                         <span class="{{ $metric['accent'] }} absolute inset-y-0 left-0 w-1"></span>
                         <div class="flex items-center gap-3">
@@ -165,7 +167,7 @@
                                     @endif
                                 </svg>
                             </span>
-                            <p class="whitespace-nowrap text-sm font-medium text-slate-500">{{ __($metric['label']) }}
+                            <p class="text-sm font-medium text-slate-500">{{ __($metric['label']) }}
                             </p>
                         </div>
                         <p class="mt-2 whitespace-nowrap text-2xl font-bold tracking-tight text-slate-900">
@@ -200,7 +202,8 @@
                             <th class="whitespace-nowrap px-4 py-3 text-right">Number of projects</th>
                             <th class="whitespace-nowrap px-4 py-3 text-right">Budgeted {{ $currencySymbol }}</th>
                             <th class="whitespace-nowrap px-4 py-3 text-right">Approved {{ $currencySymbol }}</th>
-                            <th class="whitespace-nowrap px-4 py-3 text-right">Booked {{ $currencySymbol }}</th>
+                            <th class="whitespace-nowrap px-4 py-3 text-right">Booked (Real SAP) {{ $currencySymbol }}</th>
+                            <th class="whitespace-nowrap px-4 py-3 text-right">Committed {{ $currencySymbol }}</th>
                             <th class="whitespace-nowrap px-4 py-3 text-right">Available {{ $currencySymbol }}</th>
                         </tr>
                     </thead>
@@ -212,7 +215,7 @@
                                 <td class="whitespace-nowrap px-4 py-3 text-right font-bold text-indigo-700">
                                     {{ number_format($row['project_count']) }}
                                 </td>
-                                @foreach (['budgeted', 'approved', 'booked'] as $field)
+                                @foreach (['budgeted', 'approved', 'booked', 'committed'] as $field)
                                     <td class="whitespace-nowrap px-4 py-3 text-right font-medium text-slate-700">
                                         <x-compact-money :value="$row[$field]" :symbol="$currencySymbol" />
                                     </td>
@@ -224,7 +227,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-14 text-center">
+                                <td colspan="7" class="px-6 py-14 text-center">
                                     <p class="font-semibold text-slate-700">
                                         {{ __('No projects match the selected filters.') }}</p>
                                     <p class="mt-1 text-sm text-slate-500">Clear or change the filters to view the
@@ -244,7 +247,7 @@
                     filename="annual-stacked-financial-position" height="34rem">
                     <livewire:livewire-column-chart key="{{ $stackedChart->reactiveKey() }}" :column-chart-model="$stackedChart" />
                     <x-slot:footer>
-                        Available = Approved &minus; Booked.
+                        Committed = Assigned &minus; Booked (Real SAP). Available = Approved &minus; Assigned.
                     </x-slot:footer>
                 </x-dashboard-chart-card>
 
@@ -256,31 +259,31 @@
                 </x-dashboard-chart-card>
 
                 <x-dashboard-chart-card title="Projects by year"
-                    subtitle="Project columns with Budgeted, Booked and Executed value lines"
+                    subtitle="Project columns with Budgeted, Assigned and Executed value lines"
                     filename="annual-project-count" height="34rem">
                     <x-dashboard-apex-chart :options="$projectsChartOptions"
                         chart-key="resume-projects-{{ md5(json_encode($projectsChartOptions)) }}" />
                 </x-dashboard-chart-card>
 
                 <x-dashboard-chart-card title="Available value trend"
-                    subtitle="Available, booked, budgeted and approved values by year"
+                    subtitle="Budgeted, Approved, Booked (Real SAP), Committed and Available values by year"
                     filename="annual-available-trend" height="34rem">
                     <livewire:livewire-line-chart key="{{ $availableChart->reactiveKey() }}" :line-chart-model="$availableChart" />
                 </x-dashboard-chart-card>
 
                 <x-dashboard-chart-card title="Financial coverage ratios"
-                    subtitle="Approved, booked and executed coverage by approval year, with a 100% target"
+                    subtitle="Financial coverage by approval year, with a 100% target"
                     filename="annual-financial-coverage" height="34rem">
                     <x-dashboard-apex-chart :options="$coverageChartOptions"
                         chart-key="resume-coverage-{{ md5(json_encode($coverageChartOptions)) }}" />
                     <x-slot:footer>
-                        Approved / Budgeted measures realized value against budget; Booked / Approved measures
-                        commitments against realized value.
+                        Approved / Budgeted measures budget approval. Booked (Real SAP), Committed and Available
+                        are shown as percentages of Approved.
                     </x-slot:footer>
                 </x-dashboard-chart-card>
 
                 <x-dashboard-chart-card title="Average value per project"
-                    subtitle="Average budgeted, approved and booked value for each project"
+                    subtitle="Average Budgeted, Approved, Booked (Real SAP), Committed and Available per project"
                     filename="annual-average-project-value" height="34rem">
                     <x-dashboard-apex-chart :options="$averageChartOptions"
                         chart-key="resume-average-{{ md5(json_encode($averageChartOptions)) }}" />
@@ -289,12 +292,28 @@
                 @if (($cashFlowChartOptions['series'][0]['data'] ?? []) !== [])
                     <x-dashboard-chart-card title="Milestone cash flow"
                         subtitle="Monthly sum of project budget allocated through milestone percentages"
-                        filename="monthly-milestone-cash-flow" height="34rem">
-                        <x-dashboard-apex-chart :options="$cashFlowChartOptions"
-                            chart-key="resume-cash-flow-{{ md5(json_encode($cashFlowChartOptions)) }}" />
+                        filename="monthly-milestone-cash-flow" height="38rem">
+                        <div style="display: flex; flex-direction: column; gap: 8px; height: 100%;">
+                            <section class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
+                                <div class="flex flex-wrap justify-between gap-2">
+                                    <span class="font-semibold text-red-700">
+                                        Total {{ $cashFlowSummary['years'] }}:
+                                        {{ $currencySymbol }} {{ number_format($cashFlowSummary['total'], 2) }}
+                                    </span>
+                                    <span class="font-semibold text-slate-600">
+                                        Outside selected years{{ $cashFlowSummary['outside_years'] !== '' ? ' (' . $cashFlowSummary['outside_years'] . ')' : '' }}:
+                                        {{ $currencySymbol }} {{ number_format($cashFlowSummary['outside_total'], 2) }}
+                                    </span>
+                                </div>
+                            </section>
+                            <div style="height: 300px; min-height: 300px; flex: 0 0 300px;">
+                                <x-dashboard-apex-chart :options="$cashFlowChartOptions"
+                                    chart-key="resume-cash-flow-{{ md5(json_encode($cashFlowChartOptions)) }}" />
+                            </div>
+                        </div>
                         <x-slot:footer>
-                            Each month equals project budget multiplied by milestone percentage. All Resume filters
-                            apply.
+                            Orange: before the current month. Light blue: current month onward.
+                            Other years are included only in the summary box.
                         </x-slot:footer>
                     </x-dashboard-chart-card>
                 @endif

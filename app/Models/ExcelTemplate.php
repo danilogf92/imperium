@@ -6,11 +6,20 @@ use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Storage;
 
 class ExcelTemplate extends Model
 {
     use Auditable;
+
+    public const FILE_TYPES = [
+        'pdf' => 'application/pdf',
+        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'xls' => 'application/vnd.ms-excel',
+        'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'ppt' => 'application/vnd.ms-powerpoint',
+    ];
 
     protected $fillable = [
         'name',
@@ -21,6 +30,7 @@ class ExcelTemplate extends Model
         'file_path',
         'original_file_name',
         'is_active',
+        'is_global',
         'uploaded_by',
     ];
 
@@ -28,6 +38,7 @@ class ExcelTemplate extends Model
     {
         return [
             'is_active' => 'boolean',
+            'is_global' => 'boolean',
         ];
     }
 
@@ -62,6 +73,25 @@ class ExcelTemplate extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    public function companies(): BelongsToMany
+    {
+        return $this->belongsToMany(Company::class, 'company_excel_template');
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return $query->where(fn (Builder $visibility) => $visibility
+            ->where('is_global', true)
+            ->orWhereHas('companies', fn (Builder $companies) => $companies->whereIn(
+                'companies.id', $user->availableCompaniesQuery()->select('companies.id')->reorder()
+            )));
+    }
+
+    public function fileType(): string
+    {
+        return strtolower(pathinfo($this->original_file_name, PATHINFO_EXTENSION));
     }
 
     public static function activeFor(string $key): ?self

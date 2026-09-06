@@ -4,17 +4,19 @@ namespace App\Livewire\Resume;
 
 use App\Enums\InvestmentClassificationEnum;
 use App\Enums\InvestmentEnum;
-use App\Enums\ProjectPermissionEnum;
 use App\Enums\ProjectJustificationEnum;
+use App\Enums\ProjectPermissionEnum;
 use App\Enums\ProjectStateEnum;
 use App\Exports\ProjectResumeExport;
 use App\Models\Project;
 use App\Services\Resume\ResumeChartService;
 use App\Support\ChartValueFormatter;
 use Asantibanez\LivewireCharts\Facades\LivewireCharts;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -86,7 +88,9 @@ class Resume extends Component
             ->companiesForPermission(ProjectPermissionEnum::View);
         $years = $this->baseProjectQuery(ProjectPermissionEnum::View)
             ->whereNotNull('forecast_start_date')
-            ->selectRaw('YEAR(forecast_start_date) AS year')
+            ->selectRaw(DB::connection()->getDriverName() === 'sqlite'
+                ? "strftime('%Y', forecast_start_date) AS year"
+                : 'YEAR(forecast_start_date) AS year')
             ->distinct()
             ->orderBy('year')
             ->pluck('year')
@@ -96,8 +100,8 @@ class Resume extends Component
         $stackedChart = $rows->reduce(
             function ($chart, array $row) {
                 return $chart
-                    ->addSeriesColumn('Booked', (string) $row['year'], $row['booked'])
-                    ->addSeriesColumn('Executed', (string) $row['year'], $row['executed'])
+                    ->addSeriesColumn('Booked (Real SAP)', (string) $row['year'], $row['booked'])
+                    ->addSeriesColumn('Committed', (string) $row['year'], $row['committed'])
                     ->addSeriesColumn('Available', (string) $row['year'], $row['available']);
             },
             LivewireCharts::multiColumnChartModel()
@@ -113,15 +117,16 @@ class Resume extends Component
 
         $projectsChartOptions = $this->projectsChartOptions($rows);
         $comparisonChartOptions = $this->comparisonChartOptions($rows);
-        $cashFlowChartOptions = $this->cashFlowChartOptions(ProjectPermissionEnum::View);
+        $cashFlow = $this->cashFlowChartData(ProjectPermissionEnum::View);
 
         $availableChart = $rows->reduce(
             function ($chart, array $row) {
                 return $chart
-                    ->addSeriesPoint('Available', (string) $row['year'], $row['available'])
-                    ->addSeriesPoint('Booked', (string) $row['year'], $row['booked'])
                     ->addSeriesPoint('Budgeted', (string) $row['year'], $row['budgeted'])
-                    ->addSeriesPoint('Approved', (string) $row['year'], $row['approved']);
+                    ->addSeriesPoint('Approved', (string) $row['year'], $row['approved'])
+                    ->addSeriesPoint('Booked (Real SAP)', (string) $row['year'], $row['booked'])
+                    ->addSeriesPoint('Committed', (string) $row['year'], $row['committed'])
+                    ->addSeriesPoint('Available', (string) $row['year'], $row['available']);
             },
             LivewireCharts::multiLineChartModel()
                 ->setTitle('Annual financial trend')
@@ -140,7 +145,8 @@ class Resume extends Component
             'stackedChart' => $stackedChart,
             'comparisonChartOptions' => $comparisonChartOptions,
             'projectsChartOptions' => $projectsChartOptions,
-            'cashFlowChartOptions' => $cashFlowChartOptions,
+            'cashFlowChartOptions' => $cashFlow['options'],
+            'cashFlowSummary' => $cashFlow['summary'],
             'availableChart' => $availableChart,
             'companies' => $companies,
             'years' => $years,
@@ -164,12 +170,14 @@ class Resume extends Component
     private function summaryRows(ProjectPermissionEnum $permission): Collection
     {
         $budgetColumn = $this->currency === 'dollar' ? 'global_price' : 'global_price_euros';
-        $bookedColumn = $this->currency === 'dollar' ? 'booked' : 'booked_euros';
+        $assignedColumn = $this->currency === 'dollar' ? 'booked' : 'booked_euros';
+        $bookedColumn = $this->currency === 'dollar' ? 'real_value' : 'real_value_euros';
         $executedColumn = $this->currency === 'dollar' ? 'executed_dollars' : 'executed_euros';
 
         return $this->filteredProjectQuery($permission)
             ->with('company:id,company_name')
             ->withSum('data as original_budget', $budgetColumn)
+            ->withSum('data as assigned', $assignedColumn)
             ->withSum('data as booked', $bookedColumn)
             ->withSum('data as executed', $executedColumn)
             ->whereNotNull('forecast_start_date')
@@ -186,6 +194,7 @@ class Resume extends Component
                     ) ? (float) $project->original_budget : 0
                 ), 2);
                 $executed = round((float) $projects->sum('executed'), 2);
+                $assigned = round((float) $projects->sum('assigned'), 2);
                 $booked = round((float) $projects->sum('booked'), 2);
 
                 return [
@@ -193,9 +202,11 @@ class Resume extends Component
                     'project_count' => $projects->count(),
                     'budgeted' => $original,
                     'approved' => $approved,
+                    'assigned' => $assigned,
                     'booked' => $booked,
+                    'committed' => round($assigned - $booked, 2),
                     'executed' => $executed,
-                    'available' => round($approved - $booked, 2),
+                    'available' => round($approved - $assigned, 2),
                 ];
             })
             ->sortKeys()
@@ -205,11 +216,13 @@ class Resume extends Component
     private function coverageRowsByApprovalYear(ProjectPermissionEnum $permission): Collection
     {
         $budgetColumn = $this->currency === 'dollar' ? 'global_price' : 'global_price_euros';
-        $bookedColumn = $this->currency === 'dollar' ? 'booked' : 'booked_euros';
+        $assignedColumn = $this->currency === 'dollar' ? 'booked' : 'booked_euros';
+        $bookedColumn = $this->currency === 'dollar' ? 'real_value' : 'real_value_euros';
         $executedColumn = $this->currency === 'dollar' ? 'executed_dollars' : 'executed_euros';
 
         return $this->filteredProjectQuery($permission)
             ->withSum('data as original_budget', $budgetColumn)
+            ->withSum('data as assigned', $assignedColumn)
             ->withSum('data as booked', $bookedColumn)
             ->withSum('data as executed', $executedColumn)
             ->whereNotNull('approve_date')
@@ -230,7 +243,10 @@ class Resume extends Component
                     'year' => $year,
                     'budgeted' => $budgeted,
                     'approved' => $approved,
+                    'assigned' => round((float) $projects->sum('assigned'), 2),
                     'booked' => round((float) $projects->sum('booked'), 2),
+                    'committed' => round((float) $projects->sum('assigned') - (float) $projects->sum('booked'), 2),
+                    'available' => round($approved - (float) $projects->sum('assigned'), 2),
                     'executed' => round((float) $projects->sum('executed'), 2),
                 ];
             })
@@ -327,10 +343,40 @@ class Resume extends Component
         );
 
         return [
-            'yaxis.min' => 0,
             'yaxis.labels.formatter' => $formatter,
             'dataLabels.formatter' => $formatter,
             'tooltip.y.formatter' => $formatter,
+        ];
+    }
+
+    private const FINANCIAL_LABELS = [
+        'budgeted' => 'Budgeted',
+        'approved' => 'Approved',
+        'booked' => 'Booked (Real SAP)',
+        'committed' => 'Committed',
+        'available' => 'Available',
+    ];
+
+    private function financialSeries(Collection $rows): array
+    {
+        return collect(self::FINANCIAL_LABELS)->map(
+            fn (string $label, string $field): array => [
+                'name' => $label,
+                'data' => $rows->pluck($field)->values()->all(),
+            ]
+        )->values()->all();
+    }
+
+    private function financialAxis(Collection $rows): array
+    {
+        $values = $rows->flatMap(fn (array $row): array => array_values(array_intersect_key($row, self::FINANCIAL_LABELS)));
+        $minimum = min(0, (float) $values->min());
+
+        return [
+            'min' => $minimum < 0 ? -$this->niceAxisMaximum(abs($minimum)) : 0,
+            'max' => $this->niceAxisMaximum(max(0, (float) $values->max())),
+            'tickAmount' => 5,
+            'forceNiceScale' => false,
         ];
     }
 
@@ -340,7 +386,7 @@ class Resume extends Component
         $moneyFormatter = ChartValueFormatter::compactMoney($symbol);
         $financialAxisMaximum = $this->niceAxisMaximum(max(
             (float) $rows->max('budgeted'),
-            (float) $rows->max('booked'),
+            (float) $rows->max('assigned'),
             (float) $rows->max('executed'),
         ));
         $projectsAxisMaximum = max(1, (int) ceil((float) $rows->max('project_count')));
@@ -355,7 +401,7 @@ class Resume extends Component
             'series' => [
                 ['name' => 'Projects', 'type' => 'column', 'data' => $rows->pluck('project_count')->values()->all()],
                 ['name' => 'Budgeted', 'type' => 'line', 'data' => $rows->pluck('budgeted')->values()->all()],
-                ['name' => 'Booked', 'type' => 'line', 'data' => $rows->pluck('booked')->values()->all()],
+                ['name' => 'Assigned', 'type' => 'line', 'data' => $rows->pluck('assigned')->values()->all()],
                 ['name' => 'Executed', 'type' => 'line', 'data' => $rows->pluck('executed')->values()->all()],
             ],
             'chart' => ['type' => 'line', 'height' => '100%', 'toolbar' => ['show' => false]],
@@ -387,7 +433,7 @@ class Resume extends Component
                 ],
                 [
                     ...$financialAxis,
-                    'seriesName' => 'Booked',
+                    'seriesName' => 'Assigned',
                     'opposite' => true,
                     'show' => false,
                     'labels' => ['show' => false],
@@ -424,7 +470,7 @@ class Resume extends Component
         return $niceNormalized * $magnitude;
     }
 
-    private function cashFlowChartOptions(ProjectPermissionEnum $permission): array
+    private function cashFlowChartData(ProjectPermissionEnum $permission): array
     {
         $budgetColumn = $this->currency === 'dollar' ? 'global_price' : 'global_price_euros';
         $symbol = $this->currency === 'dollar' ? '$' : "\u{20AC}";
@@ -447,16 +493,38 @@ class Resume extends Component
             ->map(fn (Collection $items): float => round((float) $items->sum('value'), 2))
             ->sortKeys();
 
-        $categories = $monthlyValues->keys()
-            ->map(fn (string $period): string => \Carbon\CarbonImmutable::createFromFormat('!Y-m', $period)->format('M Y'))
+        $selectedYears = array_values(array_unique(array_map('intval', $this->yearFilter)));
+        $visibleValues = $selectedYears === [] ? $monthlyValues : $monthlyValues->filter(
+            fn (float $value, string $period): bool => in_array((int) substr($period, 0, 4), $selectedYears, true)
+        );
+        $visibleTotal = round((float) $visibleValues->sum(), 2);
+        $outsideValues = $monthlyValues->diffKeys($visibleValues);
+        $outsideTotal = round((float) $outsideValues->sum(), 2);
+        $displayYears = $selectedYears !== [] ? $selectedYears : $monthlyValues->keys()
+            ->map(fn (string $period): int => (int) substr($period, 0, 4))->unique()->values()->all();
+        sort($displayYears);
+        $periods = collect();
+        foreach ($displayYears as $year) {
+            foreach (range(1, 12) as $month) {
+                $periods->put(sprintf('%04d-%02d', $year, $month), 0.0);
+            }
+        }
+        $visibleValues = $periods->replace($visibleValues)->sortKeys();
+        $categories = $visibleValues->keys()
+            ->map(fn (string $period): string => CarbonImmutable::createFromFormat('!Y-m', $period)->format('M Y'))
             ->values()
             ->all();
 
-        return [
-            'series' => [['name' => 'Milestone cash flow', 'data' => $monthlyValues->values()->all()]],
-            'chart' => ['type' => 'bar', 'height' => '100%', 'toolbar' => ['show' => false]],
-            'colors' => ['#0F766E'],
-            'plotOptions' => ['bar' => ['columnWidth' => '58%', 'borderRadius' => 5]],
+        $currentMonth = CarbonImmutable::now()->format('Y-m');
+        $options = [
+            'series' => [['name' => 'Milestone cash flow', 'data' => $visibleValues->values()->all()]],
+            'chart' => ['type' => 'bar', 'height' => 300, 'toolbar' => ['show' => false]],
+            'colors' => $visibleValues->keys()->map(
+                fn (string $period): string => $period < $currentMonth ? '#F97316' : '#7DD3FC'
+            )->values()->all(),
+            'stroke' => ['width' => 0],
+            'fill' => ['opacity' => 1],
+            'plotOptions' => ['bar' => ['columnWidth' => '58%', 'borderRadius' => 5, 'distributed' => true]],
             'dataLabels' => ['enabled' => false],
             'xaxis' => [
                 'categories' => $categories,
@@ -465,11 +533,24 @@ class Resume extends Component
             ],
             'yaxis' => [
                 'min' => 0,
+                'forceNiceScale' => true,
                 'title' => ['text' => "Cash flow ({$symbol})"],
                 'labels' => ['formatter' => $formatter, 'minWidth' => 80, 'maxWidth' => 120],
             ],
             'tooltip' => ['y' => ['formatter' => $formatter]],
+            'legend' => ['show' => false],
             'grid' => ['show' => true, 'borderColor' => '#E2E8F0'],
+        ];
+
+        return [
+            'options' => $options,
+            'summary' => [
+                'years' => implode(', ', $displayYears),
+                'total' => $visibleTotal,
+                'outside_total' => $outsideTotal,
+                'outside_years' => $outsideValues->keys()->map(fn (string $period): string => substr($period, 0, 4))
+                    ->unique()->values()->implode(', '),
+            ],
         ];
     }
 
@@ -478,29 +559,10 @@ class Resume extends Component
         $symbol = $this->currency === 'dollar' ? '$' : "\u{20AC}";
         $formatter = ChartValueFormatter::compactMoney($symbol);
 
-        $financialAxisMaximum = $this->niceAxisMaximum(max(
-            (float) $rows->max('budgeted'),
-            (float) $rows->max('approved'),
-            (float) $rows->max('booked'),
-            (float) $rows->max('executed'),
-        ));
-
-        $financialAxis = [
-            'min' => 0,
-            'max' => $financialAxisMaximum,
-            'tickAmount' => 5,
-            'forceNiceScale' => false,
-        ];
-
         return [
-            'series' => [
-                ['name' => 'Budgeted', 'data' => $rows->pluck('budgeted')->values()->all()],
-                ['name' => 'Approved', 'data' => $rows->pluck('approved')->values()->all()],
-                ['name' => 'Booked', 'data' => $rows->pluck('booked')->values()->all()],
-                ['name' => 'Executed', 'data' => $rows->pluck('executed')->values()->all()],
-            ],
+            'series' => $this->financialSeries($rows),
             'chart' => ['type' => 'area', 'height' => '100%', 'toolbar' => ['show' => false]],
-            'colors' => ['#2563EB', '#8B5CF6', '#F59E0B', '#10B981'],
+            'colors' => ['#2563EB', '#8B5CF6', '#059669', '#F59E0B', '#0891B2'],
             'stroke' => ['curve' => 'smooth', 'width' => 3],
             'fill' => [
                 'type' => 'gradient',
@@ -508,36 +570,12 @@ class Resume extends Component
             ],
             'dataLabels' => ['enabled' => false],
             'xaxis' => [
-                'categories' => $rows->pluck('year')
-                    ->map(fn ($year) => (string) $year)
-                    ->values()
-                    ->all(),
+                'categories' => $rows->pluck('year')->map(fn ($year) => (string) $year)->values()->all(),
             ],
             'yaxis' => [
-                [
-                    ...$financialAxis,
-                    'seriesName' => 'Budgeted',
-                    'title' => ['text' => "Financial value ({$symbol})"],
-                    'labels' => ['show' => true, 'formatter' => $formatter, 'minWidth' => 80, 'maxWidth' => 130],
-                ],
-                [
-                    ...$financialAxis,
-                    'seriesName' => 'Approved',
-                    'show' => false,
-                    'labels' => ['show' => false],
-                ],
-                [
-                    ...$financialAxis,
-                    'seriesName' => 'Booked',
-                    'show' => false,
-                    'labels' => ['show' => false],
-                ],
-                [
-                    ...$financialAxis,
-                    'seriesName' => 'Executed',
-                    'show' => false,
-                    'labels' => ['show' => false],
-                ],
+                ...$this->financialAxis($rows),
+                'title' => ['text' => "Financial value ({$symbol})"],
+                'labels' => ['formatter' => $formatter, 'minWidth' => 80, 'maxWidth' => 130],
             ],
             'tooltip' => ['y' => ['formatter' => $formatter]],
             'legend' => ['show' => true, 'position' => 'top'],

@@ -20,11 +20,11 @@ class ExcelTemplateResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentArrowDown;
 
-    protected static ?string $navigationLabel = 'Excel Templates';
+    protected static ?string $navigationLabel = 'Files & Templates';
 
-    protected static ?string $modelLabel = 'Excel template';
+    protected static ?string $modelLabel = 'file or template';
 
-    protected static ?string $pluralModelLabel = 'Excel templates';
+    protected static ?string $pluralModelLabel = 'Files & Templates';
 
     protected static ?string $recordTitleAttribute = 'name';
 

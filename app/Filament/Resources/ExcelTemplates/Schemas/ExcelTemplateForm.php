@@ -4,10 +4,12 @@ namespace App\Filament\Resources\ExcelTemplates\Schemas;
 
 use App\Models\ExcelTemplate;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 class ExcelTemplateForm
@@ -30,6 +32,7 @@ class ExcelTemplateForm
                     ])
                     ->placeholder('Library only (no system use)')
                     ->unique(ignoreRecord: true)
+                    ->live()
                     ->helperText('Optional. Select this only when the application must use this file automatically. Each system use accepts one template.'),
 
                 // TextInput::make('category')
@@ -80,26 +83,43 @@ class ExcelTemplateForm
                     ->maxLength(500)
                     ->columnSpanFull(),
 
+                Toggle::make('is_global')
+                    ->label('All users')
+                    ->helperText('Enabled: available in General for every user. Disabled: only the selected plants can see and download the file.')
+                    ->default(true)
+                    ->live()
+                    ->required(),
+
+                Select::make('companies')
+                    ->label('Allowed plants')
+                    ->helperText('Users can see and download this file when their assigned roles include any of the selected companies.')
+                    ->relationship('companies', 'company_name')
+                    ->multiple()
+                    ->searchable()
+                    ->preload()
+                    ->visible(fn (Get $get): bool => ! $get('is_global'))
+                    ->required(fn (Get $get): bool => ! $get('is_global')),
+
                 FileUpload::make('file_path')
-                    ->label('Excel file')
+                    ->label('File')
                     ->disk('local')
                     ->directory('excel-templates')
                     ->visibility('private')
-                    ->acceptedFileTypes([
-                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                        'application/vnd.ms-excel',
-                    ])
-                    ->maxSize(20480)
+                    ->acceptedFileTypes(fn (Get $get): array => in_array($get('template_key'), ['order_export', 'project_data_import'], true)
+                        ? [ExcelTemplate::FILE_TYPES['xlsx'], ExcelTemplate::FILE_TYPES['xls']]
+                        : array_values(ExcelTemplate::FILE_TYPES))
+                    ->rules(fn (Get $get): array => [in_array($get('template_key'), ['order_export', 'project_data_import'], true)
+                        ? 'extensions:xlsx,xls' : 'extensions:pdf,xlsx,xls,ppt,pptx'])
+                    ->maxSize(10240)
                     ->storeFileNamesIn('original_file_name')
                     ->downloadable()
                     ->required()
-                    ->helperText('Accepted formats: .xlsx and .xls. Maximum size: 20 MB.')
+                    ->helperText('PDF, Excel (.xlsx, .xls), PowerPoint (.pptx, .ppt). Maximum: 10 MB. System order and data templates must remain Excel files.')
                     ->columnSpanFull(),
 
-                Toggle::make('is_active')
-                    ->label('Available for users')
+                Hidden::make('is_active')
                     ->default(true)
-                    ->required(),
+                    ->dehydrateStateUsing(fn (): bool => true),
 
                 TextInput::make('disk')
                     ->default('local')

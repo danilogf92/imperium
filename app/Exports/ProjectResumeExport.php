@@ -6,6 +6,7 @@ use Illuminate\Support\Collection;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -14,12 +15,12 @@ class ProjectResumeExport
 {
     public function download(Collection $rows, array $filters, string $currencySymbol = "\u{20AC}"): BinaryFileResponse
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet()->setTitle('Annual Resume');
         $sheet->setShowGridlines(false);
-        $sheet->mergeCells('A1:F2');
+        $sheet->mergeCells('A1:G2');
         $sheet->setCellValue('A1', 'ANNUAL PROJECT FINANCIAL RESUME');
-        $sheet->getStyle('A1:F2')->applyFromArray([
+        $sheet->getStyle('A1:G2')->applyFromArray([
             'font' => ['bold' => true, 'size' => 20, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1E3A8A']],
             'alignment' => [
@@ -34,15 +35,15 @@ class ProjectResumeExport
             $sheet->setCellValue("B{$filterRow}", $value);
             $filterRow++;
         }
-        $sheet->getStyle("A4:A".($filterRow - 1))->getFont()->setBold(true);
+        $sheet->getStyle('A4:A'.($filterRow - 1))->getFont()->setBold(true);
 
         $headerRow = $filterRow + 1;
         $headers = [
             'Year', 'Number of Projects', "Budgeted {$currencySymbol}", "Approved {$currencySymbol}",
-            "Booked {$currencySymbol}", "Available {$currencySymbol}",
+            "Booked (Real SAP) {$currencySymbol}", "Committed {$currencySymbol}", "Available {$currencySymbol}",
         ];
         $sheet->fromArray($headers, null, "A{$headerRow}");
-        $sheet->getStyle("A{$headerRow}:F{$headerRow}")->applyFromArray([
+        $sheet->getStyle("A{$headerRow}:G{$headerRow}")->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2563EB']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
@@ -56,24 +57,26 @@ class ProjectResumeExport
                 $row['budgeted'],
                 $row['approved'],
                 $row['booked'],
+                $row['committed'],
                 $row['available'],
             ], null, "A{$rowNumber}");
             $rowNumber++;
         }
 
         $lastRow = max($headerRow + 1, $rowNumber - 1);
-        $sheet->getStyle("C".($headerRow + 1).":F{$lastRow}")
+        $sheet->getStyle('C'.($headerRow + 1).":G{$lastRow}")
             ->getNumberFormat()
             ->setFormatCode('"'.$currencySymbol.'" #,##0.00');
-        $sheet->getStyle("A{$headerRow}:F{$lastRow}")->getBorders()->getBottom()
+        $sheet->getStyle("A{$headerRow}:G{$lastRow}")->getBorders()->getBottom()
             ->setBorderStyle(Border::BORDER_HAIR)
-            ->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('CBD5E1'));
+            ->setColor(new Color('CBD5E1'));
         $sheet->getColumnDimension('A')->setWidth(12);
         $sheet->getColumnDimension('B')->setWidth(22);
-        foreach (range('C', 'F') as $column) {
+        foreach (range('C', 'G') as $column) {
             $sheet->getColumnDimension($column)->setWidth(20);
         }
-        $sheet->setAutoFilter("A{$headerRow}:F{$lastRow}");
+        $sheet->getColumnDimension('E')->setWidth(30);
+        $sheet->setAutoFilter("A{$headerRow}:G{$lastRow}");
         $sheet->freezePane('C'.($headerRow + 1));
 
         $directory = storage_path('app/private/exports');

@@ -19,6 +19,14 @@ class ExcelTemplatesTable
                     ->searchable()
                     ->sortable(),
 
+                IconColumn::make('is_global')
+                    ->label('All users')
+                    ->boolean(),
+
+                TextColumn::make('companies.company_name')
+                    ->label('Allowed plants')
+                    ->badge(),
+
                 TextColumn::make('category')
                     ->label('Category')
                     ->badge()
