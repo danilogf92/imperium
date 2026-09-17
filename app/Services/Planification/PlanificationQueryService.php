@@ -24,9 +24,22 @@ final class PlanificationQueryService
             $this->plannedProjectsQuery($filters, $activityWeeks)
         )->paginate((int) $filters['perPage']);
 
-        $timelineYears = $this->timelineYears(
-            $plannedProjects->getCollection()
-        );
+        $visibleProjects = $plannedProjects->getCollection();
+        $timelineYears = $this->timelineYears($visibleProjects);
+        $firstVisibleMilestone = $visibleProjects->isNotEmpty()
+            && $visibleProjects->every(fn (Project $project): bool => $project->projectMilestones->isNotEmpty())
+            ? $visibleProjects->flatMap(fn (Project $project) => $project->projectMilestones)
+                ->sortBy(fn ($item) => $item->cycle_year * 12 + $item->month)
+                ->first()
+            : null;
+        $timelineStartMonth = $firstVisibleMilestone ? (int) $firstVisibleMilestone->month : 1;
+        if ($firstVisibleMilestone) {
+            $timelineYears = $timelineYears
+                ->filter(fn ($year): bool => (int) $year >= (int) $firstVisibleMilestone->cycle_year)
+                ->values();
+        }
+        $timelineColumnCount = $timelineYears->count() * 12
+            - ($timelineYears->isNotEmpty() ? $timelineStartMonth - 1 : 0);
 
         $filterProjects = $this->access
             ->authorizedProjects()
@@ -42,6 +55,8 @@ final class PlanificationQueryService
         return [
             'plannedProjects' => $plannedProjects,
             'timelineYears' => $timelineYears,
+            'timelineStartMonth' => $timelineStartMonth,
+            'timelineColumnCount' => $timelineColumnCount,
             'projects' => $this->modalProjects(),
             'milestones' => $this->milestones(),
             'plantOptions' => $this->plantOptions($filterProjects),
@@ -69,8 +84,6 @@ final class PlanificationQueryService
                 'company:id,company_name',
                 'projectMilestones' => fn ($query) => $query
                     ->with('milestone:id,name,code,color,view_color')
-                    ->when(($filters['milestoneExecution'] ?? '') === 'completed', fn (Builder $query) => $query->due()->whereNotNull('executed_at'))
-                    ->when(($filters['milestoneExecution'] ?? '') === 'incomplete', fn (Builder $query) => $query->due()->whereNull('executed_at'))
                     ->orderBy('cycle_year')
                     ->orderBy('sequence'),
                 'weeklyActivities' => fn ($query) => $query
@@ -115,10 +128,12 @@ final class PlanificationQueryService
             $query->whereHas('projectMilestones');
         }
 
-        if (($filters['milestoneExecution'] ?? '') === 'completed') {
-            $query->whereHas('projectMilestones', fn (Builder $query) => $query->due()->whereNotNull('executed_at'));
-        } elseif (($filters['milestoneExecution'] ?? '') === 'incomplete') {
-            $query->whereHas('projectMilestones', fn (Builder $query) => $query->due()->whereNull('executed_at'));
+        if (in_array($filters['milestoneCompletion'] ?? '', ['completed', 'incomplete'], true)) {
+            $operator = $filters['milestoneCompletion'] === 'completed' ? '>=' : '<';
+            $query->whereRaw(
+                "(SELECT COALESCE(SUM(percentage), 0) FROM project_milestones WHERE project_milestones.project_id = projects.id) {$operator} ?",
+                [100]
+            );
         }
 
         if (($filters['activityExecution'] ?? '') === 'completed') {

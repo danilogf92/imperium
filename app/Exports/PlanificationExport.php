@@ -69,11 +69,14 @@ class PlanificationExport
                     }
                 });
             })
-            ->when($filters['onlyWithMilestones'], fn (Builder $query) => $query->whereHas('projectMilestones'))
-            ->when(($filters['milestoneExecution'] ?? '') === 'completed', fn (Builder $query) => $query
-                ->whereHas('projectMilestones', fn (Builder $query) => $query->due()->whereNotNull('executed_at')))
-            ->when(($filters['milestoneExecution'] ?? '') === 'incomplete', fn (Builder $query) => $query
-                ->whereHas('projectMilestones', fn (Builder $query) => $query->due()->whereNull('executed_at')))
+            ->when($filters['onlyWithMilestones'] ?? false, fn (Builder $query) => $query->whereHas('projectMilestones'))
+            ->when(in_array($filters['milestoneCompletion'] ?? '', ['completed', 'incomplete'], true), function (Builder $query) use ($filters): void {
+                $operator = $filters['milestoneCompletion'] === 'completed' ? '>=' : '<';
+                $query->whereRaw(
+                    "(SELECT COALESCE(SUM(percentage), 0) FROM project_milestones WHERE project_milestones.project_id = projects.id) {$operator} ?",
+                    [100]
+                );
+            })
             ->when(($filters['activityExecution'] ?? '') === 'completed', fn (Builder $query) => $query
                 ->whereHas('weeklyActivities', fn (Builder $query) => $query->whereNotNull('executed_at')
                     ->where(function (Builder $query) use ($activityWeeks): void {

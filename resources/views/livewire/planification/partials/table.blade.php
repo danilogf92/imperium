@@ -25,14 +25,14 @@
             @endphp
             <div class="planification-table-scroll unified-table-scroll overflow-x-auto overscroll-x-contain">
                 <table class="unified-data-table cursor-pointer"
-                    style="min-width: {{ $fixedWidth + $timelineYears->count() * 2304 }}px">
+                    style="min-width: {{ $fixedWidth + $timelineColumnCount * 192 }}px">
                     <colgroup>
                         @foreach ($visibleFixedColumns as $column)
                             <col
                                 style="width: {{ $fixedWidths[$column] }}px; min-width: {{ $fixedWidths[$column] }}px; max-width: {{ $fixedWidths[$column] }}px">
                         @endforeach
                         @foreach ($timelineYears as $year)
-                            @for ($monthNumber = 1; $monthNumber <= 12; $monthNumber++)
+                            @for ($monthNumber = $loop->first ? $timelineStartMonth : 1; $monthNumber <= 12; $monthNumber++)
                                 <col style="width: 192px; min-width: 192px; max-width: 192px">
                             @endfor
                         @endforeach
@@ -63,7 +63,7 @@
                             @endforeach
 
                             @foreach ($timelineYears as $year)
-                                <th colspan="12"
+                                <th colspan="{{ $loop->first ? 13 - $timelineStartMonth : 12 }}"
                                     class="{{ (int) $year === now()->year ? 'bg-blue-300' : '' }} border-r-2 border-blue-300 px-2 py-1.5 text-center text-sm font-bold">
                                     {{ $year }}
                                 </th>
@@ -72,9 +72,11 @@
                         </tr>
                         <tr class="bg-blue-200 text-slate-900">
                             @foreach ($timelineYears as $year)
-                                @foreach (['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'] as $monthLabel)
+                                @php $firstMonthOfYear = $loop->first ? $timelineStartMonth : 1; @endphp
+                                @foreach (['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'] as $monthIndex => $monthLabel)
+                                    @continue($monthIndex + 1 < $firstMonthOfYear)
                                     <th
-                                        class="{{ (int) $year === now()->year && $loop->iteration === now()->month ? '!border-x-2 !border-x-blue-500 !bg-[#7DB9F1] text-slate-900' : '' }} {{ $loop->last ? 'border-r-2 border-blue-300' : '' }} w-48 border-r border-blue-300 px-1 py-1.5 text-center text-xs font-semibold">
+                                        class="{{ (int) $year === now()->year && $monthIndex + 1 === now()->month ? '!border-x-2 !border-x-blue-500 !bg-[#7DB9F1] text-slate-900' : '' }} {{ $loop->last ? 'border-r-2 border-blue-300' : '' }} w-48 border-r border-blue-300 px-1 py-1.5 text-center text-xs font-semibold">
                                         {{ $monthLabel }}
                                     </th>
                                 @endforeach
@@ -350,7 +352,7 @@
                                     @php
                                         $yearItems = $plannedProject->projectMilestones->where('cycle_year', $year);
                                     @endphp
-                                    @for ($monthNumber = 1; $monthNumber <= 12; $monthNumber++)
+                                    @for ($monthNumber = $loop->first ? $timelineStartMonth : 1; $monthNumber <= 12; $monthNumber++)
                                         @php
                                             $yearIsAvailable = in_array(
                                                 (int) $year,
@@ -441,7 +443,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ $visibleFixedColumns->count() + $timelineYears->count() * 12 }}"
+                                <td colspan="{{ $visibleFixedColumns->count() + $timelineColumnCount }}"
                                     class="px-5 py-12 text-center text-sm text-gray-500">No project plans found.</td>
                             </tr>
                         @endforelse

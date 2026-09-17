@@ -66,7 +66,7 @@ class Planification extends Component
     public array $weekActivities = [];
     public ?int $pendingActivityDeleteId = null;
     public string $pendingActivityDeleteLabel = '';
-    public string $milestoneExecutionFilter = '';
+    public string $milestoneCompletionFilter = '';
     public string $activityExecutionFilter = '';
     public bool $canEditActivity = false;
     public bool $canDeleteActivity = false;
@@ -135,10 +135,10 @@ class Planification extends Component
         $this->resetPage();
     }
 
-    public function updatedMilestoneExecutionFilter(string $value): void
+    public function updatedMilestoneCompletionFilter(string $value): void
     {
         if (! in_array($value, ['', 'completed', 'incomplete'], true)) {
-            $this->milestoneExecutionFilter = '';
+            $this->milestoneCompletionFilter = '';
         }
         $this->resetPage();
     }
@@ -179,7 +179,7 @@ class Planification extends Component
             'creationYearFilter',
             'onlyWithMilestones',
             'activityWeekFilter',
-            'milestoneExecutionFilter',
+            'milestoneCompletionFilter',
             'activityExecutionFilter',
         ]);
 
@@ -383,7 +383,7 @@ class Planification extends Component
             'creationYears' => $this->creationYearFilter,
             'onlyWithMilestones' => $this->onlyWithMilestones,
             'activityWeeks' => $this->activityWeekFilter,
-            'milestoneExecution' => $this->milestoneExecutionFilter,
+            'milestoneCompletion' => $this->milestoneCompletionFilter,
             'activityExecution' => $this->activityExecutionFilter,
         ]);
 

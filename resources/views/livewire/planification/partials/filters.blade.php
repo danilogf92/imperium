@@ -38,7 +38,7 @@
                                     count($statusFilter) ||
                                     count($creationYearFilter) ||
                                     $activityWeekFilter !== '' ||
-                                    $milestoneExecutionFilter !== '' ||
+                                    $milestoneCompletionFilter !== '' ||
                                     $activityExecutionFilter !== '' ||
                                     $onlyWithMilestones ||
                                     $currency !== 'usd' ||
@@ -84,7 +84,7 @@
                     x-show="open"
                     x-collapse>
 
-                    <div class="flex flex-wrap items-center gap-3 bg-white px-4 py-4">
+                    <div class="flex flex-nowrap items-center gap-3 overflow-x-auto bg-white px-4 py-4">
 
                         {{-- Planta --}}
                         <x-dashboard-filter-dropdown
@@ -143,12 +143,12 @@
                         </div>
 
                         <label class="shrink-0">
-                            <span class="sr-only">Milestone execution</span>
-                            <select wire:model.change="milestoneExecutionFilter" data-no-global-loading
+                            <span class="sr-only">Milestone completion percentage</span>
+                            <select wire:model.change="milestoneCompletionFilter" data-no-global-loading
                                 class="h-11 rounded-lg border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                 <option value="">All milestones</option>
-                                <option value="completed">Completed milestones</option>
-                                <option value="incomplete">Incomplete milestones</option>
+                                <option value="completed">Complete milestones (100%)</option>
+                                <option value="incomplete">Incomplete milestones (&lt;100%)</option>
                             </select>
                         </label>
 
@@ -208,37 +208,19 @@
                         </label>
 
                         {{-- Solo proyectos con milestones --}}
-                        <button
-                            type="button"
-                            wire:click="toggleOnlyWithMilestones"
-                            data-no-global-loading
-                            wire:loading.attr="disabled"
-                            wire:target="toggleOnlyWithMilestones"
+                        <button type="button" wire:click="toggleOnlyWithMilestones" data-no-global-loading
+                            wire:loading.attr="disabled" wire:target="toggleOnlyWithMilestones"
                             class="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold shadow-sm transition hover:-translate-y-px hover:shadow-md disabled:opacity-60
                                 {{ $onlyWithMilestones
                                     ? 'border-blue-600 bg-blue-600 text-white hover:bg-blue-500'
                                     : 'border-slate-300 bg-white text-slate-700 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700' }}">
-
-                            <svg
-                                class="h-4 w-4"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.8">
-
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                 @if ($onlyWithMilestones)
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="m5 12 4 4L19 6" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" />
                                 @else
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M4 7h16M7 12h10m-7 5h4" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M7 12h10m-7 5h4" />
                                 @endif
                             </svg>
-
                             {{ __('With milestones') }}
                         </button>
 
@@ -250,7 +232,7 @@
                                 $statusFilter !== [] ||
                                 $creationYearFilter !== [] ||
                                 $activityWeekFilter !== '' ||
-                                $milestoneExecutionFilter !== '' ||
+                                $milestoneCompletionFilter !== '' ||
                                 $activityExecutionFilter !== '' ||
                                 $onlyWithMilestones ||
                                 $currency !== 'usd' ||

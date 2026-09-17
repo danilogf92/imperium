@@ -20,7 +20,7 @@ trait ExportsPlanification
             'creationYears' => $this->creationYearFilter,
             'onlyWithMilestones' => $this->onlyWithMilestones,
             'activityWeeks' => $this->activityWeekFilter,
-            'milestoneExecution' => $this->milestoneExecutionFilter,
+            'milestoneCompletion' => $this->milestoneCompletionFilter,
             'activityExecution' => $this->activityExecutionFilter,
             'currency' => $this->currency,
             'cellDisplay' => $this->cellDisplay,

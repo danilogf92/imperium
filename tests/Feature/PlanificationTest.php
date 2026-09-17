@@ -3,12 +3,14 @@
 namespace Tests\Feature;
 
 use App\Livewire\Planification\Planification;
+use App\Exports\PlanificationExport;
 use App\Models\Company;
 use App\Models\Milestone;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Tests\TestCase;
 
 class PlanificationTest extends TestCase
@@ -127,6 +129,121 @@ class PlanificationTest extends TestCase
             ->assertSee($project->pda_code);
     }
 
+    public function test_months_start_at_first_visible_milestone_after_filtering(): void
+    {
+        [$user, $project] = $this->projectContext();
+        $project->update(['name' => 'May timeline project']);
+        $project->projectMilestones()->create([
+            'milestone_id' => Milestone::where('code', 'WBS')->value('id'),
+            'cycle_year' => 2026,
+            'month' => 5,
+            'sequence' => 1,
+            'percentage' => 25,
+        ]);
+        [, $emptyProject] = $this->projectContext();
+        $emptyProject->update(['name' => 'Empty timeline project']);
+
+        $component = Livewire::actingAs($user)->test(Planification::class)
+            ->assertViewHas('timelineStartMonth', 1)
+            ->set('search', 'May timeline project')
+            ->assertViewHas('timelineStartMonth', 5)
+            ->assertViewHas('timelineColumnCount', 20);
+
+        $document = new \DOMDocument;
+        @$document->loadHTML('<?xml encoding="UTF-8">'.$component->html());
+        $monthHeaders = (new \DOMXPath($document))->query('//table/thead/tr[2]/th');
+        $this->assertSame('MAY', trim($monthHeaders->item(0)->textContent));
+        $this->assertSame(20, $monthHeaders->length);
+
+        $component->set('search', 'Empty timeline project')
+            ->assertViewHas('timelineStartMonth', 1)
+            ->assertViewHas('timelineColumnCount', 24);
+    }
+
+    public function test_milestone_completion_filter_distinguishes_100_percent_from_lower_allocations(): void
+    {
+        [$user, $complete] = $this->projectContext();
+        [, $partial] = $this->projectContext();
+        [, $empty] = $this->projectContext();
+        $complete->projectMilestones()->create([
+            'milestone_id' => Milestone::where('code', 'WBS')->value('id'),
+            'cycle_year' => 2026,
+            'month' => 5,
+            'sequence' => 1,
+            'percentage' => 60,
+        ]);
+        $complete->projectMilestones()->create([
+            'milestone_id' => Milestone::where('code', 'PO')->value('id'),
+            'cycle_year' => 2026,
+            'month' => 6,
+            'sequence' => 2,
+            'percentage' => 40,
+        ]);
+        $partial->projectMilestones()->create([
+            'milestone_id' => Milestone::where('code', 'WBS')->value('id'),
+            'cycle_year' => 2026,
+            'month' => 6,
+            'sequence' => 1,
+            'percentage' => 40,
+        ]);
+
+        $component = Livewire::actingAs($user)->test(Planification::class)
+            ->assertSee('With milestones')
+            ->assertSee('Complete milestones (100%)')
+            ->set('milestoneCompletionFilter', 'completed')
+            ->assertViewHas('plannedProjects', fn ($projects): bool =>
+                $projects->getCollection()->pluck('id')->all() === [$complete->id]);
+
+        $component->set('milestoneCompletionFilter', 'incomplete')
+            ->assertViewHas('plannedProjects', fn ($projects): bool =>
+                ! $projects->getCollection()->contains('id', $complete->id)
+                && $projects->getCollection()->contains('id', $partial->id)
+                && $projects->getCollection()->contains('id', $empty->id))
+            ->call('toggleOnlyWithMilestones')
+            ->assertViewHas('plannedProjects', fn ($projects): bool =>
+                $projects->getCollection()->contains('id', $partial->id)
+                && ! $projects->getCollection()->contains('id', $empty->id))
+            ->call('clearFilters')
+            ->assertSet('milestoneCompletionFilter', '')
+            ->assertSet('onlyWithMilestones', false)
+            ->assertViewHas('plannedProjects', fn ($projects): bool =>
+                $projects->getCollection()->contains('id', $complete->id)
+                && $projects->getCollection()->contains('id', $partial->id)
+                && $projects->getCollection()->contains('id', $empty->id));
+
+        $filters = [
+            'search' => '',
+            'plants' => [],
+            'statuses' => [],
+            'creationYears' => [],
+            'activityWeeks' => '',
+            'milestoneCompletion' => '',
+            'activityExecution' => '',
+            'currency' => 'usd',
+            'cellDisplay' => 'combined',
+            'onlyWithMilestones' => false,
+        ];
+        foreach (['completed' => [$complete], 'incomplete' => [$partial, $empty]] as $status => $expected) {
+            $response = (new PlanificationExport)->download($user, [
+                ...$filters,
+                'milestoneCompletion' => $status,
+            ]);
+            $path = $response->getFile()->getPathname();
+            try {
+                $workbook = IOFactory::load($path);
+                $sheet = $workbook->getActiveSheet();
+                $codes = [];
+                for ($row = 3; $row <= $sheet->getHighestDataRow(); $row++) {
+                    $codes[] = $sheet->getCell("C{$row}")->getValue();
+                }
+                $this->assertEqualsCanonicalizing(array_map(fn (Project $project) => $project->pda_code, $expected), $codes);
+                $workbook->disconnectWorksheets();
+            } finally {
+                unlink($path);
+            }
+        }
+    }
+
     public function test_postponed_projects_are_never_available_in_planification(): void
     {
         [$user, $project] = $this->projectContext();
@@ -165,15 +282,14 @@ class PlanificationTest extends TestCase
         }
 
         $item = $project->projectMilestones()->first();
-        $item->update(['executed_at' => now()]);
-        $component->set('milestoneExecutionFilter', 'completed')
+        $component->set('milestoneCompletionFilter', 'completed')
             ->assertSee('Allocated budget: 100%')
             ->assertViewHas('plannedProjects', fn ($projects) =>
                 (float) $projects->first()->allocated_percentage === 100.0
-                && $projects->first()->projectMilestones->count() === 1);
+                && $projects->first()->projectMilestones->count() === 4);
 
         $item->update(['percentage' => 40]);
-        $component->call('$refresh')
+        $component->set('milestoneCompletionFilter', 'incomplete')
             ->assertSee('Allocated budget: 90%')
             ->assertSee('bg-orange-100 text-orange-700 ring-orange-200', false);
     }

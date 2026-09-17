@@ -13,6 +13,7 @@ use App\Livewire\Project\IndexProject;
 use App\Livewire\Resume\Resume;
 use App\Livewire\Task\TaskTable;
 use App\Livewire\Templates\TemplateLibrary;
+use App\Livewire\Tools\ExcelFilter;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -67,6 +68,9 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('/templates', TemplateLibrary::class)
         ->name('templates');
+
+    Route::get('/tools', ExcelFilter::class)
+        ->name('tools');
 
     Route::get('/templates/{excelTemplate}/download', ExcelTemplateDownloadController::class)
         ->name('templates.download');
