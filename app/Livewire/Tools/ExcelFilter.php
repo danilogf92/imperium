@@ -40,10 +40,10 @@ final class ExcelFilter extends Component
     public function analyze(ExcelFilterService $excel): void
     {
         $this->validate(['upload' => ['required', 'file', 'extensions:xlsx,xls', 'mimes:xlsx,xls', 'max:12288']], [
-            'upload.required' => 'Select an Excel workbook first.',
-            'upload.extensions' => 'Only .xlsx and .xls files are accepted.',
-            'upload.mimes' => 'The selected file is not a valid Excel workbook.',
-            'upload.max' => 'The workbook may not be larger than 12 MB.',
+            'upload.required' => __('tools.error_upload_required'),
+            'upload.extensions' => __('tools.error_upload_extension'),
+            'upload.mimes' => __('tools.error_upload_invalid'),
+            'upload.max' => __('tools.error_upload_size'),
         ]);
 
         $newToken = '';
@@ -60,7 +60,7 @@ final class ExcelFilter extends Component
                 $excel->removeSource((int) auth()->id(), $newToken);
             }
             report($exception);
-            $this->addError('upload', 'The workbook could not be read. Check that it is a valid one-sheet Excel file.');
+            $this->addError('upload', __('tools.error_upload_read'));
             return;
         }
 
@@ -99,14 +99,14 @@ final class ExcelFilter extends Component
             'filterColumn' => ['required', 'integer', 'between:0,'.max(0, count($this->headers) - 1)],
             'projectCode' => ['required', 'string', 'max:150'],
         ], [
-            'selectedColumns.required' => 'Select at least one column.',
-            'selectedColumns.min' => 'Select at least one column.',
-            'filterColumn.required' => 'Choose the column that contains the project code.',
-            'projectCode.required' => 'Enter the project code.',
+            'selectedColumns.required' => __('tools.error_columns'),
+            'selectedColumns.min' => __('tools.error_columns'),
+            'filterColumn.required' => __('tools.error_filter'),
+            'projectCode.required' => __('tools.error_project'),
         ]);
         $this->projectCode = trim($this->projectCode);
         if ($this->projectCode === '') {
-            throw ValidationException::withMessages(['projectCode' => 'Enter the project code.']);
+            throw ValidationException::withMessages(['projectCode' => __('tools.error_project')]);
         }
 
         $this->previewPage = 1;
@@ -126,6 +126,22 @@ final class ExcelFilter extends Component
     {
         session()->forget($this->previewSessionKey());
         $this->clearPreview();
+    }
+
+    public function startOver(ExcelFilterService $excel): void
+    {
+        if ($this->sourceToken !== '') {
+            session()->forget($this->previewSessionKey());
+            $excel->removeSource((int) auth()->id(), $this->sourceToken);
+        }
+
+        $this->reset([
+            'upload', 'sourceToken', 'sourceName', 'headers', 'sampleRows',
+            'selectedColumns', 'columnTypes', 'filterColumn', 'projectCode',
+            'previewReady', 'previewHeaders', 'previewRows', 'matchCount',
+            'previewPage', 'lastPage',
+        ]);
+        $this->resetValidation();
     }
 
     public function goToPage(int $page, ExcelFilterService $excel): void

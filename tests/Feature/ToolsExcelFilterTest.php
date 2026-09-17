@@ -68,7 +68,7 @@ class ToolsExcelFilterTest extends TestCase
         $upload = $this->workbookUpload();
 
         $this->get('/tools')->assertRedirect(route('login'));
-        $this->actingAs($user)->get('/tools')->assertOk()->assertSee('Herramientas');
+        $this->actingAs($user)->get('/tools')->assertOk()->assertSee('Choose Excel file');
         $component = Livewire::actingAs($user)->test(ExcelFilter::class)
             ->set('upload', $upload)
             ->call('analyze')
@@ -85,7 +85,7 @@ class ToolsExcelFilterTest extends TestCase
             ->call('preview')
             ->assertHasNoErrors()
             ->assertSet('matchCount', 31)
-            ->assertSee('Descargar Excel')
+            ->assertSee('Download Excel')
             ->call('goToPage', 2)
             ->assertSet('previewPage', 2)
             ->call('modify')
@@ -100,7 +100,34 @@ class ToolsExcelFilterTest extends TestCase
 
         $component->call('modify')->set('projectCode', 'missing')->call('preview')
             ->assertSet('matchCount', 0)
-            ->assertDontSee('Descargar Excel');
+            ->assertDontSee('Download Excel');
+
+        $token = $component->get('sourceToken');
+        $sourcePath = "tools/excel-filter/sources/{$user->id}/{$token}.xlsx";
+        Storage::disk('local')->assertExists($sourcePath);
+        $component->assertSee('Start over')->call('startOver')
+            ->assertSet('sourceToken', '')
+            ->assertSet('headers', [])
+            ->assertSet('selectedColumns', [])
+            ->assertSet('columnTypes', [])
+            ->assertSet('projectCode', '')
+            ->assertSet('previewReady', false)
+            ->assertSet('matchCount', 0)
+            ->assertDontSee('Start over');
+        Storage::disk('local')->assertMissing($sourcePath);
+    }
+
+    public function test_excel_upload_labels_follow_the_three_supported_languages(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+        foreach (['en' => ['Choose Excel file', 'Tools'], 'es' => ['Seleccionar archivo Excel', 'Herramientas'], 'it' => ['Scegli file Excel', 'Strumenti']] as $locale => [$label, $navigation]) {
+            $user->preferences()->updateOrCreate(['key' => 'locale'], ['value' => ['locale' => $locale]]);
+            $this->actingAs($user)->get('/tools')->assertOk()->assertSee($label)->assertSee($navigation);
+        }
+
+        $keys = array_keys(require base_path('lang/en/tools.php'));
+        $this->assertSame($keys, array_keys(require base_path('lang/es/tools.php')));
+        $this->assertSame($keys, array_keys(require base_path('lang/it/tools.php')));
     }
 
     public function test_column_types_create_real_numeric_cells_and_blue_headers(): void

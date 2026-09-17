@@ -22,7 +22,7 @@ final class ExcelFilterService
     {
         $extension = strtolower($upload->getClientOriginalExtension());
         if (! in_array($extension, ['xlsx', 'xls'], true)) {
-            throw ValidationException::withMessages(['upload' => 'Select an .xlsx or .xls workbook.']);
+            throw ValidationException::withMessages(['upload' => __('tools.error_upload_extension')]);
         }
 
         $token = (string) Str::uuid();
@@ -48,7 +48,7 @@ final class ExcelFilterService
         [$reader, $path, $info] = $this->open($userId, $token);
         $columnCount = (int) $info['totalColumns'];
         if ($columnCount < 1 || $columnCount > self::MAX_COLUMNS) {
-            throw ValidationException::withMessages(['upload' => 'The workbook must have between 1 and '.self::MAX_COLUMNS.' columns.']);
+            throw ValidationException::withMessages(['upload' => __('tools.error_column_limit', ['max' => self::MAX_COLUMNS])]);
         }
 
         $firstRows = $this->readChunk($reader, $path, $info, 1, min(6, (int) $info['totalRows']));
@@ -60,12 +60,12 @@ final class ExcelFilterService
             }
         }
         if ($lastHeaderIndex < 0) {
-            throw ValidationException::withMessages(['upload' => 'The first row must contain column headers.']);
+            throw ValidationException::withMessages(['upload' => __('tools.error_missing_headers')]);
         }
 
         $headers = array_map(fn ($value): string => trim((string) $value), array_slice($rawHeader, 0, $lastHeaderIndex + 1));
         if (in_array('', $headers, true) || count(array_unique(array_map('mb_strtolower', $headers))) !== count($headers)) {
-            throw ValidationException::withMessages(['upload' => 'Column headers must be filled in and unique.']);
+            throw ValidationException::withMessages(['upload' => __('tools.error_duplicate_headers')]);
         }
 
         $samples = [];
@@ -84,7 +84,7 @@ final class ExcelFilterService
             }
         }
         if ($samples === []) {
-            throw ValidationException::withMessages(['upload' => 'The workbook has headers but no data rows.']);
+            throw ValidationException::withMessages(['upload' => __('tools.error_no_data')]);
         }
 
         return ['headers' => $headers, 'columnCount' => count($headers), 'sampleRows' => $samples];
@@ -156,7 +156,7 @@ final class ExcelFilterService
     private function open(int $userId, string $token): array
     {
         if (! Str::isUuid($token)) {
-            throw ValidationException::withMessages(['upload' => 'Upload the workbook again.']);
+            throw ValidationException::withMessages(['upload' => __('tools.error_reupload')]);
         }
         $disk = Storage::disk('local');
         foreach (['xlsx', 'xls'] as $extension) {
@@ -171,17 +171,17 @@ final class ExcelFilterService
                     $reader = IOFactory::createReaderForFile($path);
                     $worksheets = $reader->listWorksheetInfo($path);
                 } catch (\Throwable $exception) {
-                    throw ValidationException::withMessages(['upload' => 'The Excel file is invalid or damaged.']);
+                    throw ValidationException::withMessages(['upload' => __('tools.error_damaged')]);
                 }
                 if (count($worksheets) !== 1) {
-                    throw ValidationException::withMessages(['upload' => 'The workbook must contain exactly one sheet.']);
+                    throw ValidationException::withMessages(['upload' => __('tools.error_one_sheet')]);
                 }
 
                 return [$reader, $path, $worksheets[0]];
             }
         }
 
-        throw ValidationException::withMessages(['upload' => 'The temporary workbook expired. Upload it again.']);
+        throw ValidationException::withMessages(['upload' => __('tools.error_expired')]);
     }
 
     private function headers(IReader $reader, string $path, array $info): array
@@ -195,7 +195,7 @@ final class ExcelFilterService
         }
         $headers = array_map(fn ($value): string => trim((string) $value), array_slice($raw, 0, $last + 1));
         if ($headers === [] || in_array('', $headers, true) || count(array_unique(array_map('mb_strtolower', $headers))) !== count($headers)) {
-            throw ValidationException::withMessages(['upload' => 'The workbook headers are invalid.']);
+            throw ValidationException::withMessages(['upload' => __('tools.error_headers')]);
         }
 
         return $headers;
@@ -204,11 +204,11 @@ final class ExcelFilterService
     private function validColumns(array $selected, int $columnCount, int $filterColumn, string $value): array
     {
         if ($filterColumn < 0 || $filterColumn >= $columnCount || trim($value) === '') {
-            throw ValidationException::withMessages(['projectCode' => 'Select a filter column and enter a project code.']);
+            throw ValidationException::withMessages(['projectCode' => __('tools.error_filter_code')]);
         }
         $indices = array_values(array_filter(range(0, $columnCount - 1), fn (int $index): bool => in_array($index, array_map('intval', $selected), true)));
         if ($indices === []) {
-            throw ValidationException::withMessages(['selectedColumns' => 'Select at least one column.']);
+            throw ValidationException::withMessages(['selectedColumns' => __('tools.error_columns')]);
         }
 
         return $indices;
@@ -220,7 +220,7 @@ final class ExcelFilterService
         foreach ($selectedColumns as $index) {
             $type = $columnTypes[$index] ?? 'text';
             if (! in_array($type, ['text', 'number'], true)) {
-                throw ValidationException::withMessages(['columnTypes' => 'Selecciona Texto o Número para cada columna.']);
+                throw ValidationException::withMessages(['columnTypes' => __('tools.error_type')]);
             }
             $types[$index] = $type;
         }
