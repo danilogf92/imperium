@@ -1,19 +1,7 @@
 @php
     $currencySymbol = $currency === 'dollar' ? '$' : '€';
 
-    $formatMoney = function ($value) use ($currencySymbol) {
-        $value = (float) $value;
-
-        if (abs($value) >= 1_000_000) {
-            return $currencySymbol . ' ' . number_format($value / 1_000_000, 2) . ' M';
-        }
-
-        if (abs($value) >= 1_000) {
-            return $currencySymbol . ' ' . number_format($value / 1_000, 2) . ' K';
-        }
-
-        return $currencySymbol . ' ' . number_format($value, 2);
-    };
+    $formatMoney = fn ($value) => \App\Support\MoneyValueFormatter::thousands((float) $value, $currencySymbol);
 
     $metrics = [
         [

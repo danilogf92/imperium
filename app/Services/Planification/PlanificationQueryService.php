@@ -81,12 +81,15 @@ final class PlanificationQueryService
             ->authorizedProjects()
             ->where('state', '<>', ProjectStateEnum::Postponed->value)
             ->with([
+                'planificationActivities' => fn ($query) => $query->with(['author:id,name', 'assignee:id,name'])->limit(3),
+                'planificationNotes' => fn ($query) => $query->with('author:id,name')->limit(3),
                 'company:id,company_name',
                 'projectMilestones' => fn ($query) => $query
                     ->with('milestone:id,name,code,color,view_color')
                     ->orderBy('cycle_year')
                     ->orderBy('sequence'),
                 'weeklyActivities' => fn ($query) => $query
+                    ->with(['author:id,name', 'assignee:id,name'])
                     ->when(($filters['activityExecution'] ?? '') === 'completed', fn (Builder $query) => $query->whereNotNull('executed_at'))
                     ->when(($filters['activityExecution'] ?? '') === 'incomplete', fn (Builder $query) => $query->whereNull('executed_at'))
                     ->where(function (Builder $query) use ($activityWeeks): void {
@@ -99,7 +102,8 @@ final class PlanificationQueryService
             ])
             ->withSum('data as data_budgeted', 'global_price')
             ->withSum('data as data_budgeted_euros', 'global_price_euros')
-            ->withSum('projectMilestones as allocated_percentage', 'percentage');
+            ->withSum('projectMilestones as allocated_percentage', 'percentage')
+            ->withCount(['planificationActivities', 'planificationNotes']);
 
         $this->applyFilters($query, $filters, $activityWeeks);
 

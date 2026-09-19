@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'upload_complete' => 'Caricamento completato. Continua per verificare il file Excel.',
+    'error_upload_failed' => 'Caricamento non riuscito. Controlla la connessione e seleziona nuovamente il file (massimo 12 MB).',
     'navigation' => 'Strumenti',
     'title' => 'Strumenti · Filtra Excel',
     'description' => 'Mantieni le colonne necessarie e scarica solo le righe di un progetto.',

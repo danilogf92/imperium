@@ -19,12 +19,15 @@ use Livewire\Attributes\On;
 use Livewire\WithFileUploads;
 use App\Livewire\Project\Concerns\ManagesProjectIdeaUpload;
 use App\Livewire\Project\Concerns\ManagesProjectHandoverCertificate;
+use App\Livewire\Project\Concerns\ManagesProjectOwners;
+use App\Models\Owner;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class Edit extends Component
 {
     use ManagesProjectIdeaUpload;
     use ManagesProjectHandoverCertificate;
+    use ManagesProjectOwners;
     use WithFileUploads;
 
     public ProjectForm $form;
@@ -58,6 +61,7 @@ class Edit extends Component
         ]);
 
         $this->form->updateCompanyCode($user);
+        $this->form->owner_ids = [];
     }
 
     public function updatedFormState(): void
@@ -87,6 +91,7 @@ class Edit extends Component
     public function closeModal(): void
     {
         $this->resetValidation();
+        $this->resetOwnerCreator();
         $this->reset(['projectIdea', 'pdaDocument', 'handoverCertificate']);
         $this->dispatch('close-modal', $this->modalName());
     }
@@ -226,18 +231,34 @@ class Edit extends Component
 
     public function render(): View
     {
+        $companies = auth()->user()?->companiesForPermission(
+            ProjectPermissionEnum::Update
+        ) ?? collect();
+
         return view('livewire.project.create', [
             'isEdit' => true,
             'modalName' => $this->modalName(),
-            'companies' => auth()->user()?->companiesForPermission(
-                ProjectPermissionEnum::Update
-            ) ?? collect(),
+            'companies' => $companies,
             'stateOptions' => ProjectStateEnum::cases(),
             'investmentOptions' => InvestmentEnum::cases(),
             'justificationOptions' => ProjectJustificationEnum::cases(),
             'classificationOptions' => InvestmentClassificationEnum::cases(),
             'rateLimits' => ProjectRateSetting::current(),
+            'owners' => Owner::query()
+                ->with('companies:id')
+                ->whereHas('companies', fn ($query) => $query->whereKey($companies->pluck('id')))
+                ->orderBy('name')
+                ->get(),
         ]);
+    }
+
+    /** @return array<int, int> */
+    protected function ownerCompanyIds(): array
+    {
+        return auth()->user()?->companiesForPermissionQuery(ProjectPermissionEnum::Update)
+            ->pluck('companies.id')
+            ->map(fn ($id): int => (int) $id)
+            ->all() ?? [];
     }
 
     private function authorizedProject(): Project

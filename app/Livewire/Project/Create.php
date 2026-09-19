@@ -16,11 +16,14 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Livewire\Project\Concerns\ManagesProjectIdeaUpload;
 use App\Livewire\Project\Concerns\ManagesProjectHandoverCertificate;
+use App\Livewire\Project\Concerns\ManagesProjectOwners;
+use App\Models\Owner;
 
 class Create extends Component
 {
     use ManagesProjectIdeaUpload;
     use ManagesProjectHandoverCertificate;
+    use ManagesProjectOwners;
     use WithFileUploads;
 
     public ProjectForm $form;
@@ -40,6 +43,7 @@ class Create extends Component
         ]);
 
         $this->form->updateCompanyCode($user);
+        $this->form->owner_ids = [];
     }
 
     public function updatedFormState(): void
@@ -63,6 +67,7 @@ class Create extends Component
     public function closeCreateModal(): void
     {
         $this->form->resetForm();
+        $this->resetOwnerCreator();
         $this->reset(['projectIdea', 'pdaDocument', 'handoverCertificate']);
         $this->resetValidation(['projectIdea', 'pdaDocument', 'handoverCertificate']);
         $this->dispatch('close-modal', 'create-project');
@@ -89,6 +94,7 @@ class Create extends Component
 
         $this->dispatch('close-modal', 'create-project');
         $this->form->resetForm();
+        $this->resetOwnerCreator();
         $this->reset(['projectIdea', 'pdaDocument', 'handoverCertificate']);
     }
 
@@ -126,10 +132,12 @@ class Create extends Component
 
     public function render(): View
     {
+        $companies = auth()->user()?->companiesForPermission(
+            ProjectPermissionEnum::Create
+        ) ?? collect();
+
         return view('livewire.project.create', [
-            'companies' => auth()->user()?->companiesForPermission(
-                ProjectPermissionEnum::Create
-            ) ?? collect(),
+            'companies' => $companies,
             'canCreate' => auth()->user()?->companiesForPermissionQuery(
                 ProjectPermissionEnum::Create
             )->exists() ?? false,
@@ -138,6 +146,20 @@ class Create extends Component
             'justificationOptions' => ProjectJustificationEnum::cases(),
             'classificationOptions' => InvestmentClassificationEnum::cases(),
             'rateLimits' => ProjectRateSetting::current(),
+            'owners' => Owner::query()
+                ->with('companies:id')
+                ->whereHas('companies', fn ($query) => $query->whereKey($companies->pluck('id')))
+                ->orderBy('name')
+                ->get(),
         ]);
+    }
+
+    /** @return array<int, int> */
+    protected function ownerCompanyIds(): array
+    {
+        return auth()->user()?->companiesForPermissionQuery(ProjectPermissionEnum::Create)
+            ->pluck('companies.id')
+            ->map(fn ($id): int => (int) $id)
+            ->all() ?? [];
     }
 }

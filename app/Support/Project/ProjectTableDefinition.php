@@ -4,7 +4,7 @@ namespace App\Support\Project;
 
 final class ProjectTableDefinition
 {
-    public const PREFERENCE_KEY = 'projects.table.visible_columns.v6';
+    public const PREFERENCE_KEY = 'projects.table.visible_columns.v7';
 
     public const COLUMN_OPTIONS = [
         'id' => 'ID',
@@ -12,6 +12,8 @@ final class ProjectTableDefinition
         'plant' => 'Plant',
         'pda_code' => 'PDA code',
         'name' => 'Name',
+        'owner' => 'Owner',
+        'sap_order' => 'SAP Order',
 
         'forecast_start_year' => 'Forecast Start Year',
         'forecast_end_date' => 'Forecast End Date',
@@ -69,6 +71,8 @@ final class ProjectTableDefinition
         'plant',
         'pda_code',
         'name',
+        'owner',
+        'sap_order',
         'forecast_start_year',
         'investments',
         'state',
@@ -89,6 +93,7 @@ final class ProjectTableDefinition
         'order',
         'name',
         'pda_code',
+        'sap_order',
 
         'rate',
         'state',

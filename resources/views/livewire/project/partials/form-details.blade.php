@@ -89,6 +89,96 @@
 
                             </div>
 
+                            <div class="col-span-full">
+                                <div class="mb-2 flex items-center justify-between gap-3">
+                                    <label for="project-owner{{ $fieldSuffix }}" class="block text-sm font-medium text-gray-700">
+                                        Owner
+                                    </label>
+                                </div>
+
+                                <div id="project-owner{{ $fieldSuffix }}" class="w-full">
+                                    <x-dashboard-filter-dropdown label="Select owners" model="form.owner_ids"
+                                        :options="$owners
+                                            ->filter(fn ($owner) => $owner->companies->contains('id', (int) $form->company_id))
+                                            ->map(fn ($owner) => ['value' => $owner->id, 'label' => $owner->name])
+                                            ->values()"
+                                        :selected="$form->owner_ids" multiple :close-on-select="false"
+                                        :global-loading="false" create-action="toggleOwnerCreator"
+                                        create-label="Create owner" />
+                                </div>
+                                @error('form.owner_ids') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                                @error('form.owner_ids.*') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+
+                                @if ($showOwnerCreator)
+                                    <div class="fixed inset-0 z-[190] flex items-center justify-center p-4" role="dialog"
+                                        aria-modal="true" aria-labelledby="new-owner-title{{ $fieldSuffix }}">
+                                        <button type="button" wire:click="toggleOwnerCreator" aria-label="Close"
+                                            class="absolute inset-0 bg-slate-950/50"></button>
+
+                                        <div class="relative z-10 w-full max-w-lg rounded-lg bg-white shadow-2xl">
+                                            <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+                                                <h3 id="new-owner-title{{ $fieldSuffix }}" class="text-base font-semibold text-slate-900">
+                                                    Create owner
+                                                </h3>
+                                                <button type="button" wire:click="toggleOwnerCreator" title="Close"
+                                                    class="inline-flex h-8 w-8 items-center justify-center rounded-md text-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800">
+                                                    &times;
+                                                </button>
+                                            </div>
+
+                                            <div class="space-y-5 px-5 py-5">
+                                                <div>
+                                                    <label for="new-owner-name{{ $fieldSuffix }}" class="mb-2 block text-sm font-medium text-gray-700">
+                                                        Name <span class="text-red-500">*</span>
+                                                    </label>
+                                                    <input id="new-owner-name{{ $fieldSuffix }}" type="text" wire:model="newOwnerName"
+                                                        maxlength="255" placeholder="Owner name" autofocus
+                                                        class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                                    @error('newOwnerName') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                                                </div>
+
+                                                <div>
+                                                    <p class="mb-2 text-sm font-medium text-gray-700">
+                                                        Companies <span class="text-red-500">*</span>
+                                                    </p>
+                                                    <x-dashboard-filter-dropdown label="Select companies" model="newOwnerCompanyIds"
+                                                        :options="$companies->map(fn ($company) => [
+                                                            'value' => $company->id,
+                                                            'label' => $company->company_name ?? $company->company_code,
+                                                        ])->values()"
+                                                        :selected="$newOwnerCompanyIds" multiple :close-on-select="false"
+                                                        :global-loading="false" />
+                                                    @error('newOwnerCompanyIds') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                                                    @error('newOwnerCompanyIds.*') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                                                </div>
+                                            </div>
+
+                                            <div class="flex justify-end gap-2 border-t border-slate-200 px-5 py-4">
+                                                <button type="button" wire:click="toggleOwnerCreator"
+                                                    class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                                    Cancel
+                                                </button>
+                                                <button type="button" wire:click="createOwner" wire:loading.attr="disabled"
+                                                    wire:target="createOwner"
+                                                    class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                                                    Create
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div>
+                                <label for="sap-order{{ $fieldSuffix }}" class="mb-2 block text-sm font-medium text-gray-700">
+                                    SAP Order
+                                </label>
+                                <input id="sap-order{{ $fieldSuffix }}" type="text" wire:model="form.sap_order"
+                                    maxlength="255" placeholder="Enter SAP order"
+                                    class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                @error('form.sap_order') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
+                            </div>
+
                             {{-- PDA code --}}
                             <div class="col-span-full">
                                 <label for="pda-code{{ $fieldSuffix }}"
@@ -103,9 +193,9 @@
                                     <div
                                         class="flex items-center rounded-l-lg border border-r-0 border-gray-300 bg-gray-100 px-4 py-2.5 font-mono text-sm font-semibold uppercase text-gray-700">
                                         @if ($form->company_code)
-                                            {{ $form->company_code }}_
+                                            {{ $form->company_code }}-
                                         @else
-                                            COMPANY_
+                                            COMPANY-
                                         @endif
                                     </div>
 

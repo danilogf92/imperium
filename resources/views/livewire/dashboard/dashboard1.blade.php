@@ -145,22 +145,22 @@
                 ],
                 [
                     'label' => 'Budgeted',
-                    'value' => $currencySymbol . ' ' . number_format($budgeted, 2),
+                    'value' => \App\Support\MoneyValueFormatter::thousands($budgeted, $currencySymbol),
                     'accent' => 'bg-blue-500',
                 ],
                 [
                     'label' => 'Booked',
-                    'value' => $currencySymbol . ' ' . number_format($booked, 2),
+                    'value' => \App\Support\MoneyValueFormatter::thousands($booked, $currencySymbol),
                     'accent' => 'bg-amber-500',
                 ],
                 [
                     'label' => 'Executed',
-                    'value' => $currencySymbol . ' ' . number_format($executed, 2),
+                    'value' => \App\Support\MoneyValueFormatter::thousands($executed, $currencySymbol),
                     'accent' => 'bg-emerald-500',
                 ],
                 [
                     'label' => 'Real (SAP)',
-                    'value' => $currencySymbol . ' ' . number_format($realValue, 2),
+                    'value' => \App\Support\MoneyValueFormatter::thousands($realValue, $currencySymbol),
                     'accent' => 'bg-violet-500',
                 ],
             ];

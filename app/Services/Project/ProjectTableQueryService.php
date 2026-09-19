@@ -20,6 +20,7 @@ final class ProjectTableQueryService
                 'company:id,company_code,company_name',
                 'creator:id,name',
                 'responsible:id,name',
+                'owners:id,name',
             ])
 
             ->withExists([
@@ -70,6 +71,10 @@ final class ProjectTableQueryService
                         ->orWhere('classification_of_investments', 'like', $term)
                         ->orWhere('investments', 'like', $term)
                         ->orWhere('justification', 'like', $term);
+                    $query->orWhereHas(
+                        'owners',
+                        fn (Builder $owners): Builder => $owners->where('name', 'like', $term)
+                    )->orWhere('sap_order', 'like', $term);
                 });
             })
 

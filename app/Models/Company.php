@@ -50,6 +50,11 @@ class Company extends Model
         return $this->hasMany(Project::class);
     }
 
+    public function owners(): BelongsToMany
+    {
+        return $this->belongsToMany(Owner::class);
+    }
+
     public function roles(): HasMany
     {
         return $this->hasMany(Role::class);

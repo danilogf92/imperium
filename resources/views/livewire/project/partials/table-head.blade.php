@@ -183,6 +183,9 @@
         <th scope="col" class="whitespace-nowrap px-2 py-2">Plant</th>
         <th scope="col" class="whitespace-nowrap px-2 py-2">Created By</th>
         <th scope="col" class="whitespace-nowrap px-2 py-2">Responsible</th>
+        <th scope="col" class="whitespace-nowrap px-2 py-2">Owner</th>
+        <th wire:click="setSortBy('sap_order')" scope="col"
+            class="cursor-pointer whitespace-nowrap px-2 py-2 hover:bg-gray-200">SAP Order</th>
 
         <th wire:click="setSortBy('data_uploaded')" scope="col"
             class="cursor-pointer whitespace-nowrap px-2 py-2 hover:bg-gray-200">

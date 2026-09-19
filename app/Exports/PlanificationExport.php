@@ -39,6 +39,10 @@ class PlanificationExport
         $projectsQuery = Project::query()
             ->where('state', '<>', ProjectStateEnum::Postponed->value)
             ->with([
+                'weeklyActivities.author:id,name',
+                'weeklyActivities.assignee:id,name',
+                'planificationActivities.author:id,name',
+                'planificationActivities.assignee:id,name',
                 'company:id,company_name',
                 'projectMilestones' => fn ($query) => $query
                     ->with('milestone:id,name,code,color')
@@ -166,10 +170,10 @@ class PlanificationExport
                 $project->state?->value,
                 $project->weeklyActivities->filter(fn ($activity) =>
                     $activity->week_year === $activityWeeks[0]['year'] && $activity->week_number === $activityWeeks[0]['week'])
-                    ->pluck('activity')->implode("\n"),
+                    ->map(fn ($activity) => $activity->exportDescription())->implode("\n\n"),
                 $project->weeklyActivities->filter(fn ($activity) =>
                     $activity->week_year === $activityWeeks[1]['year'] && $activity->week_number === $activityWeeks[1]['week'])
-                    ->pluck('activity')->implode("\n"),
+                    ->map(fn ($activity) => $activity->exportDescription())->implode("\n\n"),
             ], null, "A{$row}");
 
             $sheet->getStyle("E{$row}")
@@ -380,6 +384,26 @@ class PlanificationExport
             $chart->setTopLeftPosition('A'.($totalRow + 3));
             $chart->setBottomRightPosition($monthEndColumn.($totalRow + 22));
             $sheet->addChart($chart);
+        }
+
+        // Append notes after the timeline so existing month totals and chart ranges stay intact.
+        $notesColumn = Coordinate::stringFromColumnIndex(Coordinate::columnIndexFromString($totalLastColumn) + 1);
+        $sheet->setCellValue("{$notesColumn}1", 'Project Activities / Notes');
+        $sheet->mergeCells("{$notesColumn}1:{$notesColumn}2");
+        $sheet->duplicateStyle($sheet->getStyle('A1'), "{$notesColumn}1:{$notesColumn}2");
+        $sheet->getColumnDimension($notesColumn)->setWidth(65);
+        foreach ($projects as $index => $project) {
+            $noteText = $project->planificationActivities->map(fn ($activity) => $activity->exportDescription())->implode("\n\n");
+            if (mb_strlen($noteText) > 32767) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'export' => __('notes.export_limit', ['project' => $project->pda_code]),
+                ]);
+            }
+            $noteRow = $index + 3;
+            $sheet->setCellValueExplicit("{$notesColumn}{$noteRow}", $noteText, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->getStyle("{$notesColumn}{$noteRow}")->getAlignment()->setWrapText(true)->setVertical(Alignment::VERTICAL_TOP);
+            $sheet->getStyle("{$notesColumn}{$noteRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $sheet->getRowDimension($noteRow)->setRowHeight(-1);
         }
 
         $directory = storage_path('app/private/exports');

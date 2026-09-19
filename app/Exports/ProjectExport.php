@@ -43,7 +43,7 @@ class ProjectExport
             array_diff(array_keys(self::HEADERS), ['actions'])
         ));
         $query = Project::query()
-            ->with(['company:id,company_code,company_name', 'creator:id,name', 'responsible:id,name'])
+            ->with(['company:id,company_code,company_name', 'creator:id,name', 'responsible:id,name', 'owners:id,name'])
             ->withSum('data as budgeted_euros', 'global_price_euros')
             ->withSum('data as real_euros', 'real_value_euros')
             ->withSum('data as executed_euros', 'executed_euros')
@@ -60,7 +60,9 @@ class ProjectExport
                     ->where('name', 'like', $search)->orWhere('order', 'like', $search)
                     ->orWhere('pda_code', 'like', $search)
                     ->orWhere('state', 'like', $search)->orWhere('classification_of_investments', 'like', $search)
-                    ->orWhere('investments', 'like', $search)->orWhere('justification', 'like', $search));
+                    ->orWhere('investments', 'like', $search)->orWhere('justification', 'like', $search)
+                    ->orWhere('sap_order', 'like', $search)
+                    ->orWhereHas('owners', fn (Builder $owners) => $owners->where('name', 'like', $search)));
             })
             ->when(($filters['years'] ?? []) !== [], function (Builder $query) use ($filters): void {
                 $query->where(function (Builder $query) use ($filters): void {
@@ -138,6 +140,7 @@ class ProjectExport
             'plant' => $project->company?->company_name,
             'creator' => $project->creator?->name,
             'responsible' => $project->responsible?->name,
+            'owner' => $project->owners->pluck('name')->join(', '),
             'data_uploaded' => $project->data_uploaded ? 'Yes' : 'No',
             'forecast_start_year' => $project->forecast_start_date?->format('Y'),
             'forecast_start_date' => $project->forecast_start_date?->format('Y-m-d'),

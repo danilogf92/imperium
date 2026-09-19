@@ -131,7 +131,7 @@
                                         <div class="flex flex-wrap items-start justify-between gap-2">
                                             <div class="min-w-0">
                                                 <p class="whitespace-pre-line text-sm font-semibold text-slate-800">
-                                                    {{ $activity->activity }}</p>
+                                                    {{ $activity->activity }}</p><p class="mt-1 text-xs text-slate-500">{{ $activity->attribution() }}</p>
                                                 <a href="{{ route('projects.dashboard', $activity->project) }}"
                                                     class="mt-1 block text-xs font-bold text-sky-700 hover:text-orange-700">
                                                     {{ $activity->project->name }}@if ($activity->project->pda_code)
@@ -367,7 +367,7 @@
                         <div class="flex min-w-0 gap-3"><span
                                 class="{{ $style['marker'] }} mt-1.5 h-3 w-3 shrink-0 rounded-full"></span>
                             <div class="min-w-0">
-                                <p class="whitespace-pre-line text-sm text-slate-800">{{ $activity->activity }}</p><a
+                                <p class="whitespace-pre-line text-sm text-slate-800">{{ $activity->activity }}</p><p class="mt-1 text-xs text-slate-500">{{ $activity->attribution() }}</p><a
                                     href="{{ route('projects.dashboard', $activity->project) }}"
                                     class="mt-1 block truncate text-xs font-bold text-sky-700 hover:text-orange-700">{{ $activity->project->name }}
                                     @if ($activity->project->pda_code)

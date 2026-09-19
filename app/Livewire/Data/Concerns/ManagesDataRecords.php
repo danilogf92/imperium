@@ -85,6 +85,7 @@ trait ManagesDataRecords
 
     public function closeEditModal(): void
     {
+        $this->resetSupplierCreator();
         $this->reset([
             'editingDataId',
             'editData',
@@ -116,6 +117,7 @@ trait ManagesDataRecords
             return;
         }
 
+        $this->validateSupplierSelection();
         $validated = $this->validate(
             DataCreateValidation::rules(),
             [],
@@ -155,6 +157,8 @@ trait ManagesDataRecords
             $this->editingDataId,
             ProjectPermissionEnum::Update
         );
+
+        $this->validateSupplierSelection();
 
         if (! $this->synchronizeEuroValues()) {
             return;
@@ -250,5 +254,42 @@ trait ManagesDataRecords
             position: 'center',
             timer: 1800
         );
+    }
+
+    public function openDeleteSapModal(): void
+    {
+        $this->authorizeProjectData(ProjectPermissionEnum::Delete);
+        $this->dispatch('open-modal', 'delete-project-sap-data');
+    }
+
+    public function closeDeleteSapModal(): void
+    {
+        $this->dispatch('close-modal', 'delete-project-sap-data');
+    }
+
+    public function deleteSapData(): void
+    {
+        $this->authorizeProjectData(ProjectPermissionEnum::Delete);
+
+        $deleted = DB::transaction(function (): int {
+            $project = $this->project->newQuery()->lockForUpdate()->findOrFail($this->project->id);
+            abort_unless(auth()->user()?->hasPermissionInCompany(ProjectPermissionEnum::Delete, (int) $project->company_id), 403);
+            $deleted = 0;
+            $project->data()->whereNotNull('sap_order')->whereRaw("TRIM(sap_order) <> ''")
+                ->chunkById(200, function ($rows) use (&$deleted): void {
+                    foreach ($rows as $row) {
+                        $row->delete();
+                        $deleted++;
+                    }
+                });
+            $project->update(['data_uploaded' => $project->data()->exists()]);
+
+            return $deleted;
+        });
+
+        $this->project->refresh();
+        $this->resetPage();
+        $this->closeDeleteSapModal();
+        $this->dispatch('alert', type: 'success', title: __('sap.deleted_records', ['count' => $deleted]), position: 'center', timer: 2200);
     }
 }

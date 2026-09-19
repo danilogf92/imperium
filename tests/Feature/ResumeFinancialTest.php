@@ -95,6 +95,7 @@ class ResumeFinancialTest extends TestCase
                 'month' => $month,
                 'percentage' => $percentage,
                 'sequence' => $index + 1,
+                'executed_at' => $index === 0 ? '2026-09-04 12:00:00' : null,
             ]);
         }
 
@@ -119,7 +120,21 @@ class ResumeFinancialTest extends TestCase
                         && ! isset($chart['annotations'])
                         && ! isset($chart['yaxis']['max'])
                         && $chart['yaxis']['forceNiceScale'] === true;
-                });
+                })
+                ->assertViewHas('plannedCashFlowChartOptions', function ($chart) use ($rate): bool {
+                    $bars = $chart['series'][0]['data'];
+
+                    return count($bars) === 12
+                        && $bars[7]['y'] === 200.0 * $rate
+                        && $bars[7]['fillColor'] === '#F97316'
+                        && $bars[8]['y'] === 300.0 * $rate
+                        && $bars[8]['fillColor'] === '#7DD3FC'
+                        && $chart['colors'] === ['#7DD3FC', '#94A3B8']
+                        && $chart['plotOptions']['bar']['distributed'] === false
+                        && count($chart['series'][1]['data']) === 12;
+                })
+                ->assertViewHas('plannedCashFlowSummary', fn ($summary) => $summary['total'] === 500.0 * $rate
+                    && $summary['outside_total'] === 500.0 * $rate);
         }
 
         $component->set('yearFilter', [])
@@ -131,6 +146,34 @@ class ResumeFinancialTest extends TestCase
             ->assertViewHas('cashFlowSummary', fn ($summary) => $summary['total'] === 0.0 && $summary['outside_total'] === 1000.0)
             ->assertViewHas('cashFlowChartOptions', fn ($chart) => count($chart['series'][0]['data']) === 12)
             ->assertSee('Outside selected years (2027)');
+    }
+
+    public function test_cash_flow_comparison_uses_accounting_month_and_keeps_undated_amounts_separate(): void
+    {
+        $this->seed();
+        $user = User::where('email', 'test@example.com')->sole();
+        $this->project($user, 2026, 'Execution', 1000, 0, 25);
+        $project = Project::sole();
+        foreach ([['2026-08-15', 100], ['2026-08-20', -20], ['2027-01-01', 50]] as [$date, $amount]) {
+            Data::create(['project_id' => $project->id, 'accounting_date' => $date,
+                'document_date' => '2026-02-01', 'real_value_euros' => $amount, 'real_value' => $amount * 2]);
+        }
+        $this->project($user, 2025, 'Execution', 100, 0, 999);
+        $component = Livewire::actingAs($user)->test(Resume::class)->set('yearFilter', ['2026']);
+        foreach (['euro' => 1, 'dollar' => 2] as $currency => $rate) {
+            $component->set('currency', $currency)
+                ->assertSee('Planned milestone cash flow test')
+                ->assertViewHas('plannedCashFlowChartOptions', fn ($chart) =>
+                    $chart['series'][1]['data'][7]['y'] === 80.0 * $rate
+                    && $chart['series'][1]['data'][1]['y'] === 0.0
+                    && array_column($chart['series'][0]['data'], 'x') === array_column($chart['series'][1]['data'], 'x')
+                    && ! isset($chart['yaxis']['min'])
+                    && $chart['chart']['stacked'] === false)
+                ->assertViewHas('plannedCashFlowSummary', fn ($summary) =>
+                    $summary['actual_total'] === 80.0 * $rate
+                    && $summary['outside_actual'] === 50.0 * $rate
+                    && $summary['undated_total'] === 25.0 * $rate);
+        }
     }
 
     private function project(User $user, int $year, string $state, float $budget, float $assigned, float $sap): void

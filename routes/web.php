@@ -6,6 +6,7 @@ use App\Http\Controllers\ProjectChartExcelExportController;
 use App\Livewire\Data\IndexData;
 use App\Livewire\Activities\ActivitiesDashboard;
 use App\Livewire\Dashboard\Dashboard;
+use App\Livewire\Dashboard\Review;
 use App\Livewire\Orders\Ordenes;
 use App\Livewire\Planification\Planification;
 use App\Livewire\Project\DashboardProjects;
@@ -34,6 +35,10 @@ Route::get('/dashboard', Dashboard::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::get('/review', Review::class)
+    ->middleware(['auth', 'verified'])
+    ->name('review');
+
 /*
 |--------------------------------------------------------------------------
 | Authenticated routes
@@ -57,13 +62,15 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/charts/export-excel', ProjectChartExcelExportController::class)
         ->name('charts.export-excel');
 
-    Route::get('/planification', Planification::class)
+    Route::redirect('/planification', '/planning', 301);
+    Route::get('/planning', Planification::class)
         ->name('planification');
 
     Route::get('/activities', ActivitiesDashboard::class)
         ->name('activities');
 
-    Route::get('/resume', Resume::class)
+    Route::redirect('/resume', '/summary', 301);
+    Route::get('/summary', Resume::class)
         ->name('resume');
 
     Route::get('/templates', TemplateLibrary::class)

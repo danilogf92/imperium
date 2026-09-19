@@ -147,6 +147,8 @@ class Resume extends Component
             'projectsChartOptions' => $projectsChartOptions,
             'cashFlowChartOptions' => $cashFlow['options'],
             'cashFlowSummary' => $cashFlow['summary'],
+            'plannedCashFlowChartOptions' => $cashFlow['planned_options'],
+            'plannedCashFlowSummary' => $cashFlow['planned_summary'],
             'availableChart' => $availableChart,
             'companies' => $companies,
             'years' => $years,
@@ -476,9 +478,9 @@ class Resume extends Component
         $symbol = $this->currency === 'dollar' ? '$' : "\u{20AC}";
         $formatter = ChartValueFormatter::compactMoney($symbol);
 
-        $monthlyValues = $this->filteredProjectQuery($permission)
+        $milestoneValues = $this->filteredProjectQuery($permission)
             ->withSum('data as milestone_budget', $budgetColumn)
-            ->with(['projectMilestones:id,project_id,cycle_year,month,percentage'])
+            ->with(['projectMilestones:id,project_id,cycle_year,month,percentage,executed_at'])
             ->whereHas('projectMilestones')
             ->get()
             ->flatMap(function (Project $project): Collection {
@@ -487,8 +489,10 @@ class Resume extends Component
                 return $project->projectMilestones->map(fn ($milestone): array => [
                     'period' => sprintf('%04d-%02d', $milestone->cycle_year, $milestone->month),
                     'value' => $budget * ((float) $milestone->percentage / 100),
+                    'pending' => $milestone->executed_at === null,
                 ]);
-            })
+            });
+        $monthlyValues = $milestoneValues
             ->groupBy('period')
             ->map(fn (Collection $items): float => round((float) $items->sum('value'), 2))
             ->sortKeys();
@@ -541,9 +545,11 @@ class Resume extends Component
             'legend' => ['show' => false],
             'grid' => ['show' => true, 'borderColor' => '#E2E8F0'],
         ];
+        $comparison = $this->plannedExecutionComparison($permission, $monthlyValues, $options);
 
         return [
             'options' => $options,
+            'planned_options' => $comparison['options'],
             'summary' => [
                 'years' => implode(', ', $displayYears),
                 'total' => $visibleTotal,
@@ -551,7 +557,61 @@ class Resume extends Component
                 'outside_years' => $outsideValues->keys()->map(fn (string $period): string => substr($period, 0, 4))
                     ->unique()->values()->implode(', '),
             ],
+            'planned_summary' => $comparison['summary'],
         ];
+    }
+
+    private function plannedExecutionComparison(ProjectPermissionEnum $permission, Collection $planned, array $options): array
+    {
+        $column = $this->currency === 'dollar' ? 'real_value' : 'real_value_euros';
+        $rows = \App\Models\Data::query()
+            ->whereIn('project_id', $this->filteredProjectQuery($permission)->select('projects.id'))
+            ->get(['accounting_date', $column]);
+        $dated = $rows->filter(fn ($row) => filled($row->accounting_date));
+        $actual = $dated->groupBy(fn ($row) => substr($row->accounting_date, 0, 7))
+            ->map(fn (Collection $items) => round((float) $items->sum($column), 2));
+        $years = $this->yearFilter !== [] ? array_map('intval', $this->yearFilter)
+            : $planned->keys()->merge($actual->keys())->map(fn ($period) => (int) substr($period, 0, 4))->unique()->all();
+        sort($years);
+        $periods = collect();
+        foreach ($years as $year) {
+            foreach (range(1, 12) as $month) {
+                $periods->put(sprintf('%04d-%02d', $year, $month), 0.0);
+            }
+        }
+        $plannedVisible = $periods->replace($planned->intersectByKeys($periods));
+        $actualVisible = $periods->replace($actual->intersectByKeys($periods));
+        $currentMonth = CarbonImmutable::now()->format('Y-m');
+        $categories = $periods->keys()->map(fn ($period) => CarbonImmutable::createFromFormat('!Y-m', $period)->format('M Y'))->all();
+        $options['series'] = [
+            ['name' => 'Planned milestones', 'data' => $plannedVisible->map(fn ($value, $period) => [
+                'x' => CarbonImmutable::createFromFormat('!Y-m', $period)->format('M Y'),
+                'y' => $value, 'fillColor' => $period < $currentMonth ? '#F97316' : '#7DD3FC',
+            ])->values()->all()],
+            ['name' => 'Real SAP', 'data' => $actualVisible->map(fn ($value, $period) => [
+                'x' => CarbonImmutable::createFromFormat('!Y-m', $period)->format('M Y'),
+                'y' => $value, 'fillColor' => '#94A3B8',
+            ])->values()->all()],
+        ];
+        $options['colors'] = ['#7DD3FC', '#94A3B8'];
+        $options['chart']['stacked'] = false;
+        $options['plotOptions']['bar']['distributed'] = false;
+        $options['xaxis']['categories'] = $categories;
+        $options['xaxis']['title']['text'] = 'Month';
+        unset($options['yaxis']['min']); // Preserve negative accounting adjustments.
+        $options['legend'] = ['show' => true, 'position' => 'top'];
+        $options['tooltip']['shared'] = true;
+        $options['tooltip']['intersect'] = false;
+
+        return ['options' => $options, 'summary' => [
+            'forecast_rows' => app(\App\Services\Resume\CashFlowForecast::class)->rows($planned, $actual, $periods),
+            'years' => implode(', ', $years),
+            'total' => round((float) $plannedVisible->sum(), 2),
+            'actual_total' => round((float) $actualVisible->sum(), 2),
+            'outside_total' => round((float) $planned->diffKeys($periods)->sum(), 2),
+            'outside_actual' => round((float) $actual->diffKeys($periods)->sum(), 2),
+            'undated_total' => round((float) $rows->filter(fn ($row) => blank($row->accounting_date))->sum($column), 2),
+        ]];
     }
 
     private function comparisonChartOptions(Collection $rows): array

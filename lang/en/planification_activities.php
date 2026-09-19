@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'Project activities / notes',
+    'open' => 'Open project activities',
+    'created_by' => 'Created by',
+    'assigned_to' => 'Assigned to',
+    'assigned_by' => 'Assigned by',
+    'unassigned' => 'Unassigned',
+    'general' => 'Project note (no period)',
+    'all_periods' => 'All periods and project notes',
+    'period' => 'Year / week',
+    'period_hint' => 'Leave empty for a general project note.',
+    'assignee_hint' => 'Active users with access to this project plant.',
+    'invalid_assignee' => 'Choose an active user with access to the same plant as this project.',
+    'invalid_period' => 'Choose a valid ISO year and week.',
+    'completed' => 'Completed',
+    'pending' => 'Pending',
+    'saved' => 'Activity saved.',
+    'cancel_edit' => 'Cancel editing',
+    'my_assignments' => 'My pending activities',
+    'no_assignments' => 'You have no pending assigned activities.',
+    'completed_feedback' => 'Activity completed. Removed from pending assignments.',
+    'reopened_feedback' => 'Activity reopened. It appears in pending assignments again if assigned.',
+    'unread' => ':count new assignments',
+    'preview_hint' => 'Latest activities. Click the icon to read and manage all activities and notes.',
+];

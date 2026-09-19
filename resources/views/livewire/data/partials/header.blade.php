@@ -38,12 +38,22 @@
                     <span
                         class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
                         <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                        {{ __(':count records', ['count' => number_format($data->total())]) }}
+                        {{ __(':count records', ['count' => number_format($totalRecordCount)]) }}
+                        (SAP {{ number_format($sapRecordCount) }}) (Data {{ number_format($manualRecordCount) }})
                     </span>
                 </div>
             </div>
 
             <div class="flex flex-wrap gap-2">
+                @if ($canDeleteData)
+                    <button type="button" wire:click="openDeleteSapModal"
+                        wire:loading.attr="disabled" wire:target="openDeleteSapModal,deleteSapData" @disabled($sapRecordCount === 0)
+                        data-no-global-loading
+                        class="inline-flex h-10 items-center justify-center rounded-lg bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50">
+                        <span wire:loading.remove wire:target="deleteSapData">{{ __('sap.delete_records') }}</span>
+                        <span wire:loading wire:target="deleteSapData">{{ __('sap.deleting_records') }}</span>
+                    </button>
+                @endif
                 @if ($canExportData)
                     {{-- <x-excel-export-button method="exportImportReadyExcel" label="Export for import"
                         loading-label="Preparing import file..." /> --}}

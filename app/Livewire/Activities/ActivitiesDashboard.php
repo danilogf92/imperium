@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Activities;
 
+use App\Enums\ProjectPermissionEnum;
 use App\Enums\InvestmentClassificationEnum;
 use App\Enums\InvestmentEnum;
 use App\Enums\ProjectJustificationEnum;
@@ -92,7 +93,7 @@ class ActivitiesDashboard extends Component
             : 0;
 
         return view('livewire.activities.activities-dashboard', [
-            'companies' => auth()->user()->availableCompanies(),
+            'companies' => auth()->user()->companiesForPermission(ProjectPermissionEnum::View),
             'stateOptions' => $this->reportableStateOptions(),
             'classificationOptions' => InvestmentClassificationEnum::cases(),
             'investmentOptions' => InvestmentEnum::cases(),
@@ -119,11 +120,11 @@ class ActivitiesDashboard extends Component
 
     private function activityQuery(PlanificationAccessService $access): Builder
     {
-        return ProjectWeeklyActivity::query()
+        return ProjectWeeklyActivity::query()->whereNotNull('week_year')
             ->whereHas('project', fn (Builder $query) => $query
                 ->whereIn('company_id', $access->allowedCompanyIds())
                 ->whereIn('projects.id', $this->filteredProjectIds()))
-            ->with('project:id,name,slug,pda_code,company_id')
+            ->with(['project:id,name,slug,pda_code,company_id', 'author:id,name'])
             ->when(trim($this->search) !== '', function (Builder $query): void {
                 $term = '%'.trim($this->search).'%';
                 $query->where(function (Builder $query) use ($term): void {

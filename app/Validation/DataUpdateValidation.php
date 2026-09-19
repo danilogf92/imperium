@@ -35,7 +35,12 @@ class DataUpdateValidation
     public static function rules(): array
     {
         $rules = [
-            'editData' => ['required', 'array'],
+            'editData.sap_order' => ['prohibited'],
+            'editData.order_text' => ['prohibited'],
+            'editData.denomination' => ['prohibited'],
+            'editData.accounting_date' => ['nullable', 'date_format:Y-m-d'],
+            'editData.document_date' => ['nullable', 'date_format:Y-m-d'],
+            'editData' => ['required', 'array:'.implode(',', array_diff(array_keys(\App\Support\Data\DataTableDefinition::COLUMN_OPTIONS), ['actions']))],
             'editData.description' => ['nullable', 'string', 'max:10000'],
             'editData.observations' => ['nullable', 'string', 'max:10000'],
         ];

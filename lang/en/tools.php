@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'upload_complete' => 'Upload complete. Continue to validate the workbook.',
+    'error_upload_failed' => 'Upload failed. Check your connection and select the file again (maximum 12 MB).',
     'navigation' => 'Tools',
     'title' => 'Tools · Filter Excel',
     'description' => 'Keep the columns you need and download only the rows for one project.',

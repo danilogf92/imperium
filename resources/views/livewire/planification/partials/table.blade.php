@@ -125,10 +125,16 @@
                                 @endif
 
                                 @if (in_array('pda_code', $visibleColumns, true))
+                                    @php
+                                        $displayPdaCode = preg_replace('/^.*-(?=[^-]+-[^-]+$)/', '', $plannedProject->pda_code ?? '') ?: '—';
+                                    @endphp
                                     <td style="left: {{ $fixedOffsets['pda_code'] }}px"
                                         class="planification-sticky-cell sticky z-10 w-40 border-b border-r border-gray-200 px-2 py-1.5 text-xs font-semibold text-slate-700">
-                                        <div class="truncate" title="{{ $plannedProject->pda_code }}">
-                                            {{ $plannedProject->pda_code ?? '—' }}
+                                        <div class="flex items-center gap-2">
+                                            <div class="truncate" title="{{ $plannedProject->pda_code }}">{{ $displayPdaCode }}</div>
+                                            @if (! in_array('name', $visibleColumns, true))
+                                                <x-project-notes-trigger :project="$plannedProject" context="code" />
+                                            @endif
                                         </div>
                                     </td>
                                 @endif
@@ -205,18 +211,16 @@
                                                 {{ $allocationLabel }}
                                             </span>
 
-                                            {{-- Nombre del proyecto --}}
-                                            <a href="{{ route('projects.dashboard', $plannedProject->slug) }}"
-                                                wire:navigate @class([
-                                                    'line-clamp-2 min-w-0 text-xs font-semibold leading-tight',
-                                                    'hover:underline',
-                                                    'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
+                                            <a href="{{ route('projects.dashboard', $plannedProject->slug) }}" wire:navigate
+                                                title="{{ $plannedProject->name }}"
+                                                @class([
+                                                    'line-clamp-2 min-w-0 flex-1 text-xs font-semibold leading-tight hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
                                                     'text-emerald-700' => $allocationComplete,
                                                     'text-orange-700' => !$allocationComplete,
-                                                ])
-                                                title="{{ $plannedProject->name }}">
+                                                ])>
                                                 {{ $plannedProject->name }}
                                             </a>
+                                            <x-project-notes-trigger :project="$plannedProject" />
 
                                         </div>
                                     </td>
@@ -323,7 +327,7 @@
                                                                         <span
                                                                             class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-400/20 text-[10px] font-bold text-cyan-100">{{ $loop->iteration }}</span>
                                                                         <span
-                                                                            class="min-w-0 flex-1 whitespace-pre-line text-slate-100">{{ $activity->activity }}</span>
+                                                                            class="min-w-0 flex-1 whitespace-pre-line text-slate-100"><span class="mb-1 block text-xs text-cyan-100">{{ __('planification_activities.created_by') }}: {{ $activity->attribution() }}</span><span class="mb-1 block text-xs text-cyan-100">{{ __('planification_activities.assigned_to') }}: {{ $activity->assignee?->name ?? __('planification_activities.unassigned') }}</span>{{ $activity->activity }}</span>
                                                                         @if (filled($activity->executed_at))
                                                                             <span
                                                                                 class="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-400/20 px-2 py-0.5 text-[10px] font-bold text-emerald-200">

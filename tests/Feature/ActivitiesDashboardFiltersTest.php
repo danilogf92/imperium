@@ -2,13 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ProjectPermissionEnum;
 use App\Livewire\Activities\ActivitiesDashboard;
 use App\Livewire\Dashboard\Dashboard;
 use App\Models\Company;
+use App\Models\Data;
 use App\Models\Milestone;
 use App\Models\Project;
 use App\Models\ProjectMilestone;
 use App\Models\ProjectWeeklyActivity;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -108,6 +111,44 @@ class ActivitiesDashboardFiltersTest extends TestCase
             ->assertSet('yearSearch', [])
             ->assertSet('currency', 'euro')
             ->assertViewHas('projectCount', 2);
+    }
+
+    public function test_dashboard_only_shows_plants_with_view_permission_and_refreshes_cached_totals(): void
+    {
+        $owner = User::where('email', 'test@example.com')->sole();
+        $viewer = User::factory()->create(['is_active' => true]);
+        $ciesaRole = Role::where('name', 'PROJECT MANAGER CIESA')->sole();
+        $gralcoRole = Role::where('name', 'PROJECT MANAGER GRALCO')->sole();
+        $viewer->assignRole([$ciesaRole, $gralcoRole]);
+        $gralcoRole->revokePermissionTo(ProjectPermissionEnum::View->value);
+
+        $ciesaProject = $this->createProject($owner);
+        $gralcoProject = $this->createProject($owner, [
+            'company_id' => Company::where('company_code', 'GRALCO')->value('id'),
+            'forecast_start_date' => '2024-01-01',
+        ]);
+        Data::create(['project_id' => $ciesaProject->id, 'global_price_euros' => 100]);
+        Data::create(['project_id' => $gralcoProject->id, 'global_price_euros' => 900]);
+
+        Livewire::actingAs($viewer)->test(Dashboard::class)
+            ->assertSet('years', ['2026'])
+            ->assertViewHas('projectCount', 1)
+            ->assertViewHas('budgeted', 100.0)
+            ->assertViewHas('companies', fn ($companies) => $companies->pluck('company_code')->all() === ['CIESA'])
+            ->set('companyFilter', ['CIESA', 'GRALCO'])
+            ->assertSet('companyFilter', ['CIESA']);
+
+        $gralcoRole->givePermissionTo(ProjectPermissionEnum::View->value);
+        Livewire::actingAs($viewer)->test(Dashboard::class)
+            ->assertViewHas('projectCount', 2)
+            ->assertViewHas('budgeted', 1000.0)
+            ->assertSet('years', ['2026', '2024']);
+
+        $ciesaRole->revokePermissionTo(ProjectPermissionEnum::View->value);
+        Livewire::actingAs($viewer)->test(Dashboard::class)
+            ->assertViewHas('projectCount', 1)
+            ->assertViewHas('budgeted', 900.0)
+            ->assertViewHas('companies', fn ($companies) => $companies->pluck('company_code')->all() === ['GRALCO']);
     }
 
     private function createProject(User $user, array $attributes = []): Project

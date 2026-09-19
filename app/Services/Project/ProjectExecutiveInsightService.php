@@ -102,7 +102,7 @@ final class ProjectExecutiveInsightService
 
             return ['year' => $date->isoWeekYear, 'week' => $date->isoWeek, 'label' => $offset ? 'Next week' : 'Actual week'];
         });
-        $rows = ProjectWeeklyActivity::query()->where('project_id', $projectId)
+        $rows = ProjectWeeklyActivity::query()->with('author:id,name')->where('project_id', $projectId)
             ->where(function ($query) use ($weeks): void {
                 foreach ($weeks as $week) {
                     $query->orWhere(fn ($query) => $query->where('week_year', $week['year'])->where('week_number', $week['week']));
@@ -111,7 +111,8 @@ final class ProjectExecutiveInsightService
 
         return $weeks->map(fn ($week) => [
             ...$week,
-            'items' => $rows->where('week_year', $week['year'])->where('week_number', $week['week'])->pluck('activity')->values()->all(),
+            'items' => $rows->where('week_year', $week['year'])->where('week_number', $week['week'])
+                ->map(fn ($activity) => $activity->attribution()."\n".$activity->activity)->values()->all(),
         ])->all();
     }
 

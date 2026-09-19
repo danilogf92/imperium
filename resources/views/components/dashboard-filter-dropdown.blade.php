@@ -7,8 +7,11 @@
     'default' => null,
     'showSelection' => false,
     'compact' => false,
+    'truncateSelection' => false,
     'globalLoading' => true,
     'closeOnSelect' => true,
+    'createAction' => null,
+    'createLabel' => null,
 ])
 
 @php
@@ -27,17 +30,40 @@
 @endphp
 
 <div wire:key="dashboard-filter-{{ $model }}-{{ md5(json_encode($selectedValues)) }}" x-data="{ open: false, search: '' }"
-    x-on:scroll.window="open = false; search = ''" class="w-full sm:w-auto sm:shrink-0">
+    x-init="
+        const close = () => {
+            open = false;
+            search = '';
+        };
+        const closeOnExternalScroll = (event) => {
+            if ($refs.menu?.contains(event.target)) return;
+            close();
+        };
+        const closeOnOutsideClick = (event) => {
+            if (!open || $refs.trigger?.contains(event.target) || $refs.menu?.contains(event.target)) return;
+            close();
+        };
+        window.addEventListener('scroll', closeOnExternalScroll, true);
+        document.addEventListener('pointerdown', closeOnOutsideClick, true);
+        $cleanup(() => {
+            window.removeEventListener('scroll', closeOnExternalScroll, true);
+            document.removeEventListener('pointerdown', closeOnOutsideClick, true);
+        });
+    "
+    x-on:keydown.escape.window="open = false; search = ''; $refs.trigger?.focus()"
+    @class(['w-full', 'min-w-0 max-w-full' => $truncateSelection, 'sm:w-auto sm:shrink-0' => ! $truncateSelection])>
     <button x-ref="trigger" type="button"
         @click="open = !open; if (open) { $nextTick(() => { const rect = $refs.trigger.getBoundingClientRect(); const width = Math.min(288, window.innerWidth - 16); $refs.menu.style.width = `${width}px`; $refs.menu.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - width - 8))}px`; $refs.menu.style.top = `${rect.bottom + 8}px`; }); }"
         :class="open ? 'border-blue-500 ring-2 ring-blue-500/25 text-blue-700' : 'border-slate-300'"
+        @if ($truncateSelection) title="{{ $selectedOptionLabel ?: __($label) }}" @endif
         @class([
             'inline-flex h-12 w-full cursor-pointer items-center justify-between rounded-xl border bg-white text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/25 sm:h-11 sm:rounded-lg sm:w-auto',
             'gap-3 px-4 sm:min-w-32 sm:px-3' => !$compact,
             'gap-1.5 px-3 sm:w-28 sm:px-2.5' => $compact,
+            'min-w-0 max-w-full sm:!w-full sm:!min-w-0' => $truncateSelection,
         ])>
-        <span @class(['truncate' => $compact])>{{ $selectedOptionLabel ? __($selectedOptionLabel) : __($label) }}</span>
-        <span class="flex items-center gap-2">
+        <span @class(['truncate' => $compact || $truncateSelection, 'min-w-0 text-left' => $truncateSelection])>{{ $selectedOptionLabel ? __($selectedOptionLabel) : __($label) }}</span>
+        <span class="flex shrink-0 items-center gap-2">
             @if ($selectedCount > 0)
                 <span
                     class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 text-xs font-semibold text-white">
@@ -52,7 +78,7 @@
     </button>
 
     <template x-teleport="body">
-        <div x-ref="menu" x-show="open" x-cloak data-dashboard-filter-menu @click.outside="open = false; search = ''"
+        <div x-ref="menu" x-show="open" x-cloak data-dashboard-filter-menu
             class="fixed z-[200] max-h-[70vh] max-w-[calc(100vw-1rem)] overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-2xl sm:max-h-80 sm:shadow-xl">
             <p class="px-2 pb-2 pt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __($label) }}
             </p>
@@ -95,6 +121,16 @@
                     </label>
                 @endforeach
             </div>
+
+            @if ($createAction)
+                <div class="mt-2 border-t border-slate-200 pt-2">
+                    <button type="button" wire:click="{{ $createAction }}" @click="open = false; search = ''"
+                        class="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm font-semibold text-blue-600 transition hover:bg-blue-50">
+                        <span class="inline-flex h-5 w-5 items-center justify-center rounded border border-blue-300 text-base leading-none">+</span>
+                        <span>{{ __($createLabel ?: 'Create new') }}</span>
+                    </button>
+                </div>
+            @endif
         </div>
     </template>
 </div>

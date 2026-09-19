@@ -11,6 +11,9 @@ class Data extends Model
     use Auditable, HasFactory;
 
     protected $fillable = [
+        'sap_order',
+        'accounting_date',
+        'document_date',
         'project_id',
         'area',
         'group_1',

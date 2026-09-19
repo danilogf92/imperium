@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'upload_complete' => 'Carga completa. Continúa para validar el archivo Excel.',
+    'error_upload_failed' => 'No se pudo subir el archivo. Revisa tu conexión y selecciónalo de nuevo (máximo 12 MB).',
     'navigation' => 'Herramientas',
     'title' => 'Herramientas · Filtrar Excel',
     'description' => 'Conserva las columnas que necesitas y descarga solo las filas de un proyecto.',

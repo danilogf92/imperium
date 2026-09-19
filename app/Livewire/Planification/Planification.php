@@ -20,6 +20,7 @@ class Planification extends Component
     use InteractsWithPlanificationColumns;
     use InteractsWithPerPagePreference;
     use ExportsPlanification;
+
     use WithPagination;
 
     public ?int $projectId = null;
@@ -58,12 +59,24 @@ class Planification extends Component
     public bool $onlyWithMilestones = false;
     public string $activityWeekFilter = '';
     public bool $showActivityModal = false;
+    #[\Livewire\Attributes\Locked]
     public ?int $activityProjectId = null;
+    #[\Livewire\Attributes\Locked]
+    public bool $allProjectActivities = false;
+    #[\Livewire\Attributes\Locked]
+    public bool $notesOnly = false;
+    #[\Livewire\Attributes\Locked]
+    public string $activityProjectLabel = '';
+    public string $activityPeriod = '';
+    public ?int $activityAssigneeId = null;
     public int $activityWeekYear = 0;
     public int $activityWeekNumber = 0;
     public string $weeklyActivity = '';
+    #[\Livewire\Attributes\Locked]
     public ?int $activityEditingId = null;
+    #[\Livewire\Attributes\Locked]
     public array $weekActivities = [];
+    #[\Livewire\Attributes\Locked]
     public ?int $pendingActivityDeleteId = null;
     public string $pendingActivityDeleteLabel = '';
     public string $milestoneCompletionFilter = '';
@@ -291,6 +304,11 @@ class Planification extends Component
     {
         $project = $access->authorizedProjects()->findOrFail($projectId);
         $date = $this->selectedActivityWeek()->addWeeks(in_array($weekOffset, [0, 1], true) ? $weekOffset : 0);
+        $this->allProjectActivities = false;
+        $this->notesOnly = false;
+        $this->activityProjectLabel = $project->pda_code.' · '.$project->name;
+        $this->activityPeriod = $date->format('o-\WW');
+        $this->activityAssigneeId = null;
         $this->activityProjectId = $project->id;
         $this->activityWeekYear = (int) $date->isoWeekYear;
         $this->activityWeekNumber = (int) $date->isoWeek;
@@ -299,7 +317,7 @@ class Planification extends Component
         $this->canEditActivity = $access->canForProject(ProjectPermissionEnum::Update, $project->id);
         $this->canDeleteActivity = $access->canForProject(ProjectPermissionEnum::Delete, $project->id);
         $this->loadWeekActivities();
-        $this->resetValidation('weeklyActivity');
+        $this->resetValidation();
         $this->showActivityModal = true;
         $this->dispatch('open-modal', 'weekly-project-activity');
     }
@@ -309,7 +327,7 @@ class Planification extends Component
         $this->showActivityModal = false;
         $this->reset([
             'activityProjectId', 'weeklyActivity', 'activityEditingId', 'weekActivities',
-            'pendingActivityDeleteId', 'pendingActivityDeleteLabel',
+            'pendingActivityDeleteId', 'pendingActivityDeleteLabel', 'activityAssigneeId', 'activityPeriod', 'allProjectActivities', 'activityProjectLabel',
         ]);
         $this->canEditActivity = false;
         $this->canDeleteActivity = false;
@@ -317,22 +335,68 @@ class Planification extends Component
         $this->dispatch('close-modal', 'weekly-project-activity');
     }
 
-    public function saveWeeklyActivity(PlanificationAccessService $access): void
+    public function openProjectActivities(int $projectId, PlanificationAccessService $access): void
+    {
+        $this->openWeeklyActivity($projectId, 0, $access);
+        $this->allProjectActivities = true;
+        $this->activityPeriod = '';
+        $this->loadWeekActivities();
+    }
+
+    public function openProjectNotes(int $projectId, PlanificationAccessService $access): void
+    {
+        $this->openProjectActivities($projectId, $access);
+        $this->notesOnly = true;
+        $this->loadWeekActivities();
+    }
+
+    public function openAssignedActivity(int $activityId, PlanificationAccessService $access): void
+    {
+        $activity = auth()->user()->assignedPlanificationActivities()->findOrFail($activityId);
+        $this->openProjectActivities($activity->project_id, $access);
+        auth()->user()->unreadPlanificationAssignments()->where('data->activity_id', $activityId)->update(['read_at' => now()]);
+        $this->dispatch('planification-notifications-updated');
+    }
+
+    public function cancelEditWeeklyActivity(): void
+    {
+        $this->reset(['weeklyActivity', 'activityEditingId', 'activityAssigneeId']);
+        $this->activityPeriod = $this->allProjectActivities ? '' : sprintf('%04d-W%02d', $this->activityWeekYear, $this->activityWeekNumber);
+        $this->resetValidation();
+    }
+
+    public function saveWeeklyActivity(PlanificationAccessService $access, \App\Services\Planification\PlanificationActivityService $activities): void
     {
         abort_unless($access->canForProject(ProjectPermissionEnum::Update, (int) $this->activityProjectId), 403);
-        $validated = $this->validate(['weeklyActivity' => ['required', 'string', 'max:5000']]);
+        $this->weeklyActivity = trim($this->weeklyActivity);
+        if ($this->notesOnly) {
+            $this->activityPeriod = '';
+            $this->activityAssigneeId = null;
+            if ($this->activityEditingId) {
+                ProjectWeeklyActivity::whereKey($this->activityEditingId)
+                    ->where('project_id', $this->activityProjectId)
+                    ->whereNull('week_year')->whereNull('assigned_to')->firstOrFail();
+            }
+        }
+        $this->validate([
+            'weeklyActivity' => ['required', 'string', 'max:5000'],
+            'activityAssigneeId' => ['nullable', 'integer', 'min:1'],
+            'activityPeriod' => ['nullable', 'regex:/^20[0-9]{2}-W[0-9]{2}$/'],
+        ]);
+        $year = $week = null;
+        if ($this->activityPeriod !== '') {
+            [$year, $week] = array_map('intval', explode('-W', $this->activityPeriod));
+            if (CarbonImmutable::now()->setISODate($year, $week)->format('o-\WW') !== $this->activityPeriod) {
+                $this->addError('activityPeriod', __('planification_activities.invalid_period'));
+                return;
+            }
+        }
         $project = $access->authorizedProjects()->findOrFail($this->activityProjectId);
-        $activity = $this->activityEditingId
-            ? ProjectWeeklyActivity::query()->whereKey($this->activityEditingId)
-                ->where('project_id', $project->id)->firstOrFail()
-            : new ProjectWeeklyActivity([
-                'project_id' => $project->id, 'week_year' => $this->activityWeekYear,
-                'week_number' => $this->activityWeekNumber,
-            ]);
-        $activity->activity = trim($validated['weeklyActivity']);
-        $activity->save();
-        $this->reset(['weeklyActivity', 'activityEditingId']);
+        $activities->save($project, $this->activityEditingId, $this->weeklyActivity, $this->activityAssigneeId, $year, $week);
+        $this->cancelEditWeeklyActivity();
         $this->loadWeekActivities();
+        $this->dispatch('planification-notifications-updated');
+        $this->dispatch('alert', type: 'success', title: __($this->notesOnly ? 'notes.saved' : 'planification_activities.saved'), position: 'center', timer: 1800);
     }
 
     public function editWeeklyActivity(int $activityId, PlanificationAccessService $access): void
@@ -342,6 +406,8 @@ class Planification extends Component
             ->where('project_id', $this->activityProjectId)->firstOrFail();
         $this->activityEditingId = $activity->id;
         $this->weeklyActivity = $activity->activity;
+        $this->activityAssigneeId = $activity->assigned_to;
+        $this->activityPeriod = $activity->week_year ? sprintf('%04d-W%02d', $activity->week_year, $activity->week_number) : '';
         $this->resetValidation('weeklyActivity');
     }
 
@@ -367,7 +433,7 @@ class Planification extends Component
         ProjectWeeklyActivity::query()->whereKey($activityId)
             ->where('project_id', $this->activityProjectId)->firstOrFail()->delete();
         if ($this->activityEditingId === $activityId) {
-            $this->reset(['weeklyActivity', 'activityEditingId']);
+            $this->cancelEditWeeklyActivity();
         }
         $this->reset(['pendingActivityDeleteId', 'pendingActivityDeleteLabel']);
         $this->loadWeekActivities();
@@ -389,6 +455,10 @@ class Planification extends Component
 
         return view('livewire.planification.planification', [
             ...$data,
+            'assignedActivities' => auth()->user()->assignedPlanificationActivities()->with(['project:id,pda_code,name', 'author:id,name'])->latest('id')->get(),
+            'assignmentNotices' => auth()->user()->planificationAssignments()->get()->keyBy('data.activity_id'),
+            'assigneeOptions' => $this->activityProjectId && ($activityProject = $access->authorizedProjects()->find($this->activityProjectId))
+                ? app(\App\Services\Planification\PlanificationActivityService::class)->eligibleUsers($activityProject)->orderBy('name')->get(['id', 'name']) : collect(),
             'fixedColumnOptions' => self::COLUMN_OPTIONS,
             'canUpdatePlanification' => $access->can(ProjectPermissionEnum::Update),
             'editableCompanyIds' => $access->allowedCompanyIds(ProjectPermissionEnum::Update)->pluck('companies.id')->all(),
@@ -410,16 +480,25 @@ class Planification extends Component
             ->firstOrFail();
         $activity->update(['executed_at' => $activity->executed_at ? null : now()]);
         $this->loadWeekActivities();
+        $this->dispatch('planification-notifications-updated');
+        $this->dispatch('alert', type: 'success', title: __($activity->executed_at
+            ? 'planification_activities.completed_feedback'
+            : 'planification_activities.reopened_feedback'), position: 'center', timer: 2500);
     }
 
     private function loadWeekActivities(): void
     {
         $this->weekActivities = ProjectWeeklyActivity::query()
-            ->where('project_id', $this->activityProjectId)->where('week_year', $this->activityWeekYear)
-            ->where('week_number', $this->activityWeekNumber)->latest('id')->get(['id', 'activity', 'executed_at'])
+            ->where('project_id', $this->activityProjectId)
+            ->when(! $this->allProjectActivities, fn ($query) => $query->where('week_year', $this->activityWeekYear)->where('week_number', $this->activityWeekNumber))
+            ->when($this->notesOnly, fn ($query) => $query->whereNull('week_year')->whereNull('assigned_to'))
+            ->with(['author:id,name', 'assignee:id,name'])->latest('id')->get()
             ->map(fn (ProjectWeeklyActivity $activity) => [
-                'id' => $activity->id,
-                'activity' => $activity->activity,
+                'id' => $activity->id, 'activity' => $activity->activity,
+                'attribution' => $activity->attribution(),
+                'assignee' => $activity->assignee?->name,
+                'period' => $activity->periodLabel(),
+                'expired' => $activity->week_year && now()->isAfter(CarbonImmutable::now()->setISODate($activity->week_year, $activity->week_number)->endOfWeek()),
                 'executed' => filled($activity->executed_at),
             ])->all();
     }

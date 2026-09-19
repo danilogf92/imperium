@@ -37,7 +37,9 @@
                 - Registros por página
                 - Crear milestone
                 ======================================================== --}}
+            @include('livewire.planification.partials.assignment-inbox')
             @include('livewire.planification.partials.bar')
+            @error('export')<p role="alert" class="px-5 py-3 text-sm text-red-700">{{ $message }}</p>@enderror
 
 
             {{-- ========================================================

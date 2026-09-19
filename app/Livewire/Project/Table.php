@@ -72,7 +72,7 @@ class Table extends Component
     #[On('project-updated')]
     public function refreshUpdatedProject(): void
     {
-        $this->resetPage();
+        // Livewire re-renders the table while preserving the current page and filters.
     }
 
     #[On('project-deleted')]

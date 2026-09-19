@@ -2,45 +2,22 @@
     <div class="dashboard-page-content space-y-6">
         <section class="module-accent-line overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <header class="soft-title-surface border-b border-slate-200 px-5 py-4">
-                <h1 class="text-xl font-bold text-slate-900">{{ __('tools.title') }}</h1>
-                <p class="mt-1 text-sm text-slate-600">{{ __('tools.description') }}</p>
+                <h1 class="text-xl font-bold text-slate-900">{{ __('sap.title') }}</h1>
+                <p class="mt-1 text-sm text-slate-600">{{ __('sap.description') }}</p>
             </header>
 
             <div class="space-y-6 p-4 sm:p-6">
-                <form wire:submit="analyze" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                    <div>
-                        <div class="min-w-0">
-                            <span class="mb-2 block text-sm font-semibold text-slate-800">{{ __('tools.upload_title') }}</span>
-                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                                <div class="min-w-0 flex-1">
-                                    <input id="tools-excel-upload" type="file" wire:model="upload" accept=".xlsx,.xls" class="peer sr-only">
-                                    <label for="tools-excel-upload" class="flex min-h-14 cursor-pointer flex-wrap items-center gap-3 rounded-xl border border-slate-300 bg-white p-2 shadow-sm transition hover:border-blue-400 hover:bg-blue-50/40 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blue-600">
-                                        <span class="inline-flex min-h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
-                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0L8 8m4-4 4 4M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2"/></svg>
-                                            {{ __('tools.choose_file') }}
-                                        </span>
-                                        <span class="min-w-0 flex-1 truncate text-sm text-slate-600" title="{{ $upload?->getClientOriginalName() }}">{{ $upload?->getClientOriginalName() ?? __('tools.no_file') }}</span>
-                                    </label>
-                                </div>
-                                <button type="submit" wire:loading.attr="disabled" wire:target="upload,analyze" data-no-global-loading
-                                    class="inline-flex h-11 shrink-0 items-center justify-center self-start rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-wait disabled:opacity-60 sm:self-auto">
-                                    <span wire:loading.remove wire:target="upload,analyze">{{ __('tools.analyze') }}</span>
-                                    <span wire:loading wire:target="upload,analyze">{{ __('tools.processing') }}</span>
-                                </button>
-                            </div>
-                            <p class="mt-1 text-xs text-slate-500">{{ __('tools.upload_hint') }}</p>
-                        </div>
-                    </div>
-                    <div wire:loading wire:target="upload" class="mt-2 text-xs font-medium text-blue-700">{{ __('tools.uploading') }}</div>
-                    @error('upload') <p class="mt-3 text-sm font-medium text-red-700">{{ $message }}</p> @enderror
-                </form>
+                @include('livewire.tools.sap-import')
+
 
                 @if ($sourceToken !== '')
                     <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
                         <span class="font-semibold">{{ __('tools.analyzed') }}</span> {{ $sourceName }} · {{ count($headers) }} {{ __('tools.columns') }}
                     </div>
 
-                    <section aria-labelledby="tools-sample-title">
+                    <details class="rounded-xl border border-slate-200 p-4">
+                        <summary class="cursor-pointer text-sm font-semibold text-slate-700">{{ __('tools.structure') }}</summary>
+                    <section aria-labelledby="tools-sample-title" class="mt-4">
                         <div class="mb-3">
                             <h2 id="tools-sample-title" class="text-base font-bold text-slate-900">{{ __('tools.structure') }}</h2>
                             <p class="text-xs text-slate-500">{{ __('tools.sample', ['count' => count($sampleRows)]) }}</p>
@@ -66,8 +43,11 @@
                             </table>
                         </div>
                     </section>
+                    </details>
 
                     @if (! $previewReady)
+                        <details class="rounded-xl border border-slate-200 p-4">
+                            <summary class="cursor-pointer text-sm font-semibold text-slate-700">{{ __('sap.optional') }}</summary>
                         <section class="grid gap-5 lg:grid-cols-2">
                             <div class="rounded-xl border border-slate-200 p-4">
                                 <div class="flex flex-wrap items-center justify-between gap-2">
@@ -125,6 +105,7 @@
                                 </button>
                             </div>
                         </section>
+                        </details>
                     @else
                         <section class="rounded-xl border border-slate-200" aria-labelledby="tools-preview-title">
                             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3">

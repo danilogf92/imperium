@@ -10,6 +10,7 @@ use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -22,6 +23,7 @@ class Project extends Model
         'order',
         'created_by',
         'responsible_id',
+        'sap_order',
         'name',
         'slug',
         'pda_code',
@@ -94,6 +96,11 @@ class Project extends Model
         return $this->belongsTo(User::class, 'responsible_id');
     }
 
+    public function owners(): BelongsToMany
+    {
+        return $this->belongsToMany(Owner::class);
+    }
+
     public function data(): HasMany
     {
         return $this->hasMany(Data::class);
@@ -107,5 +114,15 @@ class Project extends Model
     public function weeklyActivities(): HasMany
     {
         return $this->hasMany(ProjectWeeklyActivity::class);
+    }
+
+    public function planificationActivities(): HasMany
+    {
+        return $this->hasMany(ProjectWeeklyActivity::class)->latest('id');
+    }
+
+    public function planificationNotes(): HasMany
+    {
+        return $this->planificationActivities()->whereNull('week_year')->whereNull('assigned_to');
     }
 }

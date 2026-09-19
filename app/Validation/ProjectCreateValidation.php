@@ -23,6 +23,11 @@ class ProjectCreateValidation
                 Rule::exists('companies', 'id'),
             ],
 
+            'owner_ids' => ['nullable', 'array'],
+            'owner_ids.*' => ['integer', 'distinct', 'exists:owners,id'],
+
+            'sap_order' => ['nullable', 'string', 'max:255'],
+
             'name' => [
                 'required',
                 'string',
@@ -176,7 +181,7 @@ class ProjectCreateValidation
         return [
             'required',
             'string',
-            'regex:/^.+_.+$/',
+            'regex:/^.+-.+$/',
             'max:255',
             $uniquePdaCode,
         ];
@@ -318,6 +323,11 @@ class ProjectCreateValidation
     {
         return [
             'company_id' => 'company',
+
+            'owner_ids' => 'owners',
+            'owner_ids.*' => 'owner',
+
+            'sap_order' => 'SAP order',
 
             'name' => 'project name',
 

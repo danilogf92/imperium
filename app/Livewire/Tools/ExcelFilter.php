@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tools;
 
+use App\Enums\ProjectPermissionEnum;
 use App\Services\Tools\ExcelFilterService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
@@ -14,22 +15,37 @@ use Throwable;
 
 final class ExcelFilter extends Component
 {
+    use ManagesSapImport;
     use WithFileUploads;
 
     public mixed $upload = null;
+
     public string $sourceToken = '';
+
     public string $sourceName = '';
+
     public array $headers = [];
+
     public array $sampleRows = [];
+
     public array $selectedColumns = [];
+
     public array $columnTypes = [];
+
     public string $filterColumn = '';
+
     public string $projectCode = '';
+
     public bool $previewReady = false;
+
     public array $previewHeaders = [];
+
     public array $previewRows = [];
+
     public int $matchCount = 0;
+
     public int $previewPage = 1;
+
     public int $lastPage = 1;
 
     public function mount(): void
@@ -61,6 +77,7 @@ final class ExcelFilter extends Component
             }
             report($exception);
             $this->addError('upload', __('tools.error_upload_read'));
+
             return;
         }
 
@@ -69,9 +86,11 @@ final class ExcelFilter extends Component
             session()->forget($this->previewSessionKey());
         }
         $this->sourceToken = $newToken;
+        $this->clearSapMatches();
         $this->sourceName = $this->upload->getClientOriginalName();
         $this->headers = $analysis['headers'];
         $this->sampleRows = $analysis['sampleRows'];
+        $this->prepareSapMapping();
         $this->selectedColumns = array_keys($this->headers);
         $this->columnTypes = array_fill(0, count($this->headers), 'text');
         $this->filterColumn = '';
@@ -130,6 +149,8 @@ final class ExcelFilter extends Component
 
     public function startOver(ExcelFilterService $excel): void
     {
+        $this->clearSapMatches();
+        $this->reset('sapMapping', 'mappingConfirmed', 'hasSavedMapping', 'editingMapping');
         if ($this->sourceToken !== '') {
             session()->forget($this->previewSessionKey());
             $excel->removeSource((int) auth()->id(), $this->sourceToken);
@@ -175,7 +196,9 @@ final class ExcelFilter extends Component
 
     public function render(): View
     {
-        return view('livewire.tools.excel-filter')->layout('layouts.app');
+        $plants = auth()->user()->companiesForPermission(ProjectPermissionEnum::Update);
+
+        return view('livewire.tools.excel-filter', compact('plants'))->layout('layouts.app');
     }
 
     private function setPreview(array $result): void

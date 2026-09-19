@@ -240,6 +240,16 @@
                 {{ $project->responsible?->name ?? '—' }}
             </td>
 
+            {{-- Owner --}}
+            <td class="whitespace-nowrap px-2 py-2">
+                {{ $project->owners->pluck('name')->join(', ') ?: '—' }}
+            </td>
+
+            {{-- SAP Order --}}
+            <td class="whitespace-nowrap px-2 py-2">
+                {{ $project->sap_order ?? '—' }}
+            </td>
+
             {{-- Data Uploaded --}}
             <td class="whitespace-nowrap px-2 py-2 text-center">
                 <span class="inline-flex rounded-full px-2 py-1 text-xs font-semibold"

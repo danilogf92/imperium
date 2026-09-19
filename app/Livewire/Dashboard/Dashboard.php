@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Enums\ProjectPermissionEnum;
 use App\Enums\InvestmentClassificationEnum;
 use App\Enums\InvestmentEnum;
 use App\Enums\ProjectJustificationEnum;
@@ -40,7 +41,7 @@ class Dashboard extends Component
         );
 
         return view('livewire.dashboard.dashboard', [
-            'companies' => auth()->user()?->availableCompanies() ?? collect(),
+            'companies' => auth()->user()?->companiesForPermission(ProjectPermissionEnum::View) ?? collect(),
             'stateOptions' => $this->reportableStateOptions(),
             'classificationOptions' => InvestmentClassificationEnum::cases(),
             'investmentOptions' => InvestmentEnum::cases(),
@@ -56,6 +57,7 @@ class Dashboard extends Component
             'sha256',
             json_encode([
                 'user' => auth()->id(),
+                'view_company_ids' => auth()->user()->companyIdsForPermission(ProjectPermissionEnum::View),
                 ...$filters->cacheData(),
             ], JSON_THROW_ON_ERROR)
         );

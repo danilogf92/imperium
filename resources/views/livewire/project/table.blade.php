@@ -23,6 +23,8 @@
             'plant',
             'creator',
             'responsible',
+            'owner',
+            'sap_order',
             'data_uploaded',
             'quartile_date',
             'approve_date',

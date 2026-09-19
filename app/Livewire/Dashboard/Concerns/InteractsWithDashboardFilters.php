@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard\Concerns;
 
+use App\Enums\ProjectPermissionEnum;
 use App\Enums\InvestmentClassificationEnum;
 use App\Enums\InvestmentEnum;
 use App\Enums\ProjectJustificationEnum;
@@ -57,7 +58,11 @@ trait InteractsWithDashboardFilters
     {
         $this->companyFilter = $this->normalizeSelection(
             $this->companyFilter,
-            auth()->user()?->availableCompanyCodes() ?? []
+            auth()->user()?->companiesForPermissionQuery(ProjectPermissionEnum::View)
+                ->whereNotNull('company_code')
+                ->pluck('company_code')
+                ->map(fn (mixed $code): string => (string) $code)
+                ->all() ?? []
         );
 
         $this->yearSearch = $this->normalizeSelection($this->yearSearch, $this->years);

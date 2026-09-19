@@ -153,6 +153,29 @@ final class ExcelFilterService
         }
     }
 
+    public function sourceRows(int $userId, string $token, string|array|null $numberHeader = null): \Generator
+    {
+        [$reader, $path, $info] = $this->open($userId, $token);
+        $headers = $this->headers($reader, $path, $info);
+        $numberHeaders = (array) ($numberHeader ?? 'real value');
+        $normalizedHeaders = array_map(fn ($header) => Str::lower(Str::ascii(trim($header))), $headers);
+        $numberColumns = [];
+        foreach ($numberHeaders as $header) {
+            $index = array_search(Str::lower(Str::ascii(trim($header))), $normalizedHeaders, true);
+            if ($index !== false) {
+                $numberColumns[] = $index;
+            }
+        }
+        for ($start = 2; $start <= (int) $info['totalRows']; $start += self::CHUNK_SIZE) {
+            $end = min($start + self::CHUNK_SIZE - 1, (int) $info['totalRows']);
+            foreach ($this->readChunk($reader, $path, $info, $start, $end, count($headers), true, $numberColumns) as $row) {
+                if ($this->hasData($row)) {
+                    yield array_combine($headers, array_map(fn ($value) => (string) ($value ?? ''), $row));
+                }
+            }
+        }
+    }
+
     private function open(int $userId, string $token): array
     {
         if (! Str::isUuid($token)) {
@@ -262,7 +285,7 @@ final class ExcelFilterService
         return false;
     }
 
-    private function readChunk(IReader $reader, string $path, array $info, int $start, int $end, ?int $columnCount = null): array
+    private function readChunk(IReader $reader, string $path, array $info, int $start, int $end, ?int $columnCount = null, bool $normalizeDates = false, array $numberColumns = []): array
     {
         if ($end < $start) {
             return [];
@@ -272,7 +295,23 @@ final class ExcelFilterService
         $spreadsheet = $reader->load($path);
         try {
             $lastColumn = Coordinate::stringFromColumnIndex($columnCount ?? (int) $info['totalColumns']);
-            return $spreadsheet->getActiveSheet()->rangeToArray("A{$start}:{$lastColumn}{$end}", null, true, true, false);
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->rangeToArray("A{$start}:{$lastColumn}{$end}", null, true, true, false);
+            if ($normalizeDates) {
+                foreach ($rows as $offset => &$row) {
+                    foreach ($row as $index => &$value) {
+                        $cell = $sheet->getCell([$index + 1, $start + $offset]);
+                        if (in_array($index, $numberColumns, true) && is_numeric($cell->getCalculatedValue())) {
+                            $value = $cell->getCalculatedValue();
+                        } elseif (\PhpOffice\PhpSpreadsheet\Shared\Date::isDateTime($cell) && is_numeric($cell->getCalculatedValue())) {
+                            $value = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float) $cell->getCalculatedValue())->format('Y-m-d');
+                        }
+                    }
+                    unset($value);
+                }
+                unset($row);
+            }
+            return $rows;
         } finally {
             $spreadsheet->disconnectWorksheets();
         }

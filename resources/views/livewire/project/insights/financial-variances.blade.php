@@ -4,12 +4,12 @@
 
         <div class="rounded-lg bg-emerald-50 p-3"><span class="text-xs text-emerald-700">Available</span>
             <p class="mt-1 font-bold text-emerald-900">{{ $executiveCurrencySymbol }}
-                {{ number_format($executiveFinancial['available'], 2) }}</p>
+                {{ \App\Support\MoneyValueFormatter::thousands($executiveFinancial['available']) }}</p>
         </div>
 
         <div class="rounded-lg bg-violet-50 p-3"><span class="text-xs text-violet-700">Budget - Booked (Real SAP)</span>
             <p class="mt-1 font-bold text-violet-900">{{ $executiveCurrencySymbol }}
-                {{ number_format($executiveFinancial['real_variance'], 2) }}</p>
+                {{ \App\Support\MoneyValueFormatter::thousands($executiveFinancial['real_variance']) }}</p>
         </div>
 
         <div class="rounded-lg bg-amber-50 p-3"><span class="text-xs text-amber-700">Assigned rate</span>
@@ -34,7 +34,7 @@
                 'text-red-900' => $executiveFinancial['execution_variance'] < 0,
                 'text-slate-900' => $executiveFinancial['execution_variance'] >= 0,
             ])>{{ $executiveCurrencySymbol }}
-                {{ number_format($executiveFinancial['execution_variance'], 2) }}</p>
+                {{ \App\Support\MoneyValueFormatter::thousands($executiveFinancial['execution_variance']) }}</p>
         </div>
 
         <div @class([
@@ -51,7 +51,7 @@
                 'text-red-900' => $executiveFinancial['execution_overrun'] > 0,
                 'text-emerald-900' => $executiveFinancial['execution_overrun'] <= 0,
             ])>{{ $executiveCurrencySymbol }}
-                {{ number_format($executiveFinancial['execution_overrun'], 2) }}</p>
+                {{ \App\Support\MoneyValueFormatter::thousands($executiveFinancial['execution_overrun']) }}</p>
         </div>
     </div>
 </article>

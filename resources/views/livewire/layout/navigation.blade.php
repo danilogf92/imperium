@@ -4,6 +4,9 @@ use App\Livewire\Actions\Logout;
 use Livewire\Volt\Component;
 
 new class extends Component {
+    #[\Livewire\Attributes\On('planification-notifications-updated')]
+    public function refreshAssignmentNotice(): void {}
+
     /**
      * Log the current user out of the application.
      */
@@ -16,8 +19,9 @@ new class extends Component {
 }; ?>
 
 <nav x-data="{ open: false }" class="border-b border-sky-100 bg-white shadow-sm">
+    @php($assignmentNoticeCount = auth()->user()?->unreadPlanificationAssignments()->count() ?? 0)
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
@@ -28,9 +32,13 @@ new class extends Component {
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden items-center gap-1 2xl:ms-6 2xl:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('review')" :active="request()->routeIs('review')" wire:navigate>
+                        {{ __('Review') }}
                     </x-nav-link>
 
                     <x-nav-link :href="route('projects')" :active="request()->routeIs('projects', 'projects.dashboard')">
@@ -46,7 +54,8 @@ new class extends Component {
                     </x-nav-link>
 
                     <x-nav-link :href="route('planification')" :active="request()->routeIs('planification')" wire:navigate>
-                        {{ __('Planification') }}
+                        Planning
+                        @if ($assignmentNoticeCount)<span class="ml-1 rounded-full bg-cyan-700 px-2 py-0.5 text-xs text-white" aria-label="{{ __('planification_activities.unread', ['count' => $assignmentNoticeCount]) }}">{{ $assignmentNoticeCount }}</span>@endif
                     </x-nav-link>
 
                     <x-nav-link :href="route('activities')" :active="request()->routeIs('activities')" wire:navigate>
@@ -54,7 +63,7 @@ new class extends Component {
                     </x-nav-link>
 
                     <x-nav-link :href="route('resume')" :active="request()->routeIs('resume')" wire:navigate>
-                        {{ __('Resume') }}
+                        Summary
                     </x-nav-link>
 
                     <x-nav-link :href="route('templates')" :active="request()->routeIs('templates', 'templates.*')" wire:navigate>
@@ -69,7 +78,7 @@ new class extends Component {
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden 2xl:flex 2xl:items-center 2xl:ms-4">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button
@@ -104,8 +113,8 @@ new class extends Component {
             </div>
 
             <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open"
+            <div class="-me-2 flex items-center 2xl:hidden">
+                <button @click="open = ! open" :aria-expanded="open.toString()" aria-controls="main-mobile-navigation" aria-label="{{ __('sap.menu') }}"
                     class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
@@ -120,10 +129,14 @@ new class extends Component {
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
+    <div id="main-mobile-navigation" :class="{ 'block': open, 'hidden': !open }" class="hidden 2xl:hidden">
+        <div class="grid gap-1 px-4 pt-2 pb-3 sm:grid-cols-2 lg:grid-cols-3">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('review')" :active="request()->routeIs('review')" wire:navigate>
+                {{ __('Review') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('projects')" :active="request()->routeIs('projects', 'projects.dashboard')">
@@ -139,7 +152,8 @@ new class extends Component {
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('planification')" :active="request()->routeIs('planification')" wire:navigate>
-                {{ __('Planification') }}
+                Planning
+                @if ($assignmentNoticeCount)<span class="ml-1 rounded-full bg-cyan-700 px-2 py-0.5 text-xs text-white" aria-label="{{ __('planification_activities.unread', ['count' => $assignmentNoticeCount]) }}">{{ $assignmentNoticeCount }}</span>@endif
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('activities')" :active="request()->routeIs('activities')" wire:navigate>
@@ -147,7 +161,7 @@ new class extends Component {
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('resume')" :active="request()->routeIs('resume')" wire:navigate>
-                {{ __('Resume') }}
+                Summary
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('templates')" :active="request()->routeIs('templates', 'templates.*')" wire:navigate>

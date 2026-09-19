@@ -4,9 +4,11 @@ namespace App\Support\Data;
 
 final class DataTableDefinition
 {
-    public const PREFERENCE_KEY = 'data.table.visible_columns.v2';
+    public const PREFERENCE_KEY = 'data.table.visible_columns.v3';
 
     public const COLUMN_OPTIONS = [
+        'accounting_date' => 'sap.accounting_date',
+        'document_date' => 'sap.document_date',
         'id' => 'ID',
         'area' => 'Area',
         'group_1' => 'Group 1',
@@ -37,6 +39,7 @@ final class DataTableDefinition
     ];
 
     public const DEFAULT_COLUMNS = [
+        'real_value', 'accounting_date', 'document_date',
         'id',
         'area',
         'group_1',

@@ -1,4 +1,4 @@
-@props(['name', 'maxWidth' => '2xl', 'closeMethod' => null])
+@props(['name', 'maxWidth' => '2xl', 'closeMethod' => null, 'closeButtonRed' => false])
 
 <x-modal :name="$name" :maxWidth="$maxWidth" :close-method="$closeMethod" {{ $attributes }}>
     {{-- Encabezado del modal --}}
@@ -8,7 +8,11 @@
         </div>
         @if ($closeMethod)
             <button type="button" x-on:click="$dispatch('close')"
-                class="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                @class([
+                    'inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg transition focus:outline-none focus:ring-2',
+                    '!text-red-600 hover:bg-red-50 hover:!text-red-700 focus:ring-red-500' => $closeButtonRed,
+                    'text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus:ring-blue-500' => ! $closeButtonRed,
+                ])
                 aria-label="Close modal">
                 <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" d="m5 5 10 10M15 5 5 15" />

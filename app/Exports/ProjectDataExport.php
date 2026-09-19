@@ -15,6 +15,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class ProjectDataExport
 {
     private const HEADERS = [
+        'sap_order' => 'sap.sap_order',
+        'accounting_date' => 'sap.accounting_date', 'document_date' => 'sap.document_date',
         'area' => 'Area', 'group_1' => 'Group 1', 'group_2' => 'Group 2',
         'description' => 'Description', 'general_classification' => 'Classification',
         'item_type' => 'Item type', 'unit' => 'Unit', 'qty' => 'Qty',
@@ -41,7 +43,7 @@ class ProjectDataExport
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Project Data');
         $sheet->setShowGridlines(false);
-        $sheet->fromArray(array_map(fn (string $column): string => self::HEADERS[$column], $columns), null, 'A1');
+        $sheet->fromArray(array_map(fn (string $column): string => __(self::HEADERS[$column]), $columns), null, 'A1');
 
         $rowNumber = 2;
         foreach ($rows as $row) {
@@ -51,6 +53,14 @@ class ProjectDataExport
                     : $row->{$column},
                 $columns
             ), null, "A{$rowNumber}");
+            foreach ($columns as $index => $column) {
+                if (in_array($column, ['description', 'sap_order', 'supplier'], true)) {
+                    $sheet->setCellValueExplicit([$index + 1, $rowNumber], (string) $row->{$column}, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                } elseif (in_array($column, ['accounting_date', 'document_date'], true) && $row->{$column}) {
+                    $sheet->setCellValue([$index + 1, $rowNumber], \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(new \DateTime($row->{$column})));
+                    $sheet->getStyle([$index + 1, $rowNumber])->getNumberFormat()->setFormatCode('yyyy-mm-dd');
+                }
+            }
             $rowNumber++;
         }
 

@@ -17,6 +17,11 @@ class ProjectForm extends Form
 {
     public int|string|null $company_id = null;
 
+    /** @var array<int, int|string> */
+    public array $owner_ids = [];
+
+    public ?string $sap_order = null;
+
     public ?string $order = null;
 
     public ?int $project_id = null;
@@ -83,11 +88,18 @@ class ProjectForm extends Form
 
         $validated = $this->validatedData($company);
 
-        return Project::create([
+        $ownerIds = $validated['owner_ids'] ?? [];
+        unset($validated['owner_ids']);
+
+        $project = Project::create([
             ...$validated,
             'created_by' => $user->getKey(),
             'responsible_id' => null,
         ]);
+
+        $project->owners()->sync($ownerIds);
+
+        return $project;
     }
 
     public function setProject(Project $project): void
@@ -96,10 +108,15 @@ class ProjectForm extends Form
             $project->company?->company_code ?? ''
         );
 
-        $pdaPrefix = $companyCode.'_';
+        $pdaPrefix = $companyCode.(str_starts_with($project->pda_code, $companyCode.'_') ? '_' : '-');
 
         $this->project_id = (int) $project->getKey();
         $this->company_id = (int) $project->company_id;
+        $this->owner_ids = $project->owners()
+            ->pluck('owners.id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
+        $this->sap_order = $project->sap_order;
         $this->order = $project->order;
         $this->company_code = $companyCode;
         $this->name = $project->name;
@@ -152,9 +169,12 @@ class ProjectForm extends Form
             ]);
         }
 
-        $project->update(
-            $this->validatedData($company, $project)
-        );
+        $validated = $this->validatedData($company, $project);
+        $ownerIds = $validated['owner_ids'] ?? [];
+        unset($validated['owner_ids']);
+
+        $project->update($validated);
+        $project->owners()->sync($ownerIds);
 
         return $project;
     }
@@ -237,7 +257,7 @@ class ProjectForm extends Form
         $this->prepareDataForValidation($company);
 
         $editablePdaCode = $this->normalizeCode($this->pda_code);
-        $this->pda_code = $this->company_code.'_'.$editablePdaCode;
+        $this->pda_code = $this->company_code.'-'.$editablePdaCode;
 
         try {
             $validatorClass = $project
@@ -282,6 +302,16 @@ class ProjectForm extends Form
                 $validatorClass::attributes(),
             );
 
+            $validOwnerCount = $company->owners()
+                ->whereKey($validated['owner_ids'] ?? [])
+                ->count();
+
+            if ($validOwnerCount !== count($validated['owner_ids'] ?? [])) {
+                throw ValidationException::withMessages([
+                    'form.owner_ids' => 'Every selected owner must belong to the project company.',
+                ]);
+            }
+
             /*
              * Solo al guardar definitivamente como Postponed
              * eliminamos las fechas.
@@ -304,6 +334,8 @@ class ProjectForm extends Form
         );
 
         $this->name = trim($this->name);
+        $this->owner_ids = array_values(array_unique(array_map('intval', $this->owner_ids)));
+        $this->sap_order = filled($this->sap_order) ? trim($this->sap_order) : null;
 
         $this->order = filled($this->order)
             ? strtolower(trim($this->order))

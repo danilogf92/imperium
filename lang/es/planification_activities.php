@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'Activities / notas del proyecto',
+    'open' => 'Abrir Activities del proyecto',
+    'created_by' => 'Creado por',
+    'assigned_to' => 'Asignado a',
+    'assigned_by' => 'Asignado por',
+    'unassigned' => 'Sin responsable',
+    'general' => 'Nota del proyecto (sin período)',
+    'all_periods' => 'Todos los períodos y notas del proyecto',
+    'period' => 'Año / semana',
+    'period_hint' => 'Deja vacío para una nota general del proyecto.',
+    'assignee_hint' => 'Usuarios activos con acceso a la planta del proyecto.',
+    'invalid_assignee' => 'Selecciona un usuario activo con acceso a la misma planta del proyecto.',
+    'invalid_period' => 'Selecciona un año y semana ISO válidos.',
+    'completed' => 'Completada',
+    'pending' => 'Pendiente',
+    'saved' => 'Activity guardada.',
+    'cancel_edit' => 'Cancelar edición',
+    'my_assignments' => 'Mis Activities pendientes',
+    'no_assignments' => 'No tienes Activities asignadas pendientes.',
+    'completed_feedback' => 'Activity completada. Ya no aparece en las asignaciones pendientes.',
+    'reopened_feedback' => 'Activity reabierta. Vuelve a las asignaciones pendientes si tiene responsable.',
+    'unread' => ':count asignaciones nuevas',
+    'preview_hint' => 'Activities recientes. Haz clic en el icono para leer y gestionar todas las Activities y notas.',
+];

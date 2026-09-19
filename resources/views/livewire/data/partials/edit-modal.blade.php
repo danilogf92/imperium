@@ -51,12 +51,17 @@
                                             </span>
                                         @endif
                                     </span>
-                                    @if (in_array($column, ['description', 'observations'], true))
+                                    @if ($column === 'supplier')
+                                        <x-dashboard-filter-dropdown label="Select supplier" model="editData.supplier"
+                                            :options="array_merge([['value' => '', 'label' => 'No supplier']], $supplierOptions)" :selected="$editData['supplier'] ?? ''"
+                                            :show-selection="true" :global-loading="false" :truncate-selection="true"
+                                            create-action="toggleSupplierCreator" create-label="Create supplier" />
+                                    @elseif (in_array($column, ['description', 'observations'], true))
                                         <textarea wire:model="editData.{{ $column }}" rows="2" placeholder="Enter {{ strtolower($label) }}..."
                                             class="w-full resize-y rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"></textarea>
                                     @else
                                         <input wire:model="editData.{{ $column }}"
-                                            type="{{ in_array($column, $numericColumns, true) ? 'number' : 'text' }}"
+                                            type="{{ in_array($column, ['accounting_date', 'document_date'], true) ? 'date' : (in_array($column, $numericColumns, true) ? 'number' : 'text') }}"
                                             @if (in_array($column, $numericColumns, true)) step="0.01" @endif
                                             @readonly(in_array($column, $derivedEuroColumns, true))
                                             @class([

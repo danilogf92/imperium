@@ -172,7 +172,7 @@
                         </div>
                         <p class="mt-2 whitespace-nowrap text-2xl font-bold tracking-tight text-slate-900">
                             @if ($metric['money'])
-                                <x-compact-money :value="$metric['value']" :symbol="$currencySymbol" />
+                                {{ \App\Support\MoneyValueFormatter::thousands($metric['value'], $currencySymbol) }}
                             @else
                                 {{ number_format($metric['value']) }}
                             @endif
@@ -241,7 +241,7 @@
         </section>
 
         @if ($rows->isNotEmpty())
-            <section class="grid gap-6" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+            <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <x-dashboard-chart-card title="Stacked financial position"
                     subtitle="Years on X axis and financial values on Y axis"
                     filename="annual-stacked-financial-position" height="34rem">
@@ -298,11 +298,11 @@
                                 <div class="flex flex-wrap justify-between gap-2">
                                     <span class="font-semibold text-red-700">
                                         Total {{ $cashFlowSummary['years'] }}:
-                                        {{ $currencySymbol }} {{ number_format($cashFlowSummary['total'], 2) }}
+                                        {{ \App\Support\MoneyValueFormatter::thousands($cashFlowSummary['total'], $currencySymbol) }}
                                     </span>
                                     <span class="font-semibold text-slate-600">
                                         Outside selected years{{ $cashFlowSummary['outside_years'] !== '' ? ' (' . $cashFlowSummary['outside_years'] . ')' : '' }}:
-                                        {{ $currencySymbol }} {{ number_format($cashFlowSummary['outside_total'], 2) }}
+                                        {{ \App\Support\MoneyValueFormatter::thousands($cashFlowSummary['outside_total'], $currencySymbol) }}
                                     </span>
                                 </div>
                             </section>
@@ -314,6 +314,76 @@
                         <x-slot:footer>
                             Orange: before the current month. Light blue: current month onward.
                             Other years are included only in the summary box.
+                        </x-slot:footer>
+                    </x-dashboard-chart-card>
+
+                @endif
+                @if (($plannedCashFlowChartOptions['series'][0]['data'] ?? []) !== [])
+                    <x-dashboard-chart-card title="Planned milestone cash flow test"
+                        subtitle="Monthly planned milestones compared with Real SAP by accounting date"
+                        filename="monthly-planned-milestone-cash-flow" height="64rem">
+                        <div style="display: flex; flex-direction: column; gap: 8px; height: 100%;">
+                            <section class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
+                                <div class="flex flex-wrap justify-between gap-2">
+                                    <span class="font-semibold text-slate-600">
+                                        Planned {{ $plannedCashFlowSummary['years'] }}:
+                                        {{ \App\Support\MoneyValueFormatter::thousands($plannedCashFlowSummary['total'], $currencySymbol) }}
+                                    </span>
+                                    <span class="font-semibold text-slate-600">
+                                        Planned outside selected years:
+                                        {{ \App\Support\MoneyValueFormatter::thousands($plannedCashFlowSummary['outside_total'], $currencySymbol) }}
+                                    </span>
+                                    <span class="font-semibold text-slate-600">
+                                        Real SAP: {{ \App\Support\MoneyValueFormatter::thousands($plannedCashFlowSummary['actual_total'], $currencySymbol) }}
+                                    </span>
+                                    <span class="text-slate-600">
+                                        Real SAP outside selected years: {{ \App\Support\MoneyValueFormatter::thousands($plannedCashFlowSummary['outside_actual'], $currencySymbol) }}
+                                    </span>
+                                    @if ($plannedCashFlowSummary['undated_total'] != 0)
+                                        <span class="text-slate-600">Real SAP without accounting date (not plotted): {{ \App\Support\MoneyValueFormatter::thousands($plannedCashFlowSummary['undated_total'], $currencySymbol) }}</span>
+                                    @endif
+                                </div>
+                            </section>
+                            <div style="height: 300px; min-height: 300px; flex: 0 0 300px;">
+                                <x-dashboard-apex-chart :options="$plannedCashFlowChartOptions"
+                                    chart-key="resume-planned-cash-flow-{{ md5(json_encode($plannedCashFlowChartOptions)) }}" />
+                            </div>
+                            <p class="text-xs text-slate-600">Variance = Real SAP − base plan. Positive: above plan; negative: below plan. Neither alone indicates good or bad performance.</p>
+                            <div class="max-h-80 overflow-auto rounded-lg border border-slate-200">
+                                <table class="w-full whitespace-nowrap text-right text-xs">
+                                    <thead class="sticky top-0 bg-slate-100 text-slate-700">
+                                        <tr>
+                                            @foreach (['Month', 'Status', 'Base plan', 'Real SAP', 'Variance +/−', 'Variance %', 'Carry-in', 'Adjusted forecast', 'Remaining to spend', 'Carry-out'] as $heading)
+                                                <th class="px-3 py-2">{{ $heading }}</th>
+                                            @endforeach
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($plannedCashFlowSummary['forecast_rows'] as $forecast)
+                                            <tr class="border-t border-slate-200">
+                                                <td class="px-3 py-2 font-semibold">{{ $forecast['month'] }}</td>
+                                                <td class="px-3 py-2">{{ $forecast['status'] }}</td>
+                                                @foreach (['base', 'actual', 'difference', 'variance_percent', 'incoming', 'adjusted', 'remaining', 'outgoing'] as $field)
+                                                    <td @class(['px-3 py-2 tabular-nums', 'font-semibold text-red-700' => $field === 'difference' && $forecast[$field] > 0, 'font-semibold text-blue-700' => $field === 'difference' && $forecast[$field] < 0])>
+                                                        @if ($forecast[$field] === null)
+                                                            —
+                                                        @elseif ($field === 'variance_percent')
+                                                            {{ $forecast[$field] > 0 ? '+' : '' }}{{ number_format($forecast[$field], 1) }}%
+                                                        @else
+                                                            {{ in_array($field, ['difference', 'incoming', 'outgoing']) && $forecast[$field] > 0 ? '+' : '' }}{{ $currencySymbol }}{{ number_format($forecast[$field], 2) }}
+                                                        @endif
+                                                    </td>
+                                                @endforeach
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="text-xs text-slate-600">Adjusted forecast = base plan + carry-in, minimum zero. Closed months roll unspent amounts forward and deduct overspending. Current month is provisional; future months assume the adjusted forecast is spent. This does not change saved milestones. Values without Accounting Date are excluded.</p>
+                        </div>
+                        <x-slot:footer>
+                            Planned: orange before the current month, light blue from the current month onward.
+                            Gray: Real SAP by Accounting Date. Completed milestones remain in the plan.
                         </x-slot:footer>
                     </x-dashboard-chart-card>
                 @endif

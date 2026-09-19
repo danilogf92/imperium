@@ -156,6 +156,25 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(UserPreference::class);
     }
 
+    public function assignedPlanificationActivities(): Builder
+    {
+        return ProjectWeeklyActivity::query()->where('assigned_to', $this->id)
+            ->whereNull('executed_at')
+            ->whereHas('project', fn ($query) => $query->whereIn('company_id',
+                $this->companiesForPermissionQuery(ProjectPermissionEnum::View)->select('companies.id')->reorder()));
+    }
+
+    public function unreadPlanificationAssignments(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->planificationAssignments()->whereNull('read_at');
+    }
+
+    public function planificationAssignments(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->notifications()->where('type', \App\Notifications\PlanificationActivityAssigned::class)
+            ->whereIn('data->activity_id', $this->assignedPlanificationActivities()->select('id'));
+    }
+
     /**
      * Retorna la consulta de las compañías permitidas
      * para el usuario mediante sus roles.

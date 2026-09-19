@@ -129,6 +129,19 @@ class PlanificationTest extends TestCase
             ->assertSee($project->pda_code);
     }
 
+    public function test_pda_code_column_displays_only_the_last_two_segments(): void
+    {
+        [$user, $project] = $this->projectContext();
+        $project->update(['pda_code' => 'GRALCO-25-02']);
+
+        $document = new \DOMDocument;
+        @$document->loadHTML('<?xml encoding="UTF-8">'.Livewire::actingAs($user)->test(Planification::class)->html());
+        $code = (new \DOMXPath($document))->query('//div[@title="GRALCO-25-02"]')->item(0);
+
+        $this->assertNotNull($code);
+        $this->assertSame('25-02', trim($code->textContent));
+    }
+
     public function test_months_start_at_first_visible_milestone_after_filtering(): void
     {
         [$user, $project] = $this->projectContext();
@@ -292,6 +305,162 @@ class PlanificationTest extends TestCase
         $component->set('milestoneCompletionFilter', 'incomplete')
             ->assertSee('Allocated budget: 90%')
             ->assertSee('bg-orange-100 text-orange-700 ring-orange-200', false);
+    }
+
+    public function test_project_notes_can_be_created_edited_and_deleted_without_changing_filters(): void
+    {
+        [$user, $project] = $this->projectContext();
+        $component = Livewire::actingAs($user)->test(Planification::class)
+            ->set('search', $project->pda_code)
+            ->call('openProjectActivities', $project->id)
+            ->assertDispatched('open-modal', 'weekly-project-activity')
+            ->set('weeklyActivity', '   ')->call('saveWeeklyActivity')->assertHasErrors('weeklyActivity')
+            ->set('weeklyActivity', str_repeat('a', 5001))->call('saveWeeklyActivity')->assertHasErrors('weeklyActivity')
+            ->set('weeklyActivity', "First note\nSecond line")->call('saveWeeklyActivity')->assertHasNoErrors()
+            ->set('weeklyActivity', 'Another note')->call('saveWeeklyActivity')->assertHasNoErrors()
+            ->assertSet('search', $project->pda_code)
+            ->assertCount('weekActivities', 2)
+            ->assertViewHas('plannedProjects', fn ($projects) => $projects->first()->planification_activities_count === 2);
+        $note = $project->planificationActivities()->oldest('created_at')->get()->last();
+        $this->assertEquals($user->id, $note->created_by);
+        $component->call('editWeeklyActivity', $note->id)->set('weeklyActivity', 'Edited note')->call('saveWeeklyActivity')
+            ->assertHasNoErrors()->assertSee('Edited note')
+            ->call('requestDeleteWeeklyActivity', $note->id)->call('cancelDeleteWeeklyActivity');
+        $this->assertModelExists($note);
+        $component->call('requestDeleteWeeklyActivity', $note->id)->call('confirmDeleteWeeklyActivity')
+            ->assertCount('weekActivities', 1)->assertSet('search', $project->pda_code);
+        $this->assertModelMissing($note);
+    }
+
+    public function test_notes_are_scoped_to_project_and_permissions(): void
+    {
+        [$user, $project] = $this->projectContext();
+        [, $other] = $this->projectContext();
+        $otherNote = $other->planificationActivities()->create(['activity' => 'Private to another project', 'created_by' => $user->id]);
+        try {
+            Livewire::actingAs($user)->test(Planification::class)
+                ->call('openProjectActivities', $project->id)->call('editWeeklyActivity', $otherNote->id);
+            $this->fail('A note from another project was accessible.');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $exception) {
+            $this->assertSame(\App\Models\ProjectWeeklyActivity::class, $exception->getModel());
+        }
+
+        $role = $user->roles()->where('company_id', $project->company_id)->firstOrFail();
+        $role->revokePermissionTo(\App\Enums\ProjectPermissionEnum::Update->value);
+        $role->revokePermissionTo(\App\Enums\ProjectPermissionEnum::Delete->value);
+        Livewire::actingAs($user)->test(Planification::class)->call('openProjectActivities', $other->id)
+            ->assertSee($otherNote->activity)->assertSet('canEditActivity', false)->assertSet('canDeleteActivity', false)
+            ->set('weeklyActivity', 'Not allowed')->call('saveWeeklyActivity')->assertForbidden();
+        Livewire::actingAs($user)->test(Planification::class)->call('openProjectActivities', $other->id)
+            ->call('requestDeleteWeeklyActivity', $otherNote->id)->assertForbidden();
+        $role->revokePermissionTo(\App\Enums\ProjectPermissionEnum::View->value);
+        try {
+            Livewire::actingAs($user)->test(Planification::class)->call('openProjectActivities', $other->id);
+            $this->fail('Notes were accessible without view permission.');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $exception) {
+            $this->assertSame(Project::class, $exception->getModel());
+        }
+        $this->assertModelExists($otherNote);
+    }
+
+    public function test_notes_tooltip_is_bounded_and_escapes_html(): void
+    {
+        [$user, $project] = $this->projectContext();
+        for ($index = 0; $index < 5; $index++) {
+            $project->planificationActivities()->create(['activity' => '<script>alert(1)</script> note '.$index, 'created_by' => $user->id]);
+        }
+        Livewire::actingAs($user)->test(Planification::class)
+            ->assertViewHas('plannedProjects', fn ($projects) =>
+                $projects->first()->planification_activities_count === 5 && $projects->first()->planificationActivities->count() === 3)
+            ->assertDontSee('<script>alert(1)</script>', false)
+            ->assertSee('href="'.route('projects.dashboard', $project->slug).'"', false)
+            ->call('openProjectActivities', $project->id)->assertCount('weekActivities', 5);
+    }
+
+    public function test_notes_export_respects_filters_and_keeps_month_columns(): void
+    {
+        [$user, $project] = $this->projectContext();
+        [, $other] = $this->projectContext();
+        $project->planificationActivities()->create(['activity' => "=SUM(1,2)\nFirst note", 'created_by' => $user->id]);
+        $project->planificationActivities()->create(['activity' => 'Second note', 'created_by' => $user->id]);
+        $other->planificationActivities()->create(['activity' => 'Excluded note']);
+        foreach (['combined', 'value'] as $mode) {
+            $response = (new PlanificationExport)->download($user, [
+                'search' => $project->pda_code, 'plants' => [], 'statuses' => [], 'creationYears' => [],
+                'currency' => 'usd', 'cellDisplay' => $mode,
+            ]);
+            $path = $response->getFile()->getPathname();
+            try {
+                $book = IOFactory::load($path);
+                $sheet = $book->getActiveSheet();
+                $column = $sheet->getHighestDataColumn();
+                $this->assertSame('Project Activities / Notes', $sheet->getCell($column.'1')->getValue());
+                $this->assertSame('JAN', $sheet->getCell('I2')->getValue());
+                $this->assertSame($project->pda_code, $sheet->getCell('C3')->getValue());
+                $this->assertStringContainsString("=SUM(1,2)\nFirst note", $sheet->getCell($column.'3')->getValue());
+                $this->assertStringContainsString('Second note', $sheet->getCell($column.'3')->getValue());
+                $this->assertStringNotContainsString('Excluded note', $sheet->getCell($column.'3')->getValue());
+                $this->assertSame('s', $sheet->getCell($column.'3')->getDataType());
+                $this->assertTrue($sheet->getStyle($column.'3')->getAlignment()->getWrapText());
+                if ($mode === 'value') {
+                    $this->assertSame('=SUM(I3:I3)', $sheet->getCell('I4')->getValue());
+                }
+                $book->disconnectWorksheets();
+            } finally {
+                unlink($path);
+            }
+        }
+    }
+
+    public function test_activity_author_is_saved_preserved_displayed_and_exported(): void
+    {
+        [$user, $project] = $this->projectContext();
+        Livewire::actingAs($user)->test(Planification::class)
+            ->call('openWeeklyActivity', $project->id, 0)
+            ->set('weeklyActivity', 'Authored activity')->call('saveWeeklyActivity')
+            ->assertHasNoErrors()->assertSee($user->name);
+        $activity = $project->weeklyActivities()->sole();
+        $this->assertEquals($user->id, $activity->created_by);
+        $editor = User::factory()->create(['name' => 'Different editor']);
+        $editor->assignRole($user->roles()->where('company_id', $project->company_id)->firstOrFail());
+        Livewire::actingAs($editor)->test(Planification::class)
+            ->call('openWeeklyActivity', $project->id, 0)
+            ->call('editWeeklyActivity', $activity->id)
+            ->set('weeklyActivity', 'Edited activity')->call('saveWeeklyActivity')
+            ->assertHasNoErrors()->assertSee($user->name)
+            ->assertSet('weekActivities.0.attribution', $activity->attribution());
+        $this->assertEquals($user->id, $activity->fresh()->created_by);
+        $response = (new PlanificationExport)->download($user, [
+            'search' => $project->pda_code, 'plants' => [], 'statuses' => [], 'creationYears' => [],
+            'cellDisplay' => 'combined',
+        ]);
+        $path = $response->getFile()->getPathname();
+        try {
+            $book = IOFactory::load($path);
+            $text = $book->getActiveSheet()->getCell('G3')->getValue();
+            $this->assertStringContainsString($user->name, $text);
+            $this->assertStringContainsString($activity->created_at->format('d/m/Y H:i'), $text);
+            $this->assertStringContainsString('Edited activity', $text);
+            $this->assertStringNotContainsString('Different editor', $text);
+            $book->disconnectWorksheets();
+        } finally {
+            unlink($path);
+        }
+    }
+
+    public function test_activity_migration_recovers_creation_author_from_audit(): void
+    {
+        [$user, $project] = $this->projectContext();
+        $this->actingAs($user);
+        $activity = $project->weeklyActivities()->create([
+            'activity' => 'Legacy activity', 'week_year' => 2026, 'week_number' => 1,
+        ]);
+        $migration = require database_path('migrations/2026_09_19_150000_add_author_to_project_weekly_activities.php');
+        $migration->down();
+        $migration->up();
+        $this->assertEquals($user->id, $activity->fresh()->created_by);
+        $activity->update(['created_by' => null]);
+        $this->assertStringContainsString(__('notes.unknown_author'), $activity->fresh()->attribution());
     }
 
     /** @return array{User, Project} */

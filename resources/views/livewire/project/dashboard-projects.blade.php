@@ -252,37 +252,37 @@
             $metrics = [
                 [
                     'label' => 'Budgeted',
-                    'value' => $currencySymbol . ' ' . number_format($budgeted, 2),
+                    'value' => \App\Support\MoneyValueFormatter::thousands($budgeted, $currencySymbol),
                     'color' => 'blue',
                 ],
                 [
                     'label' => 'Approved',
-                    'value' => $currencySymbol . ' ' . number_format($approved, 2),
+                    'value' => \App\Support\MoneyValueFormatter::thousands($approved, $currencySymbol),
                     'color' => 'slate',
                 ],
                 [
                     'label' => 'Executed',
-                    'value' => $currencySymbol . ' ' . number_format($executed, 2),
+                    'value' => \App\Support\MoneyValueFormatter::thousands($executed, $currencySymbol),
                     'color' => 'emerald',
                 ],
                 [
                     'label' => 'Assigned',
-                    'value' => $currencySymbol . ' ' . number_format($booked, 2),
+                    'value' => \App\Support\MoneyValueFormatter::thousands($booked, $currencySymbol),
                     'color' => 'amber',
                 ],
                 [
                     'label' => 'Booked (Real SAP)',
-                    'value' => $currencySymbol . ' ' . number_format($real_value, 2),
+                    'value' => \App\Support\MoneyValueFormatter::thousands($real_value, $currencySymbol),
                     'color' => 'violet',
                 ],
                 [
                     'label' => 'Committed',
-                    'value' => $currencySymbol . ' ' . number_format($booked - $real_value, 2),
+                    'value' => \App\Support\MoneyValueFormatter::thousands($booked - $real_value, $currencySymbol),
                     'color' => 'amber',
                 ],
                 [
                     'label' => 'Available',
-                    'value' => $currencySymbol . ' ' . number_format($available, 2),
+                    'value' => \App\Support\MoneyValueFormatter::thousands($available, $currencySymbol),
                     'color' => 'cyan',
                 ],
                 ['label' => 'Progress', 'value' => number_format($percentage, 2) . '%', 'color' => 'rose'],

@@ -6,5 +6,9 @@
     @include('livewire.data.partials.filters')
     @include('livewire.data.partials.table')
     @include('livewire.data.partials.edit-modal')
+    @include('livewire.data.partials.supplier-creator')
     @include('livewire.data.partials.delete-modal')
+    @if ($canDeleteData)
+        @include('livewire.data.partials.delete-sap-modal')
+    @endif
 </section>

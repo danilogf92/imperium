@@ -29,6 +29,7 @@ class DataTable extends Component
     use InteractsWithDataFilters;
     use InteractsWithPerPagePreference;
     use ManagesDataRecords;
+    use \App\Livewire\Data\Concerns\ManagesSuppliers;
     use WithPagination;
 
     public Project $project;
@@ -143,6 +144,10 @@ class DataTable extends Component
 
         $service = $this->queryService();
 
+        $recordCounts = $this->project->data()
+            ->selectRaw("COUNT(*) AS total, COALESCE(SUM(CASE WHEN sap_order IS NOT NULL AND TRIM(sap_order) <> '' THEN 1 ELSE 0 END), 0) AS sap")
+            ->first();
+
         $data = $service
             ->filtered(
                 $this->project,
@@ -161,9 +166,13 @@ class DataTable extends Component
             'livewire.data.data-table',
             [
                 'data' => $data,
+                'supplierOptions' => $this->supplierNames()->map(fn ($name) => ['value' => $name, 'label' => $name])->all(),
+                'totalRecordCount' => (int) $recordCounts->total,
+                'sapRecordCount' => (int) $recordCounts->sap,
+                'manualRecordCount' => (int) $recordCounts->total - (int) $recordCounts->sap,
 
                 'columnOptions' =>
-                    DataTableDefinition::COLUMN_OPTIONS,
+                    array_map(fn ($label) => __($label), DataTableDefinition::COLUMN_OPTIONS),
 
                 'filterOptions' =>
                     $service->filterOptions(

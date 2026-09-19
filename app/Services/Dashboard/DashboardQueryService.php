@@ -2,6 +2,7 @@
 
 namespace App\Services\Dashboard;
 
+use App\Enums\ProjectPermissionEnum;
 use App\Enums\ProjectStateEnum;
 use App\Models\Data;
 use App\Models\Project;
@@ -234,7 +235,7 @@ class DashboardQueryService
     ): Builder {
         $query->whereIn(
             "{$table}.company_id",
-            $user->availableCompaniesQuery()
+            $user->companiesForPermissionQuery(ProjectPermissionEnum::View)
                 ->select('companies.id')
                 ->reorder()
         );
