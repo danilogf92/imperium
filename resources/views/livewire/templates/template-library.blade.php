@@ -28,19 +28,39 @@
             </nav>
 
             <div class="space-y-4 p-3 sm:p-4" wire:loading.class="opacity-50">
-                @forelse ($templates->sortByDesc('is_global')->groupBy(fn ($template) => $template->is_global ? 'general' : 'plants') as $audience => $files)
-                    <section wire:key="library-section-{{ $audience }}">
-                        <h2 @class([
-                            'mb-2 flex items-center gap-2 border-l-4 pl-2 text-xs font-bold',
-                            'border-blue-500 text-blue-700' => $audience === 'general',
-                            'border-amber-500 text-amber-700' => $audience === 'plants',
-                        ])>
-                            {{ $audience === 'general' ? __('General').' · '.__('All users') : __('Plants') }}
-                            <span class="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{{ $files->count() }}</span>
-                        </h2>
-                        <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                @php
+                    $groups = collect();
+                    $generalFiles = $templates->where('is_global', true);
+                    if ($generalFiles->isNotEmpty()) {
+                        $groups->put('general', ['label' => __('General'), 'files' => $generalFiles]);
+                    }
+                    foreach ($companies as $company) {
+                        if ($section !== 'all' && $section !== (string) $company->id) {
+                            continue;
+                        }
+                        $companyFiles = $templates->filter(fn ($template) => ! $template->is_global && $template->companies->contains('id', $company->id));
+                        if ($companyFiles->isNotEmpty()) {
+                            $groups->put('company-'.$company->id, ['label' => $company->company_name, 'files' => $companyFiles]);
+                        }
+                    }
+                @endphp
+                @forelse ($groups as $groupKey => $group)
+                    @php($files = $group['files'])
+                    <details wire:key="library-section-{{ $section }}-{{ $groupKey }}"
+                        class="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                        <summary class="flex cursor-pointer list-none items-center gap-3 bg-slate-50 px-4 py-4 transition hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-blue-600 [&::-webkit-details-marker]:hidden">
+                            <span @class([
+                                'h-8 w-1 shrink-0 rounded-full',
+                                'bg-blue-500' => $groupKey === 'general',
+                                'bg-amber-500' => $groupKey !== 'general',
+                            ])></span>
+                            <h2 class="min-w-0 flex-1 break-words text-sm font-bold text-slate-900">{{ $group['label'] }}</h2>
+                            <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-600">{{ $files->count() }} {{ __('Files') }}</span>
+                            <svg class="h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" /></svg>
+                        </summary>
+                        <div class="grid gap-2 border-t border-slate-200 p-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 @foreach ($files as $template)
-                    <article wire:key="library-file-{{ $template->id }}"
+                    <article wire:key="library-file-{{ $groupKey }}-{{ $template->id }}"
                         @class([
                             'flex min-w-0 flex-col rounded-lg border p-3',
                             'border-blue-200 bg-blue-50/30' => $template->is_global,
@@ -75,7 +95,7 @@
                     </article>
                 @endforeach
                         </div>
-                    </section>
+                    </details>
                 @empty
                     <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center">
                         <p class="font-semibold text-slate-700">{{ __('No files are available in this section.') }}</p>

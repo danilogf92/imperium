@@ -6,7 +6,7 @@ final class MoneyValueFormatter
 {
     public static function thousands(float|int $value, string $symbol = ''): string
     {
-        return ($symbol !== '' ? $symbol.' ' : '').number_format((int) ($value / 1_000), 0, '.', ',').' K';
+        return ($symbol !== '' ? $symbol.' ' : '').number_format((int) ($value / 1_000), 0, '.', '').' K';
     }
 
     public static function compact(float|int $value, string $symbol = ''): string

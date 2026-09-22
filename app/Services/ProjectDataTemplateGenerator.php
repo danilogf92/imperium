@@ -199,7 +199,7 @@ class ProjectDataTemplateGenerator
             ['1', 'Use the Project Data sheet and keep every header name unchanged.'],
             ['2', 'Enter one project item per row. Completely empty rows are ignored.'],
             ['3', 'The ID column is optional and ignored; DA Imperium creates new IDs.'],
-            ['4', 'Required columns: area, description, qty, unit price, and global price.'],
+            ['4', 'Required columns: area, description, qty, unit price, and global price. Area and description cells may be blank; numeric cells must contain a number (use 0 when applicable).'],
             ['5', 'Numeric columns must contain numbers only. Percentage accepts values from 0 to 100.'],
             ['6', 'Dollar values are converted to euros using the rate configured in the selected project.'],
             ['7', 'If the project already contains data, the import appends rows and requires confirmation.'],

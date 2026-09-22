@@ -227,6 +227,12 @@ class ProjectDataExcelImporter
             }
 
             foreach (self::REQUIRED_FIELDS as $field => $acceptedHeaders) {
+                // Keep the template columns mandatory, but preserve nullable text
+                // from existing project rows when importing an exported workbook.
+                if (in_array($field, ['area', 'description'], true)) {
+                    continue;
+                }
+
                 $columnIndex = $this->findHeaderIndex($headerIndexes, $acceptedHeaders);
                 $value = $columnIndex === null ? null : ($row[$columnIndex] ?? null);
                 if ($value === null || trim((string) $value) === '') {

@@ -7,6 +7,7 @@ use App\Services\ProjectDataTemplateGenerator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -39,12 +40,18 @@ final class ProjectDataImportExport
 
         $rowNumber = 2;
         foreach ($rows as $row) {
-            $sheet->fromArray(array_map(
-                fn (string $field): mixed => in_array($field, self::NUMERIC_FIELDS, true)
-                    ? (float) ($row->{$field} ?? 0)
-                    : $row->{$field},
-                self::FIELDS
-            ), null, "A{$rowNumber}");
+            foreach (self::FIELDS as $index => $field) {
+                $numeric = in_array($field, self::NUMERIC_FIELDS, true);
+                $value = $numeric ? (float) ($row->{$field} ?? 0) : $row->{$field};
+
+                if ($value !== null) {
+                    $sheet->setCellValueExplicit(
+                        Coordinate::stringFromColumnIndex($index + 1).$rowNumber,
+                        $numeric ? $value : (string) $value,
+                        $numeric ? DataType::TYPE_NUMERIC : DataType::TYPE_STRING
+                    );
+                }
+            }
             $rowNumber++;
         }
 
