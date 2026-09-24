@@ -1,6 +1,6 @@
 @if ($showFormModal)
 
-    <div wire:key="planification-form-modal" role="dialog" aria-modal="true" aria-label="Milestone" data-modal-open="true" class="app-modal fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4" x-data
+    <div wire:key="planification-form-modal" role="dialog" aria-modal="true" aria-label="{{ __('Milestone') }}" data-modal-open="true" class="app-modal fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4" x-data
         x-on:keydown.escape.window="$wire.closeForm()">
 
         {{-- ============================================================
@@ -37,11 +37,11 @@
 
                     <div>
                         <h2 class="text-lg font-bold text-slate-900">
-                            {{ $editingId ? 'Edit milestone' : 'Add milestone' }}
+                            {{ $editingId ? __('Edit milestone') : __('Add milestone') }}
                         </h2>
 
                         <p class="text-xs text-slate-500">
-                            {{ $editingId ? 'Update its position in the project timeline.' : 'Place a milestone in the project timeline.' }}
+                            {{ $editingId ? __('Update its position in the project timeline.') : __('Place a milestone in the project timeline.') }}
                         </p>
                     </div>
                 </div>
@@ -49,7 +49,7 @@
                 {{-- Cerrar modal --}}
                 <button type="button" wire:click="closeForm" data-no-global-loading
                     class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-200 hover:text-slate-700"
-                    aria-label="Close">
+                    aria-label="{{ __('notes.close') }}">
                     ✕
                 </button>
             </div>
@@ -63,20 +63,20 @@
                 <div class="sm:col-span-2">
 
                     <label class="mb-1 block text-sm font-medium text-gray-700">
-                        Project
+                        {{ __('activity_control.project') }}
                     </label>
 
                     <select wire:model.change="projectId" data-no-global-loading @disabled($editingId)
                         class="block w-full cursor-pointer rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
 
                         <option value="">
-                            Select a project
+                            {{ __('Select a project') }}
                         </option>
 
                         @foreach ($projects as $project)
                             <option value="{{ $project->id }}" @disabled(!$editingId && ($project->is_closed || !in_array($project->company_id, $editableCompanyIds, true)))>
                                 {{ $project->name }}
-                                {{ $project->is_closed ? ' (Closed)' : '' }}
+                                {{ $project->is_closed ? ' ('.__('Closed').')' : '' }}
                             </option>
                         @endforeach
                     </select>
@@ -92,14 +92,14 @@
                 <div class="sm:col-span-2">
 
                     <label class="mb-1 block text-sm font-medium text-gray-700">
-                        Milestone
+                        {{ __('Milestone') }}
                     </label>
 
                     <select wire:model="milestoneId"
                         class="block w-full cursor-pointer rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
 
                         <option value="">
-                            Select a milestone
+                            {{ __('Select a milestone') }}
                         </option>
 
                         @foreach ($milestones as $milestone)
@@ -122,14 +122,14 @@
                 <div>
 
                     <label class="mb-1 block text-sm font-medium text-gray-700">
-                        Month
+                        {{ __('Month') }}
                     </label>
 
                     <select wire:model="month"
                         class="block w-full cursor-pointer rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
 
                         <option value="">
-                            Select a month
+                            {{ __('Select a month') }}
                         </option>
 
                         @foreach ($months as $number => $label)
@@ -150,7 +150,7 @@
                 <div>
 
                     <label class="mb-1 block text-sm font-medium text-gray-700">
-                        Year
+                        {{ __('cash_flow_projection.year') }}
                     </label>
 
                     <input type="number" wire:model="cycleYear" min="2000" max="2200"
@@ -163,7 +163,7 @@
                     @enderror
 
                     <p class="mt-1 text-xs text-gray-500">
-                        Maximum two consecutive years per project.
+                        {{ __('Maximum two consecutive years per project.') }}
                     </p>
                 </div>
 
@@ -171,7 +171,7 @@
                 <div class="sm:col-span-2">
 
                     <label class="mb-1 block text-sm font-medium text-gray-700">
-                        Project percentage
+                        {{ __('Project percentage') }}
                     </label>
 
                     <div class="relative">
@@ -203,9 +203,9 @@
                             <input type="checkbox" wire:model="milestoneExecuted"
                                 class="h-5 w-5 rounded border-slate-300 text-green-600 focus:ring-green-500">
                             <span>
-                                <span class="block text-sm font-semibold text-slate-800">Milestone executed</span>
+                                <span class="block text-sm font-semibold text-slate-800">{{ __('Milestone executed') }}</span>
                                 <span class="block text-xs text-slate-500">
-                                    This status can be corrected during or after the planned month.
+                                    {{ __('This status can be corrected during or after the planned month.') }}
                                 </span>
                             </span>
                         </label>
@@ -229,7 +229,7 @@
                     @endphp
 
                     <p class="mt-1 text-xs text-slate-500">
-                        Calculated value:
+                        {{ __('Calculated value') }}:
 
                         {{ \App\Support\MoneyValueFormatter::compact(
                             $previewValue,
@@ -253,7 +253,7 @@
                     "
                     onmouseenter="this.style.backgroundColor='#dc2626'"
                     onmouseleave="this.style.backgroundColor='#ef4444'">
-                    Cancel
+                    {{ __('Cancel') }}
                 </button>
 
                 {{-- Guardar --}}
@@ -273,11 +273,11 @@
                     </svg>
 
                     <span wire:loading.remove wire:target="saveMilestone">
-                        {{ $editingId ? 'Save changes' : 'Create milestone' }}
+                        {{ $editingId ? __('Save changes') : __('Create milestone') }}
                     </span>
 
                     <span wire:loading wire:target="saveMilestone">
-                        {{ $editingId ? 'Saving...' : 'Creating...' }}
+                        {{ $editingId ? __('Saving...') : __('Creating...') }}
                     </span>
                 </button>
             </div>

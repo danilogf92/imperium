@@ -48,17 +48,17 @@
                         class="h-11 w-full rounded-lg border-slate-300 bg-white pl-9 pr-3 text-sm text-slate-700 shadow-sm transition duration-150 placeholder:text-slate-400 hover:-translate-y-px hover:border-blue-400 hover:bg-blue-50 hover:shadow-md focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/25">
                 </div>
 
-                <x-dashboard-filter-dropdown label="Area" model="areaFilter" :options="$filterOptions['areaFilter']" :selected="$areaFilter"
+                <x-dashboard-filter-dropdown label="{{ __('Area') }}" model="areaFilter" :options="$filterOptions['areaFilter']" :selected="$areaFilter"
                     multiple />
-                <x-dashboard-filter-dropdown label="Classification" model="classificationFilter" :options="$filterOptions['classificationFilter']"
+                <x-dashboard-filter-dropdown label="{{ __('Classification') }}" model="classificationFilter" :options="$filterOptions['classificationFilter']"
                     :selected="$classificationFilter" multiple />
-                <x-dashboard-filter-dropdown label="Item type" model="itemTypeFilter" :options="$filterOptions['itemTypeFilter']"
+                <x-dashboard-filter-dropdown label="{{ __('Item type') }}" model="itemTypeFilter" :options="$filterOptions['itemTypeFilter']"
                     :selected="$itemTypeFilter" multiple />
-                <x-dashboard-filter-dropdown label="Stage" model="stageFilter" :options="$filterOptions['stageFilter']" :selected="$stageFilter"
+                <x-dashboard-filter-dropdown label="{{ __('Stage') }}" model="stageFilter" :options="$filterOptions['stageFilter']" :selected="$stageFilter"
                     multiple />
-                <x-dashboard-filter-dropdown label="Supplier" model="supplierFilter" :options="$filterOptions['supplierFilter']"
+                <x-dashboard-filter-dropdown label="{{ __('Supplier') }}" model="supplierFilter" :options="$filterOptions['supplierFilter']"
                     :selected="$supplierFilter" multiple />
-                <x-dashboard-filter-dropdown label="Order year" model="orderYearFilter" :options="$filterOptions['orderYearFilter']"
+                <x-dashboard-filter-dropdown label="{{ __('Order year') }}" model="orderYearFilter" :options="$filterOptions['orderYearFilter']"
                     :selected="$orderYearFilter" multiple />
 
                 <x-per-page-select id="data-per-page" />
@@ -67,5 +67,5 @@
             </div>
         </div>
 
-<x-filter-chips clear="resetFilters" :filters="[['model' => 'search', 'label' => 'Search', 'value' => $search],['model' => 'areaFilter', 'label' => 'Area', 'value' => $areaFilter],['model' => 'classificationFilter', 'label' => 'Classification', 'value' => $classificationFilter],['model' => 'itemTypeFilter', 'label' => 'Item type', 'value' => $itemTypeFilter],['model' => 'stageFilter', 'label' => 'Stage', 'value' => $stageFilter],['model' => 'supplierFilter', 'label' => 'Supplier', 'value' => $supplierFilter],['model' => 'orderYearFilter', 'label' => 'Year', 'value' => $orderYearFilter] ]" />
+<x-filter-chips clear="resetFilters" :filters="[['model' => 'search', 'label' => __('activity_control.search'), 'value' => $search],['model' => 'areaFilter', 'label' => __('Area'), 'value' => $areaFilter],['model' => 'classificationFilter', 'label' => __('Classification'), 'value' => $classificationFilter],['model' => 'itemTypeFilter', 'label' => __('Item type'), 'value' => $itemTypeFilter],['model' => 'stageFilter', 'label' => __('Stage'), 'value' => $stageFilter],['model' => 'supplierFilter', 'label' => __('Supplier'), 'value' => $supplierFilter],['model' => 'orderYearFilter', 'label' => __('cash_flow_projection.year'), 'value' => $orderYearFilter] ]" />
 </div>

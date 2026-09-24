@@ -52,7 +52,7 @@ class DashboardScheduleChartService
         $actualPercentages = [];
         $monthlyProjects = [];
 
-        foreach (config('dashboard_charts.months') as $number => $month) {
+        foreach (array_map(fn ($month) => __($month), config('dashboard_charts.months')) as $number => $month) {
             $monthlyCount = (int) $plannedValues->get($number, 0);
             $actualMonthlyCount = (int) $actualValues->get($number, 0);
             $planned += $monthlyCount;
@@ -70,8 +70,8 @@ class DashboardScheduleChartService
             $plannedPercentages,
             $actualPercentages,
             $monthlyProjects,
-            $chartConfig['planned_series_label'],
-            $chartConfig['actual_series_label'],
+            __($chartConfig['planned_series_label']),
+            __($chartConfig['actual_series_label']),
             'Projects by forecast start date',
             $chartConfig
         );
@@ -89,7 +89,7 @@ class DashboardScheduleChartService
         $closedPercentages = [];
         $monthlyProjects = [];
 
-        foreach (config('dashboard_charts.months') as $number => $month) {
+        foreach (array_map(fn ($month) => __($month), config('dashboard_charts.months')) as $number => $month) {
             $monthlyCount = (int) $forecastValues->get($number, 0);
             $closedMonthlyCount = (int) $closeValues->get($number, 0);
             $forecast += $monthlyCount;
@@ -107,8 +107,8 @@ class DashboardScheduleChartService
             $forecastPercentages,
             $closedPercentages,
             $monthlyProjects,
-            $chartConfig['forecast_series_label'],
-            $chartConfig['close_series_label'],
+            __($chartConfig['forecast_series_label']),
+            __($chartConfig['close_series_label']),
             'Projects by forecast end date',
             $chartConfig
         );
@@ -123,6 +123,9 @@ class DashboardScheduleChartService
         string $projectsLabel,
         array $chartConfig
     ): array {
+        $firstLabel = __($firstLabel);
+        $secondLabel = __($secondLabel);
+        $projectsLabel = __($projectsLabel);
         $projectsMaximum = max(1, ...$monthlyProjects);
 
         return [
@@ -137,14 +140,14 @@ class DashboardScheduleChartService
             'markers' => ['size' => [4, 4, 0]],
             'plotOptions' => ['bar' => ['columnWidth' => '52%', 'borderRadius' => 4]],
             'dataLabels' => ['enabled' => true, 'enabledOnSeries' => [2]],
-            'xaxis' => ['categories' => array_values(config('dashboard_charts.months'))],
+            'xaxis' => ['categories' => array_values(array_map(fn ($month) => __($month), config('dashboard_charts.months')))],
             'yaxis' => [
                 [
                     'seriesName' => $firstLabel,
                     'min' => $chartConfig['y_axis_min'],
                     'max' => $chartConfig['y_axis_max'],
                     'tickAmount' => 5,
-                    'title' => ['text' => 'Cumulative progress (%)'],
+                    'title' => ['text' => __('Cumulative progress (%)')],
                     'labels' => ['formatter' => "function(value) { return Math.round(value) + '%'; }"],
                 ],
                 [
@@ -161,7 +164,7 @@ class DashboardScheduleChartService
                     'max' => $projectsMaximum,
                     'tickAmount' => min(5, $projectsMaximum),
                     'decimalsInFloat' => 0,
-                    'title' => ['text' => 'Projects'],
+                    'title' => ['text' => __('Projects')],
                     'labels' => ['formatter' => 'function(value) { return Math.round(value); }'],
                 ],
             ],
@@ -171,7 +174,7 @@ class DashboardScheduleChartService
                 'y' => [
                     ['formatter' => "function(value) { return Number(value).toFixed(1) + '%'; }"],
                     ['formatter' => "function(value) { return Number(value).toFixed(1) + '%'; }"],
-                    ['formatter' => "function(value) { return Math.round(value) + ' projects'; }"],
+                    ['formatter' => "function(value) { return Math.round(value) + ' ' + ".json_encode(__('Projects'), JSON_HEX_APOS | JSON_HEX_QUOT)."; }"],
                 ],
             ],
             'legend' => ['show' => true, 'position' => 'top'],

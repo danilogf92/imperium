@@ -15,26 +15,26 @@ class AreasTable
         return $table
             ->columns([
                 TextColumn::make('company.company_name')
-                    ->label('Company')
+                    ->label(__('Company'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('manager.name')
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
-                    ->label('Manager')
+                    ->label(__('Manager'))
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('name')
+                TextColumn::make('name')->label(__('Name'))
                     ->searchable(),
-                TextColumn::make('created_at')
+                TextColumn::make('created_at')->label(__('Created at'))
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
+                TextColumn::make('updated_at')->label(__('Updated at'))
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->dateTime()

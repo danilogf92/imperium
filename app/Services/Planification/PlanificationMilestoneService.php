@@ -82,7 +82,7 @@ final class PlanificationMilestoneService
 
         if (! $project) {
             throw ValidationException::withMessages([
-                'projectId' => 'You do not have permission to plan this project.',
+                'projectId' => __('You do not have permission to plan this project.'),
             ]);
         }
 
@@ -98,7 +98,7 @@ final class PlanificationMilestoneService
 
         if ($validated['milestoneExecuted'] && $plannedMonth->isAfter(now()->startOfMonth())) {
             throw ValidationException::withMessages([
-                'milestoneExecuted' => 'A future milestone cannot be marked as executed.',
+                'milestoneExecuted' => __('A future milestone cannot be marked as executed.'),
             ]);
         }
 
@@ -169,7 +169,7 @@ final class PlanificationMilestoneService
 
         if ($isClosed) {
             throw ValidationException::withMessages([
-                'projectId' => 'This project is closed and cannot receive more milestones.',
+                'projectId' => __('This project is closed and cannot receive more milestones.'),
             ]);
         }
     }
@@ -216,7 +216,7 @@ final class PlanificationMilestoneService
             && (! $editingId || $editingId !== $firstMilestone->id)
         ) {
             throw ValidationException::withMessages([
-                'month' => 'A milestone cannot be placed before the project plan start month.',
+                'month' => __('A milestone cannot be placed before the project plan start month.'),
             ]);
         }
 
@@ -239,7 +239,7 @@ final class PlanificationMilestoneService
 
             if (! $editingId || $requestedPosition > $closedPosition) {
                 throw ValidationException::withMessages([
-                    'milestoneId' => 'Milestones cannot be added or moved after Closed Project.',
+                    'milestoneId' => __('Milestones cannot be added or moved after Closed Project.'),
                 ]);
             }
         }
@@ -259,7 +259,7 @@ final class PlanificationMilestoneService
 
             if ($hasLaterItems) {
                 throw ValidationException::withMessages([
-                    'month' => 'Closed Project must be the final milestone in the timeline.',
+                    'month' => __('Closed Project must be the final milestone in the timeline.'),
                 ]);
             }
         }
@@ -274,7 +274,7 @@ final class PlanificationMilestoneService
 
         if ($allocatedPercentage + (float) $validated['percentage'] > 100.00001) {
             throw ValidationException::withMessages([
-                'percentage' => 'The project milestone percentages cannot exceed 100%.',
+                'percentage' => __('The project milestone percentages cannot exceed 100%.'),
             ]);
         }
     }

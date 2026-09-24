@@ -54,4 +54,14 @@ class CityResource extends Resource
             'edit' => EditCity::route('/{record}/edit'),
         ];
     }
+    public static function getModelLabel(): string
+    {
+        return __('City');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Cities');
+    }
+
 }

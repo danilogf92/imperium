@@ -67,7 +67,7 @@ class DashboardPortfolioChartService
     private function projectsByInvestmentChart(Collection $values): ColumnChartModel
     {
         $chart = (new ColumnChartModel)
-            ->setTitle('Projects by investment')
+            ->setTitle(__('Projects by investment'))
             ->setAnimated(true)
             ->setHorizontal(true)
             ->setOpacity(1)
@@ -78,7 +78,7 @@ class DashboardPortfolioChartService
         foreach ($values as $value) {
             $label = (string) $value->label;
             $chart->addColumn(
-                $label,
+                __($label),
                 (int) $value->total,
                 self::INVESTMENT_COLORS[$label] ?? '#64748b'
             );
@@ -90,7 +90,7 @@ class DashboardPortfolioChartService
     private function projectsByStateChart(Collection $values): PieChartModel
     {
         $chart = (new PieChartModel)
-            ->setTitle('Projects by state')
+            ->setTitle(__('Projects by state'))
             ->setAnimated(true)
             ->setOpacity(1)
             ->disableShades()
@@ -105,7 +105,7 @@ class DashboardPortfolioChartService
         foreach ($values as $value) {
             $label = (string) $value->label;
             $chart->addSlice(
-                $label,
+                __($label),
                 (int) $value->total,
                 self::STATE_COLORS[$label] ?? '#64748b'
             );
@@ -117,7 +117,7 @@ class DashboardPortfolioChartService
     private function projectsByStateColumnChart(Collection $values): ColumnChartModel
     {
         $chart = (new ColumnChartModel)
-            ->setTitle('Project status #')
+            ->setTitle(__('Project status #'))
             ->setAnimated(true)
             ->withDataLabels()
             ->withGrid();
@@ -125,7 +125,7 @@ class DashboardPortfolioChartService
         foreach ($values as $value) {
             $label = (string) $value->label;
             $chart->addColumn(
-                $label,
+                __($label),
                 (int) $value->total,
                 self::STATE_COLORS[$label] ?? '#64748b'
             );
@@ -139,7 +139,7 @@ class DashboardPortfolioChartService
         string $currency
     ): ColumnChartModel {
         $chart = (new ColumnChartModel)
-            ->setTitle('Budget by investment')
+            ->setTitle(__('Budget by investment'))
             ->setAnimated(true)
             ->setHorizontal(true)
             ->setOpacity(1)
@@ -151,7 +151,7 @@ class DashboardPortfolioChartService
         foreach ($values as $value) {
             $label = (string) $value->label;
             $chart->addColumn(
-                $label,
+                __($label),
                 round((float) $value->total, 2),
                 self::INVESTMENT_COLORS[$label] ?? '#64748b'
             );
@@ -165,7 +165,7 @@ class DashboardPortfolioChartService
         string $currency
     ): PieChartModel {
         $chart = (new PieChartModel)
-            ->setTitle('Budget by state')
+            ->setTitle(__('Budget by state'))
             ->setAnimated(true)
             ->setOpacity(1)
             ->disableShades()
@@ -180,7 +180,7 @@ class DashboardPortfolioChartService
         foreach ($values as $value) {
             $label = (string) $value->label;
             $chart->addSlice(
-                $label,
+                __($label),
                 round((float) $value->total, 2),
                 self::STATE_COLORS[$label] ?? '#64748b'
             );
@@ -194,7 +194,7 @@ class DashboardPortfolioChartService
         string $currency
     ): ColumnChartModel {
         $chart = (new ColumnChartModel)
-            ->setTitle('Project status value')
+            ->setTitle(__('Project status value'))
             ->setAnimated(true)
             ->withDataLabels()
             ->withGrid()
@@ -203,7 +203,7 @@ class DashboardPortfolioChartService
         foreach ($values as $value) {
             $label = (string) $value->label;
             $chart->addColumn(
-                $label,
+                __($label),
                 round((float) $value->total, 2),
                 self::STATE_COLORS[$label] ?? '#64748b'
             );
@@ -217,14 +217,14 @@ class DashboardPortfolioChartService
         string $currency
     ): RadarChartModel {
         $chart = (new RadarChartModel)
-            ->setTitle('Type of Investment')
+            ->setTitle(__('Type of Investment'))
             ->setAnimated(true)
             ->setJsonConfig($this->moneyChartConfig('yaxis', $currency));
 
         foreach ($values as $value) {
             $chart->addSeries(
-                'Investment',
-                (string) $value->label,
+                __('Investment'),
+                __((string) $value->label),
                 round((float) $value->total, 2)
             );
         }
@@ -237,13 +237,12 @@ class DashboardPortfolioChartService
         string $currency
     ): RadarChartModel {
         $chart = (new RadarChartModel)
-            ->setTitle('Area Classification')
+            ->setTitle(__('Area Classification'))
             ->setAnimated(true)
             ->setJsonConfig($this->moneyChartConfig('yaxis', $currency));
 
         foreach ($values as $value) {
-            $chart->addSeries(
-                'Investment',
+            $chart->addSeries(__('Investment'),
                 (string) $value->label,
                 round((float) $value->total, 2)
             );
@@ -275,6 +274,6 @@ class DashboardPortfolioChartService
 
     private function projectsFormatter(): string
     {
-        return "function(value) { return Number(value).toLocaleString() + ' projects'; }";
+        return "function(value) { return Number(value).toLocaleString(document.documentElement.lang) + ' ' + ".json_encode(__('Projects'), JSON_HEX_APOS | JSON_HEX_QUOT)."; }";
     }
 }

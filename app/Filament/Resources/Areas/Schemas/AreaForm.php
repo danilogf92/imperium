@@ -14,23 +14,23 @@ class AreaForm
         return $schema
             ->components([
                 Select::make('company_id')
-                    ->label('Company')
+                    ->label(__('Company'))
                     ->relationship('company', 'company_name')
                     ->searchable()
                     ->preload()
                     ->required(),
 
                 Select::make('manager_id')
-                    ->label('Manager')
+                    ->label(__('Manager'))
                     ->relationship('manager', 'name')
                     ->searchable()
                     ->preload()
                     ->nullable(),
 
 
-                TextInput::make('name')
+                TextInput::make('name')->label(__('Name'))
                     ->required(),
-                Textarea::make('description')
+                Textarea::make('description')->label(__('Description'))
                     ->default(null)
                     ->columnSpanFull(),
             ]);

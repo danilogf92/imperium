@@ -82,7 +82,7 @@ class ProjectForm extends Form
 
         if (! $company) {
             throw ValidationException::withMessages([
-                'form.company_id' => 'You cannot create projects in the selected company.',
+                'form.company_id' => __('You cannot create projects in the selected company.'),
             ]);
         }
 
@@ -165,7 +165,7 @@ class ProjectForm extends Form
 
         if (! $company) {
             throw ValidationException::withMessages([
-                'form.company_id' => 'You cannot edit projects in the selected company.',
+                'form.company_id' => __('You cannot edit projects in the selected company.'),
             ]);
         }
 
@@ -308,7 +308,7 @@ class ProjectForm extends Form
 
             if ($validOwnerCount !== count($validated['owner_ids'] ?? [])) {
                 throw ValidationException::withMessages([
-                    'form.owner_ids' => 'Every selected owner must belong to the project company.',
+                    'form.owner_ids' => __('Every selected owner must belong to the project company.'),
                 ]);
             }
 

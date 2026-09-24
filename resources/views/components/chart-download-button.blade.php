@@ -4,8 +4,8 @@
     data-download-filename="{{ $filename }}"
     onclick="event.preventDefault(); event.stopPropagation(); window.downloadDashboardChart(this)"
     class="chart-image-export inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border text-white shadow-md transition duration-150 hover:-translate-y-px hover:brightness-95 hover:text-white hover:shadow-lg active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-50"
-    title="Download chart as PNG"
-    aria-label="Download chart as PNG">
+    title="{{ __('Download chart as PNG') }}"
+    aria-label="{{ __('Download chart as PNG') }}">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
         class="pointer-events-none h-[18px] w-[18px]"
         viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">

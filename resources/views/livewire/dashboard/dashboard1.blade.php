@@ -26,7 +26,7 @@
 
             <div class="overflow-x-auto p-5">
                 <div class="flex min-w-max items-center gap-3">
-                    <x-dashboard-filter-dropdown label="Companies" model="companyFilter" :options="$companies->map(
+                    <x-dashboard-filter-dropdown label="{{ __('Companies') }}" model="companyFilter" :options="$companies->map(
                         fn($company) => [
                             'value' => $company->company_code,
                             'label' => $company->company_name,
@@ -94,39 +94,39 @@
                         </template>
                     </div>
 
-                    <x-dashboard-filter-dropdown label="States" model="stateSearch" :options="collect($stateOptions)->map(
+                    <x-dashboard-filter-dropdown label="{{ __('States') }}" model="stateSearch" :options="collect($stateOptions)->map(
                         fn($option) => [
                             'value' => $option->value,
-                            'label' => $option->value,
+                            'label' => $option->getLabel(),
                         ],
                     )" :selected="$stateSearch"
                         multiple />
 
-                    <x-dashboard-filter-dropdown label="Classifications" model="typeOfProjectSearch" :options="collect($classificationOptions)->map(
+                    <x-dashboard-filter-dropdown label="{{ __('Classifications') }}" model="typeOfProjectSearch" :options="collect($classificationOptions)->map(
                         fn($option) => [
                             'value' => $option->value,
-                            'label' => $option->value,
+                            'label' => $option->getLabel(),
                         ],
                     )"
                         :selected="$typeOfProjectSearch" multiple />
 
-                    <x-dashboard-filter-dropdown label="Investments" model="investmentSearch" :options="collect($investmentOptions)->map(
+                    <x-dashboard-filter-dropdown label="{{ __('Investments') }}" model="investmentSearch" :options="collect($investmentOptions)->map(
                         fn($option) => [
                             'value' => $option->value,
-                            'label' => $option->value,
+                            'label' => $option->getLabel(),
                         ],
                     )"
                         :selected="$investmentSearch" multiple />
 
-                    <x-dashboard-filter-dropdown label="Justifications" model="justificationSearch" :options="collect($justificationOptions)->map(
+                    <x-dashboard-filter-dropdown label="{{ __('Justifications') }}" model="justificationSearch" :options="collect($justificationOptions)->map(
                         fn($option) => [
                             'value' => $option->value,
-                            'label' => $option->value,
+                            'label' => $option->getLabel(),
                         ],
                     )"
                         :selected="$justificationSearch" multiple />
 
-                    <x-dashboard-filter-dropdown label="Currency" model="currency" :options="[['value' => 'euro', 'label' => 'Euro'], ['value' => 'dollar', 'label' => 'Dollar ($)']]" :selected="$currency"
+                    <x-dashboard-filter-dropdown label="{{ __('Currency') }}" model="currency" :options="[['value' => 'euro', 'label' => __('Euro')], ['value' => 'dollar', 'label' => __('Dollar ($)')]]" :selected="$currency"
                         default="euro" />
 
                     <x-clear-filters-button method="resetAll" :active="$companyFilter !== [] || $yearSearch !== [] || $stateSearch !== [] || $typeOfProjectSearch !== [] || $investmentSearch !== [] || $justificationSearch !== [] || $currency !== 'euro'" />
@@ -137,29 +137,29 @@
         @php
             $currencySymbol = $currency === 'dollar' ? '$' : '€';
             $metrics = [
-                ['label' => 'Projects', 'value' => number_format($projectCount), 'accent' => 'bg-indigo-500'],
+                ['label' => __('Projects'), 'value' => number_format($projectCount), 'accent' => 'bg-indigo-500'],
                 [
-                    'label' => 'With financial data',
+                    'label' => __('With financial data'),
                     'value' => number_format($projectsWithData),
                     'accent' => 'bg-cyan-500',
                 ],
                 [
-                    'label' => 'Budgeted',
+                    'label' => __('Budgeted'),
                     'value' => \App\Support\MoneyValueFormatter::thousands($budgeted, $currencySymbol),
                     'accent' => 'bg-blue-500',
                 ],
                 [
-                    'label' => 'Booked',
+                    'label' => __('Booked'),
                     'value' => \App\Support\MoneyValueFormatter::thousands($booked, $currencySymbol),
                     'accent' => 'bg-amber-500',
                 ],
                 [
-                    'label' => 'Executed',
+                    'label' => __('Executed'),
                     'value' => \App\Support\MoneyValueFormatter::thousands($executed, $currencySymbol),
                     'accent' => 'bg-emerald-500',
                 ],
                 [
-                    'label' => 'Real (SAP)',
+                    'label' => __('Real (SAP)'),
                     'value' => \App\Support\MoneyValueFormatter::thousands($realValue, $currencySymbol),
                     'accent' => 'bg-violet-500',
                 ],
@@ -230,15 +230,15 @@
 
         @if ($hasProjects)
             <section class="grid gap-6" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-                <x-dashboard-chart-card title="Projects by investment"
-                    subtitle="Number of projects by investment category" filename="projects-by-investment">
+                <x-dashboard-chart-card title="{{ __('Projects by investment') }}"
+                    subtitle="{{ __('Number of projects by investment category') }}" filename="projects-by-investment">
                     <livewire:livewire-column-chart key="{{ $projectsByInvestmentChart->reactiveKey() }}"
                         :column-chart-model="$projectsByInvestmentChart" />
                 </x-dashboard-chart-card>
 
                 @if ($hasFinancialData)
-                    <x-dashboard-chart-card title="Budget by investment"
-                        subtitle="Financial distribution by investment category" filename="budget-by-investment">
+                    <x-dashboard-chart-card title="{{ __('Budget by investment') }}"
+                        subtitle="{{ __('Financial distribution by investment category') }}" filename="budget-by-investment">
                         <livewire:livewire-column-chart key="{{ $budgetByInvestmentChart->reactiveKey() }}"
                             :column-chart-model="$budgetByInvestmentChart" />
                     </x-dashboard-chart-card>
@@ -246,13 +246,13 @@
             </section>
 
             <section class="grid gap-6" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-                <x-dashboard-chart-card title="Projects by state" subtitle="Current portfolio status distribution"
+                <x-dashboard-chart-card title="{{ __('Projects by state') }}" subtitle="{{ __('Current portfolio status distribution') }}"
                     filename="projects-by-state">
                     <livewire:livewire-pie-chart key="{{ $projectsByStateChart->reactiveKey() }}" :pie-chart-model="$projectsByStateChart" />
                 </x-dashboard-chart-card>
 
                 @if ($hasFinancialData)
-                    <x-dashboard-chart-card title="Budget by state" subtitle="Budget allocation across project states"
+                    <x-dashboard-chart-card title="{{ __('Budget by state') }}" subtitle="{{ __('Budget allocation across project states') }}"
                         filename="budget-by-state">
                         <livewire:livewire-pie-chart key="{{ $budgetByStateChart->reactiveKey() }}"
                             :pie-chart-model="$budgetByStateChart" />
@@ -261,15 +261,15 @@
             </section>
 
             <section class="grid gap-6" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-                <x-dashboard-chart-card title="Project status count" subtitle="Number of projects in each state"
+                <x-dashboard-chart-card title="{{ __('Project status count') }}" subtitle="{{ __('Number of projects in each state') }}"
                     filename="project-status-count">
                     <livewire:livewire-column-chart key="{{ $projectsByStateColumnChart->reactiveKey() }}"
                         :column-chart-model="$projectsByStateColumnChart" />
                 </x-dashboard-chart-card>
 
                 @if ($hasFinancialData)
-                    <x-dashboard-chart-card title="Project status value"
-                        subtitle="Financial value grouped by project state" filename="project-status-value">
+                    <x-dashboard-chart-card title="{{ __('Project status value') }}"
+                        subtitle="{{ __('Financial value grouped by project state') }}" filename="project-status-value">
                         <livewire:livewire-column-chart key="{{ $budgetByStateColumnChart->reactiveKey() }}"
                             :column-chart-model="$budgetByStateColumnChart" />
                     </x-dashboard-chart-card>
@@ -278,15 +278,15 @@
 
             @if ($hasFinancialData)
                 <section class="grid gap-6" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-                    <x-dashboard-chart-card title="Investment type" subtitle="Investment value by classification"
+                    <x-dashboard-chart-card title="{{ __('Investment type') }}" subtitle="{{ __('Investment value by classification') }}"
                         filename="investment-type">
                         <livewire:livewire-radar-chart key="{{ $budgetByInvestmentRadarChart->reactiveKey() }}"
                             :radar-chart-model="$budgetByInvestmentRadarChart" />
                     </x-dashboard-chart-card>
 
                     @if ($hasAreaData)
-                        <x-dashboard-chart-card title="Area classification"
-                            subtitle="Investment distribution across project areas" filename="area-classification">
+                        <x-dashboard-chart-card title="{{ __('Area classification') }}"
+                            subtitle="{{ __('Investment distribution across project areas') }}" filename="area-classification">
                             <livewire:livewire-radar-chart key="{{ $budgetByAreaRadarChart->reactiveKey() }}"
                                 :radar-chart-model="$budgetByAreaRadarChart" />
                         </x-dashboard-chart-card>
@@ -294,14 +294,14 @@
                 </section>
 
                 <section class="grid gap-6" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-                    <x-dashboard-chart-card title="Cumulative projects by month"
-                        subtitle="Portfolio growth throughout the year" filename="cumulative-projects-by-month">
+                    <x-dashboard-chart-card title="{{ __('Cumulative projects by month') }}"
+                        subtitle="{{ __('Portfolio growth throughout the year') }}" filename="cumulative-projects-by-month">
                         <livewire:livewire-line-chart key="{{ $projectsCreationCurveChart->reactiveKey() }}"
                             :line-chart-model="$projectsCreationCurveChart" />
                     </x-dashboard-chart-card>
 
-                    <x-dashboard-chart-card title="Cumulative budget by month"
-                        subtitle="Budget growth by project creation month" filename="cumulative-budget-by-month">
+                    <x-dashboard-chart-card title="{{ __('Cumulative budget by month') }}"
+                        subtitle="{{ __('Budget growth by project creation month') }}" filename="cumulative-budget-by-month">
                         <livewire:livewire-line-chart key="{{ $budgetCreationCurveChart->reactiveKey() }}"
                             :line-chart-model="$budgetCreationCurveChart" />
                     </x-dashboard-chart-card>
@@ -312,7 +312,7 @@
                     <div>
                         <h2 class="font-semibold text-slate-800">{{ __('No financial data available') }}</h2>
                         <p class="mt-2 text-sm text-slate-500">
-                            Financial charts will appear when project data is uploaded.
+                            {{ __('Financial charts will appear when project data is uploaded.') }}
                         </p>
                     </div>
                 </section>
@@ -326,24 +326,25 @@
 
         @if ($hasProjects)
             <section class="grid grid-cols-1 gap-6 xl:grid-cols-2">
-                <x-dashboard-chart-card title="Start date vs approved date"
-                    subtitle="Cumulative planned and actual project execution" filename="planned-vs-actual-execution"
+                <x-dashboard-chart-card title="{{ __('Start date vs approved date') }}"
+                    subtitle="{{ __('Cumulative planned and actual project execution') }}" filename="planned-vs-actual-execution"
                     height="40rem">
                     <livewire:livewire-line-chart key="{{ $plannedVsActualExecutionChart->reactiveKey() }}"
                         :line-chart-model="$plannedVsActualExecutionChart" />
                     <x-slot:footer>
-                        Cumulative percentage over a total actual value of
+                        {{ __('Cumulative percentage over a total actual value of') }}
+
                         {{ $currencySymbol }}{{ number_format($scheduleRealValueTotal, 2) }}.
                     </x-slot:footer>
                 </x-dashboard-chart-card>
 
-                <x-dashboard-chart-card title="Forecast end date vs close date"
-                    subtitle="Monthly project completion comparison" filename="forecast-vs-close-date"
+                <x-dashboard-chart-card title="{{ __('Forecast end date vs close date') }}"
+                    subtitle="{{ __('Monthly project completion comparison') }}" filename="forecast-vs-close-date"
                     height="40rem">
                     <livewire:livewire-line-chart key="{{ $forecastVsCloseDateChart->reactiveKey() }}"
                         :line-chart-model="$forecastVsCloseDateChart" />
                     <x-slot:footer>
-                        Monthly project count by forecast completion date and close date.
+                        {{ __('Monthly project count by forecast completion date and close date.') }}
                     </x-slot:footer>
                 </x-dashboard-chart-card>
             </section>

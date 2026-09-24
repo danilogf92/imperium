@@ -2,13 +2,18 @@
 
 namespace App\Enums;
 
-enum ProjectStateEnum: string
+enum ProjectStateEnum: string implements \Filament\Support\Contracts\HasLabel
 {
     case Capex = 'Capex';
     case Planning = 'Planning';
     case Execution = 'Execution';
     case Finished = 'Finished';
     case Postponed = 'Postponed';
+
+    public function getLabel(): string
+    {
+        return __($this->value);
+    }
 
     public static function values(): array
     {

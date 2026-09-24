@@ -23,7 +23,7 @@ trait ConvertsDataCurrencies
         if ($rate <= 0) {
             $this->addError(
                 "editData.{$field}",
-                'The project rate must be greater than zero to convert currencies.'
+                __('The project rate must be greater than zero to convert currencies.')
             );
 
             return;
@@ -80,7 +80,7 @@ trait ConvertsDataCurrencies
         if ($rate <= 0 && $hasDollarValue) {
             $this->addError(
                 'editData.global_price',
-                'The project rate must be greater than zero to convert dollars to euros.'
+                __('The project rate must be greater than zero to convert dollars to euros.')
             );
 
             return false;

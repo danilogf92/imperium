@@ -7,15 +7,15 @@
                 <div>
                     <div class="flex flex-wrap items-center gap-2">
                         <h2 class="text-xl font-bold text-gray-900">
-                            {{ $creatingData ? 'Create data row' : 'Edit data record' }}
+                            {{ $creatingData ? __('Create data row') : __('Edit data record') }}
                         </h2>
                         <span wire:dirty
                             class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                            Unsaved changes
+                            {{ __('Unsaved changes') }}
                         </span>
                     </div>
                     <p class="mt-1 text-sm font-normal text-gray-500">
-                        {{ $creatingData ? 'Add information to' : 'Update the information for' }}
+                        {{ $creatingData ? __('Add information to') : __('Update the information for') }}
                         <span class="font-semibold text-gray-700">{{ $project->pda_code }}</span>
                         &middot; {{ $project->name }}.
                     </p>
@@ -26,9 +26,9 @@
                 <div class="max-h-[70vh] space-y-6 overflow-y-auto py-2 pr-2">
                     <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                         <div class="border-b border-gray-200 bg-gray-50 px-5 py-4">
-                            <h3 class="font-semibold text-gray-900">Record information</h3>
+                            <h3 class="font-semibold text-gray-900">{{ __('Record information') }}</h3>
                             <p class="mt-1 text-sm text-gray-500">
-                                Update classification, financial values and procurement details.
+                                {{ __('Update classification, financial values and procurement details.') }}
                             </p>
                         </div>
 
@@ -47,13 +47,13 @@
                                         @if (in_array($column, $linkedCurrencyColumns, true))
                                             <span
                                                 class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">
-                                                Linked
+                                                {{ __('Linked') }}
                                             </span>
                                         @endif
                                     </span>
                                     @if ($column === 'supplier')
-                                        <x-dashboard-filter-dropdown label="Select supplier" model="editData.supplier"
-                                            :options="array_merge([['value' => '', 'label' => 'No supplier']], $supplierOptions)" :selected="$editData['supplier'] ?? ''"
+                                        <x-dashboard-filter-dropdown label="{{ __('Select supplier') }}" model="editData.supplier"
+                                            :options="array_merge([['value' => '', 'label' => __('No supplier')]], $supplierOptions)" :selected="$editData['supplier'] ?? ''"
                                             :show-selection="true" :global-loading="false" :truncate-selection="true"
                                             create-action="toggleSupplierCreator" create-label="Create supplier" />
                                     @elseif (in_array($column, ['description', 'observations'], true))
@@ -78,9 +78,9 @@
 
                             <section class="data-edit-grid-wide rounded-xl border border-blue-100 bg-blue-50/50 p-4">
                                 <div class="mb-3">
-                                    <h4 class="text-sm font-bold text-slate-800">Financial values</h4>
+                                    <h4 class="text-sm font-bold text-slate-800">{{ __('Financial values') }}</h4>
                                     <p class="text-xs text-slate-500">
-                                        Enter the dollar value. Its euro equivalent is calculated when you leave the field.
+                                        {{ __('Enter the dollar value. Its euro equivalent is calculated when you leave the field.') }}
                                     </p>
                                 </div>
                                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -105,7 +105,7 @@
                                             <span class="mb-1.5 flex items-center justify-between gap-2 text-sm font-semibold text-slate-700">
                                                 <span>{{ $financialLabel }} <span class="text-blue-700">€</span></span>
                                                 <span class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">
-                                                    Auto-calculated
+                                                    {{ __('Auto-calculated') }}
                                                 </span>
                                             </span>
                                             <input wire:model="editData.{{ $euroColumn }}" type="number" step="0.01"
@@ -130,21 +130,21 @@
                     <section class="rounded-lg border border-slate-200 bg-slate-50 p-3" x-data="{ copied: false }">
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
                             <label class="min-w-0 flex-1">
-                                <span class="mb-1 block text-xs font-medium text-slate-600">Base</span>
+                                <span class="mb-1 block text-xs font-medium text-slate-600">{{ __('Base') }}</span>
                                 <input wire:model.blur="bookedBase" data-no-global-loading type="number"
                                     min="0" step="0.01"
                                     class="block h-9 w-full rounded-md border-slate-300 bg-white px-3 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </label>
                             <span class="hidden pb-2 text-slate-400 sm:block">×</span>
                             <label class="min-w-0 flex-1">
-                                <span class="mb-1 block text-xs font-medium text-slate-600">Multiplier</span>
+                                <span class="mb-1 block text-xs font-medium text-slate-600">{{ __('Multiplier') }}</span>
                                 <input wire:model.blur="bookedMultiplier" data-no-global-loading
                                     type="number" min="0" step="0.000001"
                                     class="block h-9 w-full rounded-md border-slate-300 bg-white px-3 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </label>
                             <span class="hidden pb-2 text-slate-400 sm:block">=</span>
                             <div class="min-w-0 flex-1">
-                                <span class="mb-1 block text-xs font-medium text-slate-600">Result</span>
+                                <span class="mb-1 block text-xs font-medium text-slate-600">{{ __('Result') }}</span>
                                 <div class="relative">
                                     <input x-ref="result" readonly type="text" inputmode="decimal"
                                         value="{{ number_format($bookedCalculatorResult, 2, '.', '') }}"
@@ -153,9 +153,9 @@
                                     <button type="button" data-no-global-loading
                                         x-on:click="$refs.result.select(); $refs.result.setSelectionRange(0, $refs.result.value.length); document.execCommand('copy'); if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText($refs.result.value).catch(() => {}); copied = true; setTimeout(() => copied = false, 1500)"
                                         class="absolute inset-y-0 right-0 inline-flex items-center px-3 text-xs font-medium text-blue-600 hover:text-blue-800"
-                                        title="Copy result">
+                                        title="{{ __('Copy result') }}">
                                     <span class="text-xs font-medium text-blue-600"
-                                        x-text="copied ? 'Copied' : 'Copy'">Copy</span>
+                                        x-text="copied ? @js(__('Copied')) : @js(__('Copy'))">{{ __('Copy') }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -171,7 +171,7 @@
                         style="background-color: #ef4444; border-color: #dc2626; color: #ffffff;"
                         onmouseenter="this.style.backgroundColor='#dc2626'"
                         onmouseleave="this.style.backgroundColor='#ef4444'">
-                        Cancel
+                        {{ __('Cancel') }}
                     </x-secondary-button>
 
                     <x-button wire:click="{{ $dataSaveMethod }}"
@@ -182,10 +182,10 @@
                         onmouseenter="this.style.backgroundColor='#1d4ed8'"
                         onmouseleave="this.style.backgroundColor='#2563eb'">
                         <span wire:loading.remove wire:target="{{ $dataSaveMethod }}">
-                            {{ $creatingData ? 'Create row' : 'Save changes' }}
+                            {{ $creatingData ? __('Create row') : __('Save changes') }}
                         </span>
                         <span wire:loading wire:target="{{ $dataSaveMethod }}">
-                            {{ $creatingData ? 'Creating...' : 'Saving...' }}
+                            {{ $creatingData ? __('Creating...') : __('Saving...') }}
                         </span>
                     </x-button>
                 </div>

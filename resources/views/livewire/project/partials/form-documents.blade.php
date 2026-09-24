@@ -2,9 +2,9 @@
 <section x-show="activeSection === 'documents'" x-cloak
     class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
     <div class="border-b border-gray-200 bg-gray-50 px-5 py-4">
-        <h3 class="font-semibold text-gray-900">Project documents</h3>
+        <h3 class="font-semibold text-gray-900">{{ __('Project documents') }}</h3>
         <p class="mt-1 text-sm text-gray-500">
-            Upload or replace the PDA, Project ideas and Project Handover Certificate files.
+            {{ __('Upload or replace the PDA, Project ideas and Project Handover Certificate files.') }}
         </p>
     </div>
 

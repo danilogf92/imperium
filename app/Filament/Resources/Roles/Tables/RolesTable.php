@@ -15,23 +15,23 @@ class RolesTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Role')
+                    ->label(__('Role'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('guard_name')
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
-                    ->label('Guard')
+                    ->label(__('Guard'))
                     ->searchable(),
 
-                TextColumn::make('created_at')
+                TextColumn::make('created_at')->label(__('Created at'))
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->dateTime()
                     ->sortable(),
 
-                TextColumn::make('updated_at')
+                TextColumn::make('updated_at')->label(__('Updated at'))
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->dateTime()

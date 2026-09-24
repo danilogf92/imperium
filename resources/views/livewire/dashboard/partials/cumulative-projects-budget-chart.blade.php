@@ -251,8 +251,7 @@
         </div>
 
         <x-slot:footer>
-            Line: cumulative projects as percentage of total projects.
-            Bars: {{ strtolower($valueSeriesLabel) }} by {{ $chartDateLabel }}.
+            {{ __('Line: cumulative projects as percentage of total projects. Bars: :value by :period.', ['value' => $valueSeriesLabel, 'period' => $chartDateLabel]) }}
         </x-slot:footer>
     </x-dashboard-chart-card>
 @endif

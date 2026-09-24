@@ -266,7 +266,7 @@ class ActivitiesDashboard extends Component
         $metrics = $this->summarize($activities);
         $topOverdueActivities = $activities->where('dashboard_status', 'overdue')
             ->sortBy('due_date')->take(5)->map(function (ProjectWeeklyActivity $activity) use ($today) {
-                $activity->setAttribute('planned_month', $activity->week_start->startOfMonth()->locale('en'));
+                $activity->setAttribute('planned_month', $activity->week_start->startOfMonth()->locale(app()->getLocale()));
                 $activity->setAttribute('days_overdue', (int) $activity->due_date->startOfDay()->diffInDays($today));
 
                 return $activity;
@@ -433,7 +433,7 @@ class ActivitiesDashboard extends Component
             $project = $activityItems->first()?->project ?? $milestoneItems->first()?->project;
 
             return [
-                'name' => $project?->name ?? 'Unknown project',
+                'name' => $project?->name ?? __('Unknown project'),
                 'activities' => $activityItems->count(),
                 'milestones' => $milestoneItems->count(),
                 'score' => $activityItems->count() + ($milestoneItems->count() * 3),
@@ -510,7 +510,7 @@ class ActivitiesDashboard extends Component
                 'itemMargin' => ['horizontal' => 14, 'vertical' => 6],
             ],
             'noData' => [
-                'text' => 'No data available for this chart',
+                'text' => __('No data available for this chart'),
                 'align' => 'center',
                 'verticalAlign' => 'middle',
                 'style' => ['color' => '#64748B', 'fontSize' => '14px', 'fontFamily' => 'Figtree, sans-serif'],
@@ -524,7 +524,7 @@ class ActivitiesDashboard extends Component
                     $overdue->count(),
                     $activities->where('dashboard_status', 'pending')->count(),
                 ],
-                'labels' => ['Completed', 'Overdue', 'Upcoming'],
+                'labels' => [__('activity_control.completed'), __('activity_control.overdue'), __('Upcoming')],
                 'chart' => $base['chart'] + ['type' => 'donut'],
                 'colors' => ['#22C55E', '#EF4444', '#38BDF8'],
                 'stroke' => ['show' => true, 'width' => 3, 'colors' => ['#FFFFFF'], 'lineCap' => 'round'],
@@ -546,7 +546,7 @@ class ActivitiesDashboard extends Component
                     'show' => true,
                     'name' => ['show' => true, 'offsetY' => -8, 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B'],
                     'value' => ['show' => true, 'offsetY' => 8, 'fontSize' => '28px', 'fontWeight' => 800, 'color' => '#0F172A', 'formatter' => 'function(value) { return Math.round(value); }'],
-                    'total' => ['show' => true, 'showAlways' => true, 'label' => 'Total activities', 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B', 'formatter' => 'function(options) { return options.globals.seriesTotals.reduce((total, value) => total + value, 0); }'],
+                    'total' => ['show' => true, 'showAlways' => true, 'label' => __('Total activities'), 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B', 'formatter' => 'function(options) { return options.globals.seriesTotals.reduce((total, value) => total + value, 0); }'],
                 ]]]],
                 'responsive' => [[
                     'breakpoint' => 640,
@@ -559,8 +559,8 @@ class ActivitiesDashboard extends Component
             ]),
             'riskProjectChart' => array_merge($base, [
                 'series' => [
-                    ['name' => 'Overdue activities', 'data' => $riskProjects->pluck('activities')->all()],
-                    ['name' => 'Overdue milestones', 'data' => $riskProjects->pluck('milestones')->all()],
+                    ['name' => __('Overdue activities'), 'data' => $riskProjects->pluck('activities')->all()],
+                    ['name' => __('Overdue milestones'), 'data' => $riskProjects->pluck('milestones')->all()],
                 ],
                 'chart' => $base['chart'] + ['type' => 'bar', 'stacked' => true],
                 'colors' => ['#2563EB', '#EA580C'],
@@ -580,9 +580,9 @@ class ActivitiesDashboard extends Component
             ]),
             'weeklyTrendChart' => array_merge($base, [
                 'series' => [
-                    ['name' => 'Completed', 'data' => $weeks->pluck('completed')->all()],
-                    ['name' => 'Overdue', 'data' => $weeks->pluck('overdue')->all()],
-                    ['name' => 'Upcoming', 'data' => $weeks->pluck('pending')->all()],
+                    ['name' => __('activity_control.completed'), 'data' => $weeks->pluck('completed')->all()],
+                    ['name' => __('activity_control.overdue'), 'data' => $weeks->pluck('overdue')->all()],
+                    ['name' => __('Upcoming'), 'data' => $weeks->pluck('pending')->all()],
                 ],
                 'chart' => $base['chart'] + ['type' => 'bar', 'stacked' => true],
                 'colors' => ['#2563EB', '#EA580C', '#F59E0B'],
@@ -597,11 +597,11 @@ class ActivitiesDashboard extends Component
                 'legend' => $base['legend'],
             ]),
             'agingChart' => array_merge($base, [
-                'series' => [['name' => 'Overdue activities', 'data' => array_values($aging)]],
+                'series' => [['name' => __('Overdue activities'), 'data' => array_values($aging)]],
                 'chart' => $base['chart'] + ['type' => 'bar'],
                 'colors' => ['#F59E0B', '#F97316', '#EA580C', '#C2410C'],
                 'plotOptions' => ['bar' => ['borderRadius' => 5, 'borderRadiusApplication' => 'end', 'columnWidth' => '42%', 'distributed' => true]],
-                'xaxis' => ['categories' => array_keys($aging), 'labels' => ['style' => ['fontSize' => '11px', 'fontWeight' => 600]]],
+                'xaxis' => ['categories' => array_map(fn ($label) => __($label), array_keys($aging)), 'labels' => ['style' => ['fontSize' => '11px', 'fontWeight' => 600]]],
                 'yaxis' => ['min' => 0, 'forceNiceScale' => true, 'labels' => ['formatter' => 'function(value) { return Math.round(value); }']],
                 'legend' => ['show' => false],
             ]),
@@ -611,7 +611,7 @@ class ActivitiesDashboard extends Component
                     $overdueMilestones->count(),
                     $milestones->where('dashboard_status', 'pending')->count(),
                 ],
-                'labels' => ['Completed', 'Overdue', 'Upcoming'],
+                'labels' => [__('activity_control.completed'), __('activity_control.overdue'), __('Upcoming')],
                 'chart' => $base['chart'] + ['type' => 'donut'],
                 'colors' => ['#22C55E', '#EF4444', '#38BDF8'],
                 'stroke' => ['show' => true, 'width' => 3, 'colors' => ['#FFFFFF'], 'lineCap' => 'round'],
@@ -633,7 +633,7 @@ class ActivitiesDashboard extends Component
                     'show' => true,
                     'name' => ['show' => true, 'offsetY' => -8, 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B'],
                     'value' => ['show' => true, 'offsetY' => 8, 'fontSize' => '28px', 'fontWeight' => 800, 'color' => '#0F172A', 'formatter' => 'function(value) { return Math.round(value); }'],
-                    'total' => ['show' => true, 'showAlways' => true, 'label' => 'Total milestones', 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B', 'formatter' => 'function(options) { return options.globals.seriesTotals.reduce((total, value) => total + value, 0); }'],
+                    'total' => ['show' => true, 'showAlways' => true, 'label' => __('Total milestones'), 'fontSize' => '12px', 'fontWeight' => 600, 'color' => '#64748B', 'formatter' => 'function(options) { return options.globals.seriesTotals.reduce((total, value) => total + value, 0); }'],
                 ]]]],
                 'responsive' => [[
                     'breakpoint' => 640,

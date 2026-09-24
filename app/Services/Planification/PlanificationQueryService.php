@@ -279,7 +279,7 @@ final class PlanificationQueryService
                 'offset' => $offset,
                 'year' => (int) $date->isoWeekYear,
                 'week' => (int) $date->isoWeek,
-                'label' => ($offset === 0 ? 'Actual Week' : 'Next Week').' · '.$date->isoFormat('MMM D'),
+                'label' => __($offset === 0 ? 'Actual Week' : 'Next Week').' · '.$date->isoFormat('MMM D'),
             ];
         })->all();
     }
@@ -302,7 +302,7 @@ final class PlanificationQueryService
 
                 return collect(range(1, $weeksInYear))->map(fn (int $week) => [
                     'value' => sprintf('%d-W%02d', $year, $week),
-                    'label' => sprintf('Week %02d - %d', $week, $year),
+                    'label' => __('activity_control.planned_week', ['week' => str_pad((string) $week, 2, '0', STR_PAD_LEFT), 'year' => $year]),
                 ])->all();
             })
             ->values();
@@ -317,25 +317,25 @@ final class PlanificationQueryService
             ->orderByDesc('week_year')->orderByDesc('week_number')->get()
             ->map(fn (ProjectWeeklyActivity $activity) => [
                 'value' => sprintf('%d-W%02d', $activity->week_year, $activity->week_number),
-                'label' => sprintf('%d · Week %02d', $activity->week_year, $activity->week_number),
+                'label' => __('activity_control.planned_week', ['week' => str_pad((string) $activity->week_number, 2, '0', STR_PAD_LEFT), 'year' => $activity->week_year]),
             ]);
     }
 
     private function months(): array
     {
         return [
-            1 => 'January',
-            2 => 'February',
-            3 => 'March',
-            4 => 'April',
-            5 => 'May',
-            6 => 'June',
-            7 => 'July',
-            8 => 'August',
-            9 => 'September',
-            10 => 'October',
-            11 => 'November',
-            12 => 'December',
+            1 => __('January'),
+            2 => __('February'),
+            3 => __('March'),
+            4 => __('April'),
+            5 => __('May'),
+            6 => __('June'),
+            7 => __('July'),
+            8 => __('August'),
+            9 => __('September'),
+            10 => __('October'),
+            11 => __('November'),
+            12 => __('December'),
         ];
     }
 }

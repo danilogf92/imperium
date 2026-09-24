@@ -90,8 +90,8 @@ final class ProjectDataImportExport
         $sheet->setAutoFilter("A1:{$lastColumn}{$lastRow}");
         $spreadsheet->getProperties()
             ->setCreator('DA Imperium')
-            ->setTitle("Project Data Import - {$project->name}")
-            ->setSubject('Project data prepared for re-import');
+            ->setTitle(__('Project Data Import - :value1', ['value1' => $project->name]))
+            ->setSubject(__('Project data prepared for re-import'));
 
         $directory = storage_path('app/private/exports');
         if (! is_dir($directory)) {

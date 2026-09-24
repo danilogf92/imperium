@@ -31,7 +31,7 @@ class AfterOrEqualWhenPresent implements DataAwareRule, ValidationRule
         $otherTimestamp = strtotime((string) $otherValue);
 
         if ($timestamp !== false && $otherTimestamp !== false && $timestamp < $otherTimestamp) {
-            $fail('The close date must be after or equal to the approve date.');
+            $fail(__('The close date must be after or equal to the approve date.'));
         }
     }
 }

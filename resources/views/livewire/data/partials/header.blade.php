@@ -32,14 +32,14 @@
                     @if ($project->state)
                         <span class="rounded-full px-2.5 py-1 font-medium"
                             style="background-color: {{ $project->state->softColor() }}; color: {{ $project->state->textColor() }};">
-                            {{ $project->state->value }}
+                            {{ $project->state->getLabel() }}
                         </span>
                     @endif
                     <span
                         class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
                         <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                         {{ __(':count records', ['count' => number_format($totalRecordCount)]) }}
-                        (SAP {{ number_format($sapRecordCount) }}) (Data {{ number_format($manualRecordCount) }})
+                        (SAP {{ number_format($sapRecordCount) }}) ({{ __('Data') }} {{ number_format($manualRecordCount) }})
                     </span>
                 </div>
             </div>
@@ -114,14 +114,14 @@
 
                 @if ($hasOrders)
                     <a href="{{ route('projects.orders', ['project' => $project->slug]) }}" wire:navigate
-                        title="View project orders"
+                        title="{{ __('View project orders') }}"
                         class="data-action-button data-back-to-projects inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2">
                         <svg class="mr-2 h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor"
                             stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M4 3.5h12v13H4v-13Zm3 3h6m-6 3h6m-6 3h4" />
                         </svg>
-                        Orders
+                        {{ __('Orders') }}
                     </a>
                 @else
                     <span class="data-orders-tooltip-wrapper inline-flex" tabindex="0"
@@ -133,10 +133,10 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M4 3.5h12v13H4v-13Zm3 3h6m-6 3h6m-6 3h4" />
                             </svg>
-                            Orders
+                            {{ __('Orders') }}
                         </button>
                         <span id="orders-disabled-tooltip" role="tooltip" class="data-orders-tooltip">
-                            This project has no orders
+                            {{ __('This project has no orders') }}
                         </span>
                     </span>
                 @endif

@@ -8,8 +8,6 @@
 .dark :is(input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea) { background-color: var(--app-surface); color: var(--app-text); border-color: var(--app-border); }
 .dark :is(input, textarea)::placeholder { color: #94a3b8; }
 .dark :is(input, select, textarea):disabled { background-color: #1e293b; color: #94a3b8; }
-.dark .app-pagination button:not(:disabled):hover { background: #1e3a5f; color: #bfdbfe; }
-.dark .app-pagination :is([aria-disabled=true] > span, button:disabled) { background: #1e293b; border-color: #334155; color: #94a3b8; }
 .dark select.app-per-page-select { background: var(--app-surface); color: var(--app-text); border-color: var(--app-border); }
 .dark select.app-per-page-select:hover { border-color: #60a5fa; }
 .dark .apexcharts-canvas { color: #e2e8f0; }

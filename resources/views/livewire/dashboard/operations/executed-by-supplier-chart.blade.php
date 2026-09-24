@@ -1,5 +1,5 @@
-<x-dashboard-chart-card title="Top suppliers by executed value"
-    subtitle="The ten suppliers with the largest executed amounts"
+<x-dashboard-chart-card title="{{ __('Top suppliers by executed value') }}"
+    subtitle="{{ __('The ten suppliers with the largest executed amounts') }}"
     filename="top-suppliers-executed" height="30rem">
     <livewire:livewire-column-chart key="{{ $executedBySupplierChart->reactiveKey() }}"
         :column-chart-model="$executedBySupplierChart" />

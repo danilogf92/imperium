@@ -13,11 +13,11 @@ class RoleForm
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label('Role Name')
+                    ->label(__('Role Name'))
                     ->required(),
 
                 Select::make('company_id')
-                    ->label('Company')
+                    ->label(__('Company'))
                     ->relationship(
                         name: 'company',
                         titleAttribute: 'company_name'
@@ -27,7 +27,7 @@ class RoleForm
                     ->required(),
 
                 Select::make('permissions')
-                    ->label('Permissions')
+                    ->label(__('Permissions'))
                     ->relationship('permissions', 'name')
                     ->multiple()
                     ->searchable()

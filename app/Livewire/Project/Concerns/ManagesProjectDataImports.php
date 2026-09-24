@@ -42,15 +42,15 @@ trait ManagesProjectDataImports
         $this->dataImportExistingRows = Data::query()->where('project_id', $project->id)->count();
         if ($this->dataImportExistingRows > 0) {
             $this->addError('dataImportFile',
-                'Delete the existing project data before importing another Excel file.');
+                __('Delete the existing project data before importing another Excel file.'));
             return;
         }
         $this->validate(
             ['dataImportFile' => ['required', 'file', 'extensions:xlsx,xls', 'max:20480']],
-            ['dataImportFile.extensions' => 'Select an Excel file in .xlsx or .xls format.']
+            ['dataImportFile.extensions' => __('Select an Excel file in .xlsx or .xls format.')]
         );
         $imported = $importer->import($project, $this->dataImportFile->getRealPath());
-        $this->notifyProjectChange($project, "{$imported} data rows imported");
+        $this->notifyProjectChange($project, __(':count data rows imported', ['count' => $imported]));
         $this->closeDataImportModal();
     }
 
@@ -62,7 +62,7 @@ trait ManagesProjectDataImports
             Data::query()->where('project_id', $project->id)->delete();
             $project->update(['data_uploaded' => false]);
         });
-        $this->notifyProjectChange($project, 'Project data deleted');
+        $this->notifyProjectChange($project, __('Project data deleted'));
         $this->closeDataImportModal();
     }
 

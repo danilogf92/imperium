@@ -97,7 +97,7 @@ class Table extends Component
 
         return view('livewire.project.table', [
             'projects' => $query->paginate($this->perPage),
-            'columnOptions' => ProjectTableDefinition::COLUMN_OPTIONS,
+            'columnOptions' => array_map(fn ($label) => __($label), ProjectTableDefinition::COLUMN_OPTIONS),
             'updateCompanyIds' => $user?->companyIdsForPermission(ProjectPermissionEnum::Update) ?? [],
             'deleteCompanyIds' => $user?->companyIdsForPermission(ProjectPermissionEnum::Delete) ?? [],
         ]);

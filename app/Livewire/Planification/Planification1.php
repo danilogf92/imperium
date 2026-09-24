@@ -206,7 +206,7 @@ class Planification extends Component
 
         if (! $project) {
             throw ValidationException::withMessages([
-                'projectId' => 'You do not have permission to plan this project.',
+                'projectId' => __('You do not have permission to plan this project.'),
             ]);
         }
 
@@ -244,7 +244,7 @@ class Planification extends Component
             && (! $this->editingId || $this->editingId !== $firstMilestone->id)
         ) {
             throw ValidationException::withMessages([
-                'month' => 'A milestone cannot be placed before the project plan start month.',
+                'month' => __('A milestone cannot be placed before the project plan start month.'),
             ]);
         }
 
@@ -259,7 +259,7 @@ class Planification extends Component
 
             if (! $this->editingId || $requestedPosition > $closedPosition) {
                 throw ValidationException::withMessages([
-                    'milestoneId' => 'Milestones cannot be added or moved after Closed Project.',
+                    'milestoneId' => __('Milestones cannot be added or moved after Closed Project.'),
                 ]);
             }
         }
@@ -273,7 +273,7 @@ class Planification extends Component
 
             if ($hasLaterItems) {
                 throw ValidationException::withMessages([
-                    'month' => 'Closed Project must be the final milestone in the timeline.',
+                    'month' => __('Closed Project must be the final milestone in the timeline.'),
                 ]);
             }
         }
@@ -285,7 +285,7 @@ class Planification extends Component
 
         if ($allocatedPercentage + (float) $validated['percentage'] > 100.00001) {
             throw ValidationException::withMessages([
-                'percentage' => 'The project milestone percentages cannot exceed 100%.',
+                'percentage' => __('The project milestone percentages cannot exceed 100%.'),
             ]);
         }
 
@@ -312,7 +312,7 @@ class Planification extends Component
             $this->resequenceProject($project->id);
         });
 
-        $message = $this->editingId ? 'Milestone updated successfully.' : 'Milestone added successfully.';
+        $message = $this->editingId ? __('Milestone updated successfully.') : __('Milestone added successfully.');
         $this->showFormModal = false;
         $this->reset(['milestoneId', 'month', 'cycleYear', 'editingId']);
         $this->percentage = '0';
@@ -345,7 +345,7 @@ class Planification extends Component
         $item->delete();
         $this->resequenceProject($projectId);
         $this->reset(['pendingDeleteId', 'pendingDeleteLabel']);
-        session()->flash('planification-status', 'Milestone removed successfully.');
+        session()->flash('planification-status', __('Milestone removed successfully.'));
     }
 
     public function render(): View
@@ -443,18 +443,18 @@ class Planification extends Component
                 ?->companiesForPermissionQuery(ProjectPermissionEnum::Export)
                 ->exists() ?? false,
             'months' => [
-                1 => 'January',
-                2 => 'February',
-                3 => 'March',
-                4 => 'April',
-                5 => 'May',
-                6 => 'June',
-                7 => 'July',
-                8 => 'August',
-                9 => 'September',
-                10 => 'October',
-                11 => 'November',
-                12 => 'December',
+                1 => __('January'),
+                2 => __('February'),
+                3 => __('March'),
+                4 => __('April'),
+                5 => __('May'),
+                6 => __('June'),
+                7 => __('July'),
+                8 => __('August'),
+                9 => __('September'),
+                10 => __('October'),
+                11 => __('November'),
+                12 => __('December'),
             ],
         ])->layout('layouts.app');
     }
@@ -504,7 +504,7 @@ class Planification extends Component
 
         if ($isClosed) {
             throw ValidationException::withMessages([
-                'projectId' => 'This project is closed and cannot receive more milestones.',
+                'projectId' => __('This project is closed and cannot receive more milestones.'),
             ]);
         }
     }

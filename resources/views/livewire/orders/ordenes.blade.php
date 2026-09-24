@@ -87,7 +87,7 @@
                             @if (filled($search) || $plantFilter !== [] || $yearFilter !== [] || $orderFilter !== [])
                                 <span
                                     class="rounded-full bg-blue-600 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white">
-                                    Active
+                                    {{ __('Active') }}
                                 </span>
                             @endif
                         </div>
@@ -127,11 +127,11 @@
                                 </button>
                             @endif
                         </div>
-                        <x-dashboard-filter-dropdown label="Plants" model="plantFilter" :options="$plantOptions"
+                        <x-dashboard-filter-dropdown label="{{ __('Plants') }}" model="plantFilter" :options="$plantOptions"
                             :selected="$plantFilter" multiple close-on-select />
-                        <x-dashboard-filter-dropdown label="Years" model="yearFilter" :options="$yearOptions"
+                        <x-dashboard-filter-dropdown label="{{ __('Years') }}" model="yearFilter" :options="$yearOptions"
                             :selected="$yearFilter" multiple close-on-select />
-                        <x-dashboard-filter-dropdown label="Order numbers" model="orderFilter" :options="$orderOptions"
+                        <x-dashboard-filter-dropdown label="{{ __('Order numbers') }}" model="orderFilter" :options="$orderOptions"
                             :selected="$orderFilter" multiple close-on-select />
                         <x-clear-filters-button method="resetFilters" :active="filled($search) || $plantFilter !== [] || $yearFilter !== [] || $orderFilter !== []" />
                     </div>
@@ -140,7 +140,7 @@
                 </div>
             </div>
 
-            <x-filter-chips clear="resetFilters" :filters="[['model' => 'search', 'label' => 'Search', 'value' => $search],['model' => 'plantFilter', 'label' => 'Plants', 'value' => $plantFilter],['model' => 'yearFilter', 'label' => 'Years', 'value' => $yearFilter],['model' => 'orderFilter', 'label' => 'Orders', 'value' => $orderFilter] ]" />
+            <x-filter-chips clear="resetFilters" :filters="[['model' => 'search', 'label' => __('activity_control.search'), 'value' => $search],['model' => 'plantFilter', 'label' => __('Plants'), 'value' => $plantFilter],['model' => 'yearFilter', 'label' => __('Years'), 'value' => $yearFilter],['model' => 'orderFilter', 'label' => __('Orders'), 'value' => $orderFilter] ]" />
             <div class="unified-table-scroll" x-data="{ fullTable: false }" x-bind:class="{ 'app-table-full': fullTable }" data-mobile-table data-order-scope="{{ $project ? 'project' : 'all' }}">
                 <x-table-density-toggle />
                 <table class="unified-data-table cursor-pointer">
@@ -189,7 +189,7 @@
                                         {{ $sortDir === 'asc' ? '↑' : '↓' }}
                                     @endif
                                 </th>
-                                <th class="px-4 py-3 text-center">Actions</th>
+                                <th class="px-4 py-3 text-center">{{ __('Actions') }}</th>
                             @else
                                 <th wire:click="setSortBy('pda_code')" data-global-loading
                                     class="cursor-pointer px-4 py-3 transition hover:bg-blue-100 hover:text-blue-700">
@@ -215,7 +215,7 @@
                                         {{ $sortDir === 'asc' ? '↑' : '↓' }}
                                     @endif
                                 </th>
-                                <th class="px-4 py-3 text-center">Actions</th>
+                                <th class="px-4 py-3 text-center">{{ __('Actions') }}</th>
                             @endif
                         </tr>
                     </thead>
@@ -252,8 +252,8 @@
                                     <td class="px-4 py-3">
                                         <div class="flex justify-center gap-2">
                                             <a href="{{ route('projects.dashboard', ['project' => $order->project_slug]) }}"
-                                                wire:navigate title="View project dashboard"
-                                                aria-label="View project dashboard"
+                                                wire:navigate title="{{ __('View project dashboard') }}"
+                                                aria-label="{{ __('View project dashboard') }}"
                                                 class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-amber-600 bg-amber-500 text-white shadow-sm transition hover:-translate-y-px hover:bg-amber-400 hover:shadow-md">
                                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
                                                     stroke="currentColor" stroke-width="1.8">
@@ -262,8 +262,8 @@
                                                 </svg>
                                             </a>
                                             <a href="{{ route('projects.orders', ['project' => $order->project_slug]) }}"
-                                                wire:navigate title="View project orders"
-                                                aria-label="View project orders"
+                                                wire:navigate title="{{ __('View project orders') }}"
+                                                aria-label="{{ __('View project orders') }}"
                                                 class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-blue-700 bg-blue-600 text-white shadow-sm transition hover:-translate-y-px hover:bg-blue-500 hover:shadow-md">
                                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
                                                     stroke="currentColor" stroke-width="1.8">
@@ -272,7 +272,7 @@
                                                 </svg>
                                             </a>
                                             <a href="{{ route('projects.data', ['project' => $order->project_slug]) }}"
-                                                wire:navigate title="View project data" aria-label="View project data"
+                                                wire:navigate title="{{ __('View project data') }}" aria-label="{{ __('View project data') }}"
                                                 class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-emerald-700 bg-emerald-600 text-white shadow-sm transition hover:-translate-y-px hover:bg-emerald-500 hover:shadow-md">
                                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
                                                     stroke="currentColor" stroke-width="1.8">
@@ -286,7 +286,7 @@
                                     <td class="px-4 py-3 text-center">
                                         <button
                                             wire:click="downloadOrder({{ $order->project_id }}, @js((string) $order->order_no), {{ $order->order_year }})"
-                                            data-global-loading type="button" title="Download order Excel"
+                                            data-global-loading type="button" title="{{ __('Download order Excel') }}"
                                             aria-label="Download order {{ $order->order_no }} as Excel"
                                             class="inline-flex h-9 w-9 items-center justify-center rounded-md text-white shadow-sm transition hover:-translate-y-px hover:brightness-110 hover:shadow-md active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                                             style="background-color: #2563eb">
@@ -330,8 +330,8 @@
                                     <td class="px-4 py-3">
                                         <div class="flex justify-center gap-2">
                                             <a href="{{ route('projects.dashboard', ['project' => $order->project_slug]) }}"
-                                                wire:navigate title="View project dashboard"
-                                                aria-label="View project dashboard"
+                                                wire:navigate title="{{ __('View project dashboard') }}"
+                                                aria-label="{{ __('View project dashboard') }}"
                                                 class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-amber-600 bg-amber-500 text-white shadow-sm transition hover:-translate-y-px hover:bg-amber-400 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1">
                                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
                                                     stroke="currentColor" stroke-width="1.8">
@@ -341,8 +341,8 @@
                                             </a>
                                             @if (!$project)
                                                 <a href="{{ route('projects.orders', ['project' => $order->project_slug]) }}"
-                                                    wire:navigate title="View project orders"
-                                                    aria-label="View project orders"
+                                                    wire:navigate title="{{ __('View project orders') }}"
+                                                    aria-label="{{ __('View project orders') }}"
                                                     class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-blue-700 bg-blue-600 text-white shadow-sm transition hover:-translate-y-px hover:bg-blue-500 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1">
                                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
                                                         stroke="currentColor" stroke-width="1.8">
@@ -352,7 +352,7 @@
                                                 </a>
                                             @endif
                                             <a href="{{ route('projects.data', ['project' => $order->project_slug]) }}"
-                                                wire:navigate title="View project data" aria-label="View project data"
+                                                wire:navigate title="{{ __('View project data') }}" aria-label="{{ __('View project data') }}"
                                                 class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-emerald-700 bg-emerald-600 text-white shadow-sm transition hover:-translate-y-px hover:bg-emerald-500 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1">
                                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
                                                     stroke="currentColor" stroke-width="1.8">
@@ -367,7 +367,7 @@
                         @empty
                             <tr>
                                 <td colspan="{{ $project ? 8 : 6 }}" class="px-6 py-12 text-center text-slate-500">
-                                    No orders were found for the selected scope.
+                                    {{ __('No orders were found for the selected scope.') }}
                                 </td>
                             </tr>
                         @endforelse

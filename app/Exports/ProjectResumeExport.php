@@ -16,10 +16,10 @@ class ProjectResumeExport
     public function download(Collection $rows, array $filters, string $currencySymbol = "\u{20AC}"): BinaryFileResponse
     {
         $spreadsheet = new Spreadsheet;
-        $sheet = $spreadsheet->getActiveSheet()->setTitle('Annual Resume');
+        $sheet = $spreadsheet->getActiveSheet()->setTitle(__('Annual Resume'));
         $sheet->setShowGridlines(false);
         $sheet->mergeCells('A1:G2');
-        $sheet->setCellValue('A1', 'ANNUAL PROJECT FINANCIAL RESUME');
+        $sheet->setCellValue('A1', __('ANNUAL PROJECT FINANCIAL RESUME'));
         $sheet->getStyle('A1:G2')->applyFromArray([
             'font' => ['bold' => true, 'size' => 20, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1E3A8A']],
@@ -39,10 +39,10 @@ class ProjectResumeExport
 
         $headerRow = $filterRow + 1;
         $headers = [
-            'Year', 'Number of Projects', "Budgeted {$currencySymbol}", "Approved {$currencySymbol}",
-            "Booked (Real SAP) {$currencySymbol}", "Committed {$currencySymbol}", "Available {$currencySymbol}",
+            'Year', 'Number of Projects', __('Budgeted :value1', ['value1' => $currencySymbol]), __('Approved :value1', ['value1' => $currencySymbol]),
+            __('Booked (Real SAP) :value1', ['value1' => $currencySymbol]), __('Committed :value1', ['value1' => $currencySymbol]), __('Available :value1', ['value1' => $currencySymbol]),
         ];
-        $sheet->fromArray($headers, null, "A{$headerRow}");
+        $sheet->fromArray(array_map(fn ($label) => __($label), $headers), null, "A{$headerRow}");
         $sheet->getStyle("A{$headerRow}:G{$headerRow}")->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2563EB']],

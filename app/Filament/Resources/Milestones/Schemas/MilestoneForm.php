@@ -14,28 +14,28 @@ class MilestoneForm
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label('Name')
+                    ->label(__('Name'))
                     ->required()
                     ->maxLength(120),
 
                 TextInput::make('code')
-                    ->label('Code')
+                    ->label(__('Code'))
                     ->required()
                     ->maxLength(20)
                     ->unique(ignoreRecord: true)
                     ->dehydrateStateUsing(
                         fn (?string $state): string => Str::upper(trim((string) $state))
                     )
-                    ->helperText('Short unique identifier, for example: PO or WMAT.'),
+                    ->helperText(__('Short unique identifier, for example: PO or WMAT.')),
 
                 ColorPicker::make('color')
-                    ->label('Export color')
+                    ->label(__('Export color'))
                     ->required()
                     ->default('#2563EB')
                     ->regex('/^#[0-9A-Fa-f]{6}$/'),
 
                 ColorPicker::make('view_color')
-                    ->label('View color')
+                    ->label(__('View color'))
                     ->required()
                     ->default('#2563EB')
                     ->regex('/^#[0-9A-Fa-f]{6}$/'),

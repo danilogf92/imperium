@@ -15,7 +15,7 @@ class Login extends BaseLogin
 
         if ($user && ! $user->is_active) {
             throw ValidationException::withMessages([
-                'data.email' => 'Your account is disabled. Contact an administrator to enable it.',
+                'data.email' => __('Your account is disabled. Contact an administrator to enable it.'),
             ]);
         }
 

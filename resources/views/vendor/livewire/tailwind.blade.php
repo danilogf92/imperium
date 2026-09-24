@@ -12,7 +12,7 @@ $scrollIntoViewJsSnippet = ($scrollTo !== false)
 
 <div>
     @if ($paginator->hasPages())
-        <nav role="navigation" aria-label="Pagination Navigation" class="app-pagination flex items-center justify-between gap-3">
+        <nav role="navigation" aria-label="{{ __('Pagination Navigation') }}" class="app-pagination flex items-center justify-between gap-3">
             <div class="flex flex-wrap items-center justify-between gap-2 flex-1 sm:hidden">
                 <span>
                     @if ($paginator->onFirstPage())

@@ -140,7 +140,7 @@ trait ManagesDataRecords
         $this->dispatch(
             'alert',
             type: 'success',
-            title: 'Data row created',
+            title: __('Data row created'),
             position: 'center',
             timer: 1800
         );
@@ -179,7 +179,7 @@ trait ManagesDataRecords
         $this->dispatch(
             'alert',
             type: 'success',
-            title: 'Data updated',
+            title: __('Data updated'),
             position: 'center',
             timer: 1800
         );
@@ -198,7 +198,7 @@ trait ManagesDataRecords
         $this->deletingDataLabel =
             $data->description
             ?: $data->code
-            ?: "Record #{$data->id}";
+            ?: __('Record #:value1', ['value1' => $data->id]);
 
         $this->dispatch(
             'open-modal',
@@ -250,7 +250,7 @@ trait ManagesDataRecords
         $this->dispatch(
             'alert',
             type: 'success',
-            title: 'Data deleted',
+            title: __('Data deleted'),
             position: 'center',
             timer: 1800
         );

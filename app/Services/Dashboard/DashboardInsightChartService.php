@@ -28,7 +28,7 @@ final class DashboardInsightChartService
     private function financialFlowChart(array $statistics, string $currency): ColumnChartModel
     {
         $chart = (new ColumnChartModel)
-            ->setTitle('Financial flow')
+            ->setTitle(__('Financial flow'))
             ->setAnimated(true)
             ->setOpacity(1)
             ->setColors(['#2563EB', '#D97706', '#DC2626', '#16A34A'])
@@ -43,7 +43,7 @@ final class DashboardInsightChartService
             ['Executed', (float) $statistics['executed'], '#ef4444'],
             ['Real value', (float) $statistics['realValue'], '#16a34a'],
         ] as [$label, $value, $color]) {
-            $chart->addColumn($label, round($value, 2), $color);
+            $chart->addColumn(__($label), round($value, 2), $color);
         }
 
         return $chart;
@@ -55,15 +55,15 @@ final class DashboardInsightChartService
         $available = max($budgeted - $booked, 0);
 
         return (new PieChartModel)
-            ->setTitle('Committed vs available budget')
+            ->setTitle(__('Committed vs available budget'))
             ->setAnimated(true)
             ->setType('donut')
             ->setColors(['#D97706', '#16A34A'])
             ->disableShades()
             ->withDataLabels()
             ->withLegend()
-            ->addSlice('Committed', round($committed, 2), '#f59e0b')
-            ->addSlice('Available', round($available, 2), '#22c55e')
+            ->addSlice(__('Committed'), round($committed, 2), '#f59e0b')
+            ->addSlice(__('Available'), round($available, 2), '#22c55e')
             ->setJsonConfig([
                 'dataLabels.formatter' => $this->percentFormatter(),
                 'tooltip.y.formatter' => $this->moneyFormatter($currency),
@@ -73,18 +73,18 @@ final class DashboardInsightChartService
     private function dataCoverageChart(int $projectCount, int $projectsWithData): PieChartModel
     {
         return (new PieChartModel)
-            ->setTitle('Project data coverage')
+            ->setTitle(__('Project data coverage'))
             ->setAnimated(true)
             ->setType('donut')
             ->setColors(['#2563EB', '#94A3B8'])
             ->disableShades()
             ->withDataLabels()
             ->withLegend()
-            ->addSlice('With financial data', $projectsWithData, '#2563eb')
-            ->addSlice('Without financial data', max($projectCount - $projectsWithData, 0), '#cbd5e1')
+            ->addSlice(__('With financial data'), $projectsWithData, '#2563eb')
+            ->addSlice(__('Without financial data'), max($projectCount - $projectsWithData, 0), '#cbd5e1')
             ->setJsonConfig([
                 'dataLabels.formatter' => $this->percentFormatter(),
-                'tooltip.y.formatter' => "function(value) { return Number(value).toLocaleString() + ' projects'; }",
+                'tooltip.y.formatter' => "function(value) { return Number(value).toLocaleString(document.documentElement.lang) + ' ' + ".json_encode(__('Projects'), JSON_HEX_APOS | JSON_HEX_QUOT)."; }",
             ]);
     }
 
@@ -98,7 +98,7 @@ final class DashboardInsightChartService
         ];
         $colors = ['#6366f1', '#0ea5e9', '#22c55e'];
         $chart = (new PieChartModel)
-            ->setTitle('Portfolio stage')
+            ->setTitle(__('Portfolio stage'))
             ->setAnimated(true)
             ->setType('donut')
             ->setColors(['#7C3AED', '#0891B2', '#16A34A'])
@@ -107,11 +107,11 @@ final class DashboardInsightChartService
             ->withLegend()
             ->setJsonConfig([
                 'dataLabels.formatter' => $this->percentFormatter(),
-                'tooltip.y.formatter' => "function(value) { return Number(value).toLocaleString() + ' projects'; }",
+                'tooltip.y.formatter' => "function(value) { return Number(value).toLocaleString(document.documentElement.lang) + ' ' + ".json_encode(__('Projects'), JSON_HEX_APOS | JSON_HEX_QUOT)."; }",
             ]);
 
         foreach ($stages as $index => $total) {
-            $chart->addSlice($index, $total, $colors[array_search($index, array_keys($stages), true)]);
+            $chart->addSlice(__($index), $total, $colors[array_search($index, array_keys($stages), true)]);
         }
 
         return $chart;

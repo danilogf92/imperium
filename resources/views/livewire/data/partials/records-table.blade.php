@@ -37,9 +37,9 @@
                                 <div class="flex items-center justify-center gap-2">
                                     @if ($canEditData)
                                         <button wire:click="openEditModal({{ $item->id }})" data-no-global-loading
-                                            type="button" title="Edit data" aria-label="Edit data"
+                                            type="button" title="{{ __('Edit data') }}" aria-label="{{ __('Edit data') }}"
                                             class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-blue-600 text-white shadow-sm transition duration-150 hover:-translate-y-px hover:bg-blue-500 hover:shadow-md active:translate-y-0 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1">
-                                            <span class="sr-only">Edit data</span>
+                                            <span class="sr-only">{{ __('Edit data') }}</span>
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -49,9 +49,9 @@
                                     @endif
                                     @if ($canDeleteData)
                                         <button wire:click="openDeleteModal({{ $item->id }})" data-no-global-loading
-                                            type="button" title="Delete data" aria-label="Delete data"
+                                            type="button" title="{{ __('Delete data') }}" aria-label="{{ __('Delete data') }}"
                                             class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-red-600 text-white shadow-sm transition duration-150 hover:-translate-y-px hover:bg-red-500 hover:shadow-md active:translate-y-0 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1">
-                                            <span class="sr-only">Delete data</span>
+                                            <span class="sr-only">{{ __('Delete data') }}</span>
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]"
                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                                 stroke-width="1.8">
@@ -110,7 +110,7 @@
                     <tr class="unified-empty-row">
                         <td colspan="{{ max(count($visibleColumns), 1) }}"
                             class="px-6 py-16 text-center text-sm text-slate-500">
-                            {{ $hasActiveFilters ? 'No records match the selected filters.' : 'No data found for this project.' }}
+                            {{ $hasActiveFilters ? __('No records match the selected filters.') : __('No data found for this project.') }}
                         </td>
                     </tr>
                 @endforelse

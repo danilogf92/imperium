@@ -2,9 +2,7 @@
     <div>
         <p class="text-sm font-semibold text-gray-700">{{ __('Table columns') }}</p>
         <p class="text-xs text-gray-500">
-            Showing {{ $projects->firstItem() ?? 0 }}-{{ $projects->lastItem() ?? 0 }} of
-            {{ number_format($projects->total()) }} projects · {{ count($visibleColumns) }} of
-            {{ count($columnOptions) }} columns visible
+            {{ __('Showing :first–:last of :total projects · :visible of :columns columns visible', ['first' => $projects->firstItem() ?? 0, 'last' => $projects->lastItem() ?? 0, 'total' => number_format($projects->total()), 'visible' => count($visibleColumns), 'columns' => count($columnOptions)]) }}
         </p>
     </div>
 
@@ -30,7 +28,7 @@
         @endif
         <x-action-message on="column-view-deleted" class="text-sm text-emerald-700">{{ __('View deleted.') }}</x-action-message>
 
-        <x-dashboard-filter-dropdown label="Columns" model="visibleColumns" :options="collect($columnOptions)
+        <x-dashboard-filter-dropdown label="{{ __('Columns') }}" model="visibleColumns" :options="collect($columnOptions)
             ->except('actions')
             ->map(fn($label, $value) => ['value' => $value, 'label' => $label])
             ->values()" :selected="$visibleColumns"
@@ -57,7 +55,7 @@
 
         <x-ui-button compact-mobile icon="refresh" wire:click="resetColumns" type="button"
             class="default-columns-button inline-flex h-11 items-center justify-center rounded-lg px-3 text-sm font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-            Default columns
+            {{ __('Default columns') }}
         </x-ui-button>
     </div>
 </div>

@@ -49,7 +49,7 @@ final class ProjectSupplierChartService
     {
         $formatter = $this->moneyFormatter($currency);
         $chart = (new ColumnChartModel)
-            ->setTitle($title)
+            ->setTitle(__($title))
             ->setAnimated(true)
             ->setHorizontal(true)
             ->setOpacity(1)

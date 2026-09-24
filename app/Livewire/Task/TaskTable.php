@@ -116,7 +116,7 @@ class TaskTable extends Component
 
         return view('livewire.task.task-table', [
             'data' => $data,
-            'columnOptions' => TaskTableDefinition::COLUMN_OPTIONS,
+            'columnOptions' => array_map(fn ($label) => __($label), TaskTableDefinition::COLUMN_OPTIONS),
             'updateCompanyIds' => $user->companyIdsForPermission(ProjectPermissionEnum::Update),
             'deleteCompanyIds' => $user->companyIdsForPermission(ProjectPermissionEnum::Delete),
         ])->layout('layouts.app');

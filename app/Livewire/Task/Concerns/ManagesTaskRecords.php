@@ -35,14 +35,14 @@ trait ManagesTaskRecords
         );
         $data->update(['percentage' => $validated['editData']['percentage']]);
         $this->closeEditModal();
-        $this->dispatch('alert', type: 'success', title: 'Task updated', position: 'center', timer: 1800);
+        $this->dispatch('alert', type: 'success', title: __('Task updated'), position: 'center', timer: 1800);
     }
 
     public function openDeleteModal(int $dataId): void
     {
         $data = $this->tasks()->authorizedData($dataId, ProjectPermissionEnum::Delete);
         $this->deletingDataId = (int) $data->id;
-        $this->deletingDataLabel = $data->description ?: "Task #{$data->id}";
+        $this->deletingDataLabel = $data->description ?: __('Task #:value1', ['value1' => $data->id]);
         $this->dispatch('open-modal', 'delete-task-data');
     }
 
@@ -65,7 +65,7 @@ trait ManagesTaskRecords
 
         $this->closeDeleteModal();
         $this->resetPage();
-        $this->dispatch('alert', type: 'success', title: 'Task deleted', position: 'center', timer: 1800);
+        $this->dispatch('alert', type: 'success', title: __('Task deleted'), position: 'center', timer: 1800);
     }
 
     private function tasks(): TaskTableQueryService

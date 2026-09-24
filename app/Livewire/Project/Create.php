@@ -107,9 +107,9 @@ class Create extends Component
         $this->validate([
             'pdaDocument' => ['required', 'file', 'extensions:pdf', 'mimes:pdf', 'max:10240'],
         ], [
-            'pdaDocument.extensions' => 'The PDA must be a PDF file.',
-            'pdaDocument.mimes' => 'Only a valid PDF file is allowed.',
-            'pdaDocument.max' => 'The PDA may not be larger than 10 MB.',
+            'pdaDocument.extensions' => __('The PDA must be a PDF file.'),
+            'pdaDocument.mimes' => __('Only a valid PDF file is allowed.'),
+            'pdaDocument.max' => __('The PDA may not be larger than 10 MB.'),
         ]);
     }
 

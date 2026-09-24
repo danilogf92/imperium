@@ -37,7 +37,7 @@ trait ManagesProjectDocuments
         abort_unless($this->documentProjectId, 404);
         $project = $this->authorizedMutableProject($this->documentProjectId);
         abort_if(filled($project->upload_pda), 409,
-            'Delete the current document before uploading another one.');
+            __('Delete the current document before uploading another one.'));
         $this->validate(
             ProjectDocumentUploadValidation::rules(),
             ProjectDocumentUploadValidation::messages(),
@@ -57,7 +57,7 @@ trait ManagesProjectDocuments
             Storage::disk('public')->delete($previousPath);
         }
 
-        $this->notifyProjectChange($project, 'Document uploaded');
+        $this->notifyProjectChange($project, __('Document uploaded'));
         $this->closeDocumentModal();
     }
 
@@ -94,7 +94,7 @@ trait ManagesProjectDocuments
         if (str_starts_with($path, "projects/{$project->id}/documents/")) {
             Storage::disk('public')->delete($path);
         }
-        $this->notifyProjectChange($project, 'Document deleted');
+        $this->notifyProjectChange($project, __('Document deleted'));
         $this->closeDeleteDocumentModal();
     }
 

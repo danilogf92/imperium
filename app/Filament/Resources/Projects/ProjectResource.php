@@ -47,4 +47,14 @@ class ProjectResource extends Resource
             'edit' => EditProject::route('/{record}/edit'),
         ];
     }
+    public static function getModelLabel(): string
+    {
+        return __('activity_control.project');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Projects');
+    }
+
 }

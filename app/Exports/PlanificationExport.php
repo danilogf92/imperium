@@ -127,7 +127,7 @@ class PlanificationExport
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Planification');
+        $sheet->setTitle(__('Planification'));
         $sheet->freezePane('I3');
 
         $currency = ($filters['currency'] ?? 'usd') === 'eur' ? 'eur' : 'usd';
@@ -140,11 +140,11 @@ class PlanificationExport
         $fixedHeaders = ['Forecast Start Year', 'Plant', 'PDA Code', 'Name', 'Budgeted Total', 'Status', 'Actual Week', 'Next Week'];
         foreach ($fixedHeaders as $index => $header) {
             $column = Coordinate::stringFromColumnIndex($index + 1);
-            $sheet->setCellValue("{$column}1", $header);
+            $sheet->setCellValue("{$column}1", __($header));
             $sheet->mergeCells("{$column}1:{$column}2");
         }
 
-        $monthLabels = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        $monthLabels = array_map(fn ($month) => mb_strtoupper(\Carbon\CarbonImmutable::create(2000, $month, 1)->translatedFormat('M')), range(1, 12));
         $columnIndex = 9;
         foreach ($years as $year) {
             $startColumn = Coordinate::stringFromColumnIndex($columnIndex);
@@ -167,7 +167,7 @@ class PlanificationExport
                 $project->pda_code,
                 $project->name,
                 (float) ($currency === 'eur' ? $project->data_budgeted_euros : $project->data_budgeted),
-                $project->state?->value,
+                $project->state?->getLabel(),
                 $project->weeklyActivities->filter(fn ($activity) =>
                     $activity->week_year === $activityWeeks[0]['year'] && $activity->week_number === $activityWeeks[0]['week'])
                     ->map(fn ($activity) => $activity->exportDescription())->implode("\n\n"),
@@ -319,7 +319,7 @@ class PlanificationExport
         ));
 
         if ($cellDisplay === 'value') {
-            $sheet->setCellValue("A{$totalRow}", 'TOTAL');
+            $sheet->setCellValue("A{$totalRow}", __('TOTAL'));
             $sheet->getStyle("A{$totalRow}:{$totalLastColumn}{$totalRow}")->applyFromArray([
                 'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '0F766E']],
@@ -377,7 +377,7 @@ class PlanificationExport
 
             $chart = new Chart(
                 'monthly_milestone_totals',
-                new Title('Monthly milestone totals'),
+                new Title(__('Monthly milestone totals')),
                 new Legend(Legend::POSITION_BOTTOM),
                 new PlotArea(null, [$series])
             );
@@ -388,7 +388,7 @@ class PlanificationExport
 
         // Append notes after the timeline so existing month totals and chart ranges stay intact.
         $notesColumn = Coordinate::stringFromColumnIndex(Coordinate::columnIndexFromString($totalLastColumn) + 1);
-        $sheet->setCellValue("{$notesColumn}1", 'Project Activities / Notes');
+        $sheet->setCellValue("{$notesColumn}1", __('Project Activities / Notes'));
         $sheet->mergeCells("{$notesColumn}1:{$notesColumn}2");
         $sheet->duplicateStyle($sheet->getStyle('A1'), "{$notesColumn}1:{$notesColumn}2");
         $sheet->getColumnDimension($notesColumn)->setWidth(65);

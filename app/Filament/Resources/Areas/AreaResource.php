@@ -54,4 +54,14 @@ class AreaResource extends Resource
             'edit' => EditArea::route('/{record}/edit'),
         ];
     }
+    public static function getModelLabel(): string
+    {
+        return __('Area');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Areas');
+    }
+
 }

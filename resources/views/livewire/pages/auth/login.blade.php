@@ -39,8 +39,8 @@ new #[Layout('layouts.guest')] class extends Component
 
 <div class="space-y-6" x-data="{ showPassword: false }">
     <div class="text-center">
-        <h1 class="text-2xl font-bold tracking-tight text-slate-900">Welcome back</h1>
-        <p class="mt-1 text-sm text-slate-500">Sign in to continue to your workspace.</p>
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ __('Welcome back') }}</h1>
+        <p class="mt-1 text-sm text-slate-500">{{ __('Sign in to continue to your workspace.') }}</p>
     </div>
 
     <x-auth-session-status class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700" :status="session('status')" />

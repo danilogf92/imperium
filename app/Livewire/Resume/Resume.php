@@ -100,12 +100,12 @@ class Resume extends Component
         $stackedChart = $rows->reduce(
             function ($chart, array $row) {
                 return $chart
-                    ->addSeriesColumn('Booked (Real SAP)', (string) $row['year'], $row['booked'])
-                    ->addSeriesColumn('Committed', (string) $row['year'], $row['committed'])
-                    ->addSeriesColumn('Available', (string) $row['year'], $row['available']);
+                    ->addSeriesColumn(__('Booked (Real SAP)'), (string) $row['year'], $row['booked'])
+                    ->addSeriesColumn(__('Committed'), (string) $row['year'], $row['committed'])
+                    ->addSeriesColumn(__('Available'), (string) $row['year'], $row['available']);
             },
             LivewireCharts::multiColumnChartModel()
-                ->setTitle('Annual financial position')
+                ->setTitle(__('Annual financial position'))
                 ->stacked()
                 ->withGrid()
                 ->withDataLabels()
@@ -122,14 +122,14 @@ class Resume extends Component
         $availableChart = $rows->reduce(
             function ($chart, array $row) {
                 return $chart
-                    ->addSeriesPoint('Budgeted', (string) $row['year'], $row['budgeted'])
-                    ->addSeriesPoint('Approved', (string) $row['year'], $row['approved'])
-                    ->addSeriesPoint('Booked (Real SAP)', (string) $row['year'], $row['booked'])
-                    ->addSeriesPoint('Committed', (string) $row['year'], $row['committed'])
-                    ->addSeriesPoint('Available', (string) $row['year'], $row['available']);
+                    ->addSeriesPoint(__('Budgeted'), (string) $row['year'], $row['budgeted'])
+                    ->addSeriesPoint(__('Approved'), (string) $row['year'], $row['approved'])
+                    ->addSeriesPoint(__('Booked (Real SAP)'), (string) $row['year'], $row['booked'])
+                    ->addSeriesPoint(__('Committed'), (string) $row['year'], $row['committed'])
+                    ->addSeriesPoint(__('Available'), (string) $row['year'], $row['available']);
             },
             LivewireCharts::multiLineChartModel()
-                ->setTitle('Annual financial trend')
+                ->setTitle(__('Annual financial trend'))
                 ->withGrid()
                 ->withDataLabels()
                 ->withLegend()
@@ -330,14 +330,14 @@ class Resume extends Component
     private function activeFilterLabels(): array
     {
         return [
-            'Search' => trim($this->search) ?: 'All',
-            'Plants' => $this->plantFilter === [] ? 'All' : implode(', ', $this->plantFilter),
-            'Years' => $this->yearFilter === [] ? 'All' : implode(', ', $this->yearFilter),
-            'States' => $this->stateFilter === [] ? 'All' : implode(', ', $this->stateFilter),
-            'Investments' => $this->investmentFilter === [] ? 'All' : implode(', ', $this->investmentFilter),
-            'Classifications' => $this->classificationFilter === [] ? 'All' : implode(', ', $this->classificationFilter),
-            'Justifications' => $this->justificationFilter === [] ? 'All' : implode(', ', $this->justificationFilter),
-            'Currency' => $this->currency === 'dollar' ? 'USD' : 'EUR',
+            __('activity_control.search') => trim($this->search) ?: __('activity_control.all'),
+            __('Plants') => $this->plantFilter === [] ? __('activity_control.all') : implode(', ', $this->plantFilter),
+            __('Years') => $this->yearFilter === [] ? __('activity_control.all') : implode(', ', $this->yearFilter),
+            __('States') => $this->stateFilter === [] ? __('activity_control.all') : implode(', ', array_map(fn ($value) => __($value), $this->stateFilter)),
+            __('Investments') => $this->investmentFilter === [] ? __('activity_control.all') : implode(', ', array_map(fn ($value) => __($value), $this->investmentFilter)),
+            __('Classifications') => $this->classificationFilter === [] ? __('activity_control.all') : implode(', ', array_map(fn ($value) => __($value), $this->classificationFilter)),
+            __('Justifications') => $this->justificationFilter === [] ? __('activity_control.all') : implode(', ', array_map(fn ($value) => __($value), $this->justificationFilter)),
+            __('Currency') => $this->currency === 'dollar' ? 'USD' : 'EUR',
         ];
     }
 
@@ -366,7 +366,7 @@ class Resume extends Component
     {
         return collect(self::FINANCIAL_LABELS)->map(
             fn (string $label, string $field): array => [
-                'name' => $label,
+                'name' => __($label),
                 'data' => $rows->pluck($field)->values()->all(),
             ]
         )->values()->all();
@@ -404,10 +404,10 @@ class Resume extends Component
 
         return [
             'series' => [
-                ['name' => 'Projects', 'type' => 'column', 'data' => $rows->pluck('project_count')->values()->all()],
-                ['name' => 'Budgeted', 'type' => 'line', 'data' => $rows->pluck('budgeted')->values()->all()],
-                ['name' => 'Assigned', 'type' => 'line', 'data' => $rows->pluck('assigned')->values()->all()],
-                ['name' => 'Executed', 'type' => 'line', 'data' => $rows->pluck('executed')->values()->all()],
+                ['name' => __('Projects'), 'type' => 'column', 'data' => $rows->pluck('project_count')->values()->all()],
+                ['name' => __('Budgeted'), 'type' => 'line', 'data' => $rows->pluck('budgeted')->values()->all()],
+                ['name' => __('Assigned'), 'type' => 'line', 'data' => $rows->pluck('assigned')->values()->all()],
+                ['name' => __('Executed'), 'type' => 'line', 'data' => $rows->pluck('executed')->values()->all()],
             ],
             'chart' => ['type' => 'line', 'height' => '100%', 'toolbar' => ['show' => false]],
             'colors' => ['#4F46E5', '#0EA5E9', '#F59E0B', '#009E0B'],
@@ -417,8 +417,8 @@ class Resume extends Component
             'xaxis' => ['categories' => $rows->pluck('year')->map(fn ($year) => (string) $year)->values()->all()],
             'yaxis' => [
                 [
-                    'seriesName' => 'Projects',
-                    'title' => ['text' => 'Projects'],
+                    'seriesName' => __('Projects'),
+                    'title' => ['text' => __('Projects')],
                     'decimalsInFloat' => 0,
                     'min' => 0,
                     'max' => $projectsAxisMaximum,
@@ -427,9 +427,9 @@ class Resume extends Component
                 ],
                 [
                     ...$financialAxis,
-                    'seriesName' => 'Budgeted',
+                    'seriesName' => __('Budgeted'),
                     'opposite' => true,
-                    'title' => ['text' => "Financial value ({$symbol})"],
+                    'title' => ['text' => __('Financial value (:value1)', ['value1' => $symbol])],
                     'labels' => [
                         'formatter' => $moneyFormatter,
                         'minWidth' => 70,
@@ -438,20 +438,20 @@ class Resume extends Component
                 ],
                 [
                     ...$financialAxis,
-                    'seriesName' => 'Assigned',
+                    'seriesName' => __('Assigned'),
                     'opposite' => true,
                     'show' => false,
                     'labels' => ['show' => false],
                 ],
                 [
                     ...$financialAxis,
-                    'seriesName' => 'Executed',
+                    'seriesName' => __('Executed'),
                     'opposite' => true,
                     'show' => false,
                     'labels' => ['show' => false],
                 ],
             ],
-            'tooltip' => ['y' => ['formatter' => "function(value, context) { if (context.seriesIndex === 0) return Number(value).toLocaleString() + ' projects'; return ({$moneyFormatter})(value); }"]],
+            'tooltip' => ['y' => ['formatter' => "function(value, context) { if (context.seriesIndex === 0) return Number(value).toLocaleString(document.documentElement.lang) + ' ' + ".json_encode(__('Projects'), JSON_HEX_APOS | JSON_HEX_QUOT)."; return ({$moneyFormatter})(value); }"]],
             'legend' => ['show' => true, 'position' => 'top'],
             'grid' => ['show' => true, 'borderColor' => '#E2E8F0'],
         ];
@@ -518,13 +518,13 @@ class Resume extends Component
         }
         $visibleValues = $periods->replace($visibleValues)->sortKeys();
         $categories = $visibleValues->keys()
-            ->map(fn (string $period): string => CarbonImmutable::createFromFormat('!Y-m', $period)->format('M Y'))
+            ->map(fn (string $period): string => CarbonImmutable::createFromFormat('!Y-m', $period)->translatedFormat('M Y'))
             ->values()
             ->all();
 
         $currentMonth = CarbonImmutable::now()->format('Y-m');
         $options = [
-            'series' => [['name' => 'Milestone cash flow', 'data' => $visibleValues->values()->all()]],
+            'series' => [['name' => __('Milestone cash flow'), 'data' => $visibleValues->values()->all()]],
             'chart' => ['type' => 'bar', 'height' => 300, 'toolbar' => ['show' => false]],
             'colors' => $visibleValues->keys()->map(
                 fn (string $period): string => $period < $currentMonth ? '#F97316' : '#7DD3FC'
@@ -535,13 +535,13 @@ class Resume extends Component
             'dataLabels' => ['enabled' => false],
             'xaxis' => [
                 'categories' => $categories,
-                'title' => ['text' => 'Milestone month'],
+                'title' => ['text' => __('Milestone month')],
                 'labels' => ['rotate' => -45, 'hideOverlappingLabels' => true],
             ],
             'yaxis' => [
                 'min' => 0,
                 'forceNiceScale' => true,
-                'title' => ['text' => "Cash flow ({$symbol})"],
+                'title' => ['text' => __('Cash flow (:value1)', ['value1' => $symbol])],
                 'labels' => ['formatter' => $formatter, 'minWidth' => 80, 'maxWidth' => 120],
             ],
             'tooltip' => ['y' => ['formatter' => $formatter]],
@@ -555,8 +555,8 @@ class Resume extends Component
         $comparison = $this->plannedExecutionComparison($realRows, $realColumn, $monthlyValues, $options);
         $documentValues = $this->monthlyRealValues($realRows, 'document_date', $realColumn);
         $options['series'] = [
-            ['name' => 'Planning', 'data' => $visibleValues->values()->all()],
-            ['name' => 'Real', 'data' => $visibleValues->keys()->map(fn (string $period): float => (float) $documentValues->get($period, 0.0))->all()],
+            ['name' => __('cash_flow_projection.planned'), 'data' => $visibleValues->values()->all()],
+            ['name' => __('cash_flow_projection.actual'), 'data' => $visibleValues->keys()->map(fn (string $period): float => (float) $documentValues->get($period, 0.0))->all()],
         ];
         $options['colors'] = ['#94A3B8', '#38BDF8'];
         $options['chart']['stacked'] = false;
@@ -578,7 +578,7 @@ class Resume extends Component
         $projectionOptions['colors'] = ['#94A3B8', '#38BDF8', '#8B5CF6'];
         $projectionOptions['xaxis']['categories'] = array_column($projection['rows'], 'month');
         $encodedSymbol = json_encode($symbol, JSON_THROW_ON_ERROR);
-        $projectionOptions['tooltip']['y']['formatter'] = "function(value) { return value == null ? '—' : {$encodedSymbol} + ' ' + Number(value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); }";
+        $projectionOptions['tooltip']['y']['formatter'] = "function(value) { return value == null ? '—' : {$encodedSymbol} + ' ' + Number(value).toLocaleString(document.documentElement.lang, {minimumFractionDigits: 2, maximumFractionDigits: 2}); }";
 
         return [
             'options' => $options,
@@ -618,14 +618,14 @@ class Resume extends Component
         $plannedVisible = $periods->replace($planned->intersectByKeys($periods));
         $actualVisible = $periods->replace($actual->intersectByKeys($periods));
         $currentMonth = CarbonImmutable::now()->format('Y-m');
-        $categories = $periods->keys()->map(fn ($period) => CarbonImmutable::createFromFormat('!Y-m', $period)->format('M Y'))->all();
+        $categories = $periods->keys()->map(fn ($period) => CarbonImmutable::createFromFormat('!Y-m', $period)->translatedFormat('M Y'))->all();
         $options['series'] = [
-            ['name' => 'Planned milestones', 'data' => $plannedVisible->map(fn ($value, $period) => [
-                'x' => CarbonImmutable::createFromFormat('!Y-m', $period)->format('M Y'),
+            ['name' => __('Planned milestones'), 'data' => $plannedVisible->map(fn ($value, $period) => [
+                'x' => CarbonImmutable::createFromFormat('!Y-m', $period)->translatedFormat('M Y'),
                 'y' => $value, 'fillColor' => $period < $currentMonth ? '#F97316' : '#7DD3FC',
             ])->values()->all()],
-            ['name' => 'Real SAP', 'data' => $actualVisible->map(fn ($value, $period) => [
-                'x' => CarbonImmutable::createFromFormat('!Y-m', $period)->format('M Y'),
+            ['name' => __('Real SAP'), 'data' => $actualVisible->map(fn ($value, $period) => [
+                'x' => CarbonImmutable::createFromFormat('!Y-m', $period)->translatedFormat('M Y'),
                 'y' => $value, 'fillColor' => '#94A3B8',
             ])->values()->all()],
         ];
@@ -633,7 +633,7 @@ class Resume extends Component
         $options['chart']['stacked'] = false;
         $options['plotOptions']['bar']['distributed'] = false;
         $options['xaxis']['categories'] = $categories;
-        $options['xaxis']['title']['text'] = 'Month';
+        $options['xaxis']['title']['text'] = __('Month');
         unset($options['yaxis']['min']); // Preserve negative accounting adjustments.
         $options['legend'] = ['show' => true, 'position' => 'top'];
         $options['tooltip']['shared'] = true;
@@ -670,7 +670,7 @@ class Resume extends Component
             ],
             'yaxis' => [
                 ...$this->financialAxis($rows),
-                'title' => ['text' => "Financial value ({$symbol})"],
+                'title' => ['text' => __('Financial value (:value1)', ['value1' => $symbol])],
                 'labels' => ['formatter' => $formatter, 'minWidth' => 80, 'maxWidth' => 130],
             ],
             'tooltip' => ['y' => ['formatter' => $formatter]],

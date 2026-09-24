@@ -195,53 +195,53 @@ class ProjectCreateValidation
             /*
              * Company
              */
-            'company_id.required' => 'The company is required.',
+            'company_id.required' => __('The company is required.'),
 
-            'company_id.integer' => 'The selected company is invalid.',
+            'company_id.integer' => __('The selected company is invalid.'),
 
-            'company_id.exists' => 'The selected company does not exist.',
+            'company_id.exists' => __('The selected company does not exist.'),
 
             /*
              * Name
              */
-            'name.required' => 'The project name is required.',
+            'name.required' => __('The project name is required.'),
 
-            'name.string' => 'The project name must be valid text.',
+            'name.string' => __('The project name must be valid text.'),
 
-            'name.max' => 'The project name may not be greater than 255 characters.',
+            'name.max' => __('The project name may not be greater than 255 characters.'),
 
             /*
              * Order
              *
              * Ya no existe mensaje required.
              */
-            'order.string' => 'The project order must be valid text.',
+            'order.string' => __('The project order must be valid text.'),
 
-            'order.regex' => 'The project order must start with a number and may end with letters, for example 10, 10a, or 10b.',
+            'order.regex' => __('The project order must start with a number and may end with letters, for example 10, 10a, or 10b.'),
 
-            'order.max' => 'The project order may not be greater than 20 characters.',
+            'order.max' => __('The project order may not be greater than 20 characters.'),
 
-            'order.unique' => 'This project order is already in use for the selected plant.',
+            'order.unique' => __('This project order is already in use for the selected plant.'),
 
             /*
              * PDA
              */
-            'pda_code.required' => 'The PDA code is required.',
+            'pda_code.required' => __('The PDA code is required.'),
 
-            'pda_code.string' => 'The PDA code must be valid text.',
+            'pda_code.string' => __('The PDA code must be valid text.'),
 
-            'pda_code.regex' => 'The PDA code is required.',
+            'pda_code.regex' => __('The PDA code is required.'),
 
-            'pda_code.max' => 'The PDA code may not be greater than 255 characters.',
+            'pda_code.max' => __('The PDA code may not be greater than 255 characters.'),
 
-            'pda_code.unique' => 'The PDA code is already registered.',
+            'pda_code.unique' => __('The PDA code is already registered.'),
 
             /*
              * Rate
              */
-            'rate.required' => 'The rate is required.',
+            'rate.required' => __('The rate is required.'),
 
-            'rate.numeric' => 'The rate must be numeric.',
+            'rate.numeric' => __('The rate must be numeric.'),
 
             'rate.min' => "The rate must be at least {$rateSettings->min_rate}.",
 
@@ -250,72 +250,72 @@ class ProjectCreateValidation
             /*
              * State
              */
-            'state.required' => 'The project state is required.',
+            'state.required' => __('The project state is required.'),
 
-            'state.in' => 'The selected project state is invalid.',
+            'state.in' => __('The selected project state is invalid.'),
 
             /*
              * Investments
              */
-            'investments.required' => 'The investment type is required.',
+            'investments.required' => __('The investment type is required.'),
 
-            'investments.in' => 'The selected investment type is invalid.',
+            'investments.in' => __('The selected investment type is invalid.'),
 
             /*
              * Justification
              */
-            'justification.required' => 'The justification is required.',
+            'justification.required' => __('The justification is required.'),
 
-            'justification.in' => 'The selected justification is invalid.',
+            'justification.in' => __('The selected justification is invalid.'),
 
             /*
              * Classification
              */
-            'classification_of_investments.required' => 'The investment classification is required.',
+            'classification_of_investments.required' => __('The investment classification is required.'),
 
-            'classification_of_investments.in' => 'The selected investment classification is invalid.',
+            'classification_of_investments.in' => __('The selected investment classification is invalid.'),
 
             /*
              * Forecast Start Date
              */
-            'forecast_start_date.required_unless' => 'The forecast start date is required unless the project is postponed.',
+            'forecast_start_date.required_unless' => __('The forecast start date is required unless the project is postponed.'),
 
-            'forecast_start_date.date' => 'The forecast start date must be a valid date.',
+            'forecast_start_date.date' => __('The forecast start date must be a valid date.'),
 
-            'forecast_start_date.before_or_equal' => 'The start date must be before or equal to the finish date.',
+            'forecast_start_date.before_or_equal' => __('The start date must be before or equal to the finish date.'),
 
             /*
              * Forecast End Date
              */
-            'forecast_end_date.required_unless' => 'The forecast finish date is required unless the project is postponed.',
+            'forecast_end_date.required_unless' => __('The forecast finish date is required unless the project is postponed.'),
 
-            'forecast_end_date.date' => 'The forecast finish date must be a valid date.',
+            'forecast_end_date.date' => __('The forecast finish date must be a valid date.'),
 
-            'forecast_end_date.after_or_equal' => 'The finish date must be after or equal to the start date.',
+            'forecast_end_date.after_or_equal' => __('The finish date must be after or equal to the start date.'),
 
             /*
              * Quartile Date
              */
-            'quartile_date.date' => 'The quartile date must be a valid date.',
+            'quartile_date.date' => __('The quartile date must be a valid date.'),
 
             /*
              * Approve Date
              */
-            'approve_date.date' => 'The approve date must be a valid date.',
+            'approve_date.date' => __('The approve date must be a valid date.'),
 
-            'approve_date.after_or_equal' => 'The approve date must be after or equal to the start date.',
+            'approve_date.after_or_equal' => __('The approve date must be after or equal to the start date.'),
 
             /*
              * Close Date
              */
-            'close_date.date' => 'The close date must be a valid date.',
+            'close_date.date' => __('The close date must be a valid date.'),
 
-            'close_date.after_or_equal' => 'The close date must be after or equal to the start date.',
+            'close_date.after_or_equal' => __('The close date must be after or equal to the start date.'),
 
             /*
              * Data Uploaded
              */
-            'data_uploaded.boolean' => 'The data uploaded status must be true or false.',
+            'data_uploaded.boolean' => __('The data uploaded status must be true or false.'),
         ];
     }
 

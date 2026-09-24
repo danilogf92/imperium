@@ -20,7 +20,7 @@
                         class="flex flex-wrap items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                         @if (! $notesOnly)<button type="button" @if ($canEditActivity) wire:click="toggleWeeklyActivityExecuted({{ $activity['id'] }})" @else disabled @endif
                             data-no-global-loading
-                            title="{{ $canEditActivity ? ($activity['executed'] ? 'Executed — click to change' : 'Not executed — click to mark as executed') : ($activity['executed'] ? 'Executed' : 'Not executed') }}"
+                            title="{{ $canEditActivity ? ($activity['executed'] ? __('Executed — click to change') : __('Not executed — click to mark as executed')) : ($activity['executed'] ? __('Executed') : __('Not executed')) }}"
                             class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-base font-bold
                                 {{ $canEditActivity ? 'cursor-pointer' : 'cursor-default' }} {{ $activity['executed'] ? 'border-green-600 bg-green-600 text-white' : ($activity['expired'] ? 'border-red-600 bg-red-600 text-white hover:bg-red-500' : 'border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-100') }}">
                             {{ $activity['executed'] ? '✓' : ($activity['expired'] ? '×' : '○') }}
@@ -32,14 +32,14 @@
                         </div>
                         @if ($canEditActivity)
                             <button type="button" wire:click="editWeeklyActivity({{ $activity['id'] }})"
-                            data-no-global-loading title="Edit activity"
+                            data-no-global-loading title="{{ __('Edit activity') }}"
                             class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-500">
                             ✎
                             </button>
                         @endif
                         @if ($canDeleteActivity)
                             <button type="button" wire:click="requestDeleteWeeklyActivity({{ $activity['id'] }})"
-                            data-no-global-loading title="Delete activity"
+                            data-no-global-loading title="{{ __('Delete activity') }}"
                             class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-red-600 text-white hover:bg-red-500">
                             ×
                             </button>
@@ -70,13 +70,13 @@
         @endif
         <label class="block">
             <span class="mb-2 block text-sm font-semibold text-slate-700">
-                {{ $notesOnly ? __($activityEditingId ? 'notes.edit' : 'notes.add') : ($activityEditingId ? 'Edit activity' : 'Add another activity') }}
+                {{ $notesOnly ? __($activityEditingId ? 'notes.edit' : 'notes.add') : ($activityEditingId ? __('Edit activity') : __('Add another activity')) }}
             </span>
             <textarea wire:model="weeklyActivity" rows="7" maxlength="5000"
-                placeholder="{{ $notesOnly ? __('notes.placeholder') : 'Describe the activity planned for this project and week...' }}"
+                placeholder="{{ $notesOnly ? __('notes.placeholder') : __('Describe the activity planned for this project and week...') }}"
                 class="block w-full resize-y rounded-xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-cyan-500 focus:ring-cyan-500"></textarea>
             <div class="mt-1.5 flex justify-between gap-3 text-xs text-slate-500">
-                <span>Up to 5,000 characters.</span>
+                <span>{{ __('notes.limit') }}</span>
                 <span>{{ mb_strlen($weeklyActivity) }}/5000</span>
             </div>
             @error('weeklyActivity')
@@ -91,15 +91,15 @@
         <div class="flex w-full flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button type="button" wire:click="closeActivityModal" data-no-global-loading
                 class="inline-flex h-10 cursor-pointer items-center rounded-lg bg-red-500 px-4 text-sm font-semibold text-white hover:bg-red-600">
-                Cancel
+                {{ __('Cancel') }}
             </button>
             @if ($canEditActivity)
             @if ($activityEditingId)<button type="button" wire:click="cancelEditWeeklyActivity" data-no-global-loading class="rounded-lg border border-slate-300 px-4 text-sm font-semibold">{{ __('planification_activities.cancel_edit') }}</button>@endif
             <button type="button" wire:click="saveWeeklyActivity" data-no-global-loading
                 wire:loading.attr="disabled" wire:target="saveWeeklyActivity"
                 class="inline-flex h-10 cursor-pointer items-center rounded-lg bg-cyan-600 px-4 text-sm font-semibold text-white hover:bg-cyan-700 disabled:cursor-wait disabled:opacity-60">
-                <span wire:loading.remove wire:target="saveWeeklyActivity">{{ $notesOnly ? __('notes.save') : ($activityEditingId ? 'Update activity' : 'Add activity') }}</span>
-                <span wire:loading wire:target="saveWeeklyActivity">Saving...</span>
+                <span wire:loading.remove wire:target="saveWeeklyActivity">{{ $notesOnly ? __('notes.save') : ($activityEditingId ? __('Update activity') : __('Add activity')) }}</span>
+                <span wire:loading wire:target="saveWeeklyActivity">{{ __('Saving...') }}</span>
             </button>
             @endif
         </div>

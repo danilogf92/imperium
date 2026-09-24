@@ -41,7 +41,7 @@
                         @if ($hasActiveFilters)
                             <span
                                 class="rounded-full bg-blue-600 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white">
-                                Active
+                                {{ __('Active') }}
                             </span>
                         @endif
                     </div>
@@ -79,7 +79,7 @@
                         @endif
                     </div>
 
-                    <x-dashboard-filter-dropdown label="Plants" model="plantFilter" :options="$companies->map(
+                    <x-dashboard-filter-dropdown label="{{ __('Plants') }}" model="plantFilter" :options="$companies->map(
                         fn($company) => [
                             'value' => (string) $company->id,
                             'label' => $company->company_name,
@@ -87,43 +87,43 @@
                     )" :selected="$plantFilter"
                         multiple compact :global-loading="false" />
 
-                    <x-dashboard-filter-dropdown label="Years" model="yearFilter" :options="$years->map(fn($year) => ['value' => $year, 'label' => $year])" :selected="$yearFilter"
+                    <x-dashboard-filter-dropdown label="{{ __('Years') }}" model="yearFilter" :options="$years->map(fn($year) => ['value' => $year, 'label' => $year])" :selected="$yearFilter"
                         multiple compact :global-loading="false" />
 
-                    <x-dashboard-filter-dropdown label="Status" model="stateFilter" :options="collect($stateOptions)->map(
+                    <x-dashboard-filter-dropdown label="{{ __('Status') }}" model="stateFilter" :options="collect($stateOptions)->map(
                         fn($state) => [
                             'value' => $state->value,
-                            'label' => $state->value,
+                            'label' => $state->getLabel(),
                         ],
                     )" :selected="$stateFilter"
                         multiple compact :global-loading="false" />
 
-                    <x-dashboard-filter-dropdown label="Investments" model="investmentFilter" :options="collect($investmentOptions)->map(
+                    <x-dashboard-filter-dropdown label="{{ __('Investments') }}" model="investmentFilter" :options="collect($investmentOptions)->map(
                         fn($investment) => [
                             'value' => $investment->value,
-                            'label' => $investment->value,
+                            'label' => $investment->getLabel(),
                         ],
                     )"
                         :selected="$investmentFilter" multiple compact :global-loading="false" />
 
-                    <x-dashboard-filter-dropdown label="Classifications" model="classificationFilter" :options="collect($classificationOptions)->map(
+                    <x-dashboard-filter-dropdown label="{{ __('Classifications') }}" model="classificationFilter" :options="collect($classificationOptions)->map(
                         fn($classification) => [
                             'value' => $classification->value,
-                            'label' => $classification->value,
+                            'label' => $classification->getLabel(),
                         ],
                     )"
                         :selected="$classificationFilter" multiple compact :global-loading="false" />
 
-                    <x-dashboard-filter-dropdown label="Justifications" model="justificationFilter" :options="collect($justificationOptions)->map(
+                    <x-dashboard-filter-dropdown label="{{ __('Justifications') }}" model="justificationFilter" :options="collect($justificationOptions)->map(
                         fn($justification) => [
                             'value' => $justification->value,
-                            'label' => $justification->value,
+                            'label' => $justification->getLabel(),
                         ],
                     )"
                         :selected="$justificationFilter" multiple compact :global-loading="false" />
 
                     <div class="w-24 shrink-0">
-                        <label for="resume-currency" class="sr-only">Currency</label>
+                        <label for="resume-currency" class="sr-only">{{ __('Currency') }}</label>
                         <select id="resume-currency" wire:model.live="currency" data-no-global-loading
                             class="h-11 w-full cursor-pointer rounded-lg border-slate-300 bg-white text-sm font-medium text-slate-700 shadow-sm hover:border-blue-400 focus:border-blue-500 focus:ring-blue-500">
                             <option value="euro">EUR</option>
@@ -135,7 +135,7 @@
                 </div>
             </div>
 
-<x-filter-chips clear="clearFilters" :filters="[['model' => 'search', 'label' => 'Search', 'value' => $search],['model' => 'plantFilter', 'label' => 'Plants', 'value' => $plantFilter],['model' => 'yearFilter', 'label' => 'Years', 'value' => $yearFilter],['model' => 'stateFilter', 'label' => 'Status', 'value' => $stateFilter],['model' => 'investmentFilter', 'label' => 'Investments', 'value' => $investmentFilter],['model' => 'classificationFilter', 'label' => 'Classification', 'value' => $classificationFilter],['model' => 'justificationFilter', 'label' => 'Justifications', 'value' => $justificationFilter],['model' => 'currency', 'label' => 'Currency', 'value' => $currency, 'default' => 'euro'] ]" />
+<x-filter-chips clear="clearFilters" :filters="[['model' => 'search', 'label' => __('activity_control.search'), 'value' => $search],['model' => 'plantFilter', 'label' => __('Plants'), 'value' => $plantFilter],['model' => 'yearFilter', 'label' => __('Years'), 'value' => $yearFilter],['model' => 'stateFilter', 'translate' => true, 'label' => __('Status'), 'value' => $stateFilter],['model' => 'investmentFilter', 'translate' => true, 'label' => __('Investments'), 'value' => $investmentFilter],['model' => 'classificationFilter', 'translate' => true, 'label' => __('Classification'), 'value' => $classificationFilter],['model' => 'justificationFilter', 'translate' => true, 'label' => __('Justifications'), 'value' => $justificationFilter],['model' => 'currency', 'translate' => true, 'label' => __('Currency'), 'value' => $currency, 'default' => 'euro'] ]" />
 </section>
 
         @php
@@ -152,7 +152,7 @@
         <section class="overflow-x-auto pb-1">
             <div class="dashboard-metrics-grid gap-4"
                 data-summary-metrics>
-                @foreach ([['label' => 'Projects', 'value' => $totals['projects'], 'money' => false, 'accent' => 'bg-indigo-500', 'text' => 'text-indigo-600'], ['label' => 'Budgeted', 'value' => $totals['budgeted'], 'money' => true, 'accent' => 'bg-sky-500', 'text' => 'text-sky-600'], ['label' => 'Approved', 'value' => $totals['approved'], 'money' => true, 'accent' => 'bg-blue-500', 'text' => 'text-blue-600'], ['label' => 'Booked (Real SAP)', 'value' => $totals['booked'], 'money' => true, 'accent' => 'bg-amber-500', 'text' => 'text-amber-600'], ['label' => 'Committed', 'value' => $totals['committed'], 'money' => true, 'accent' => 'bg-orange-500', 'text' => 'text-orange-600'], ['label' => 'Available', 'value' => $totals['available'], 'money' => true, 'accent' => $totals['available'] < 0 ? 'bg-red-500' : 'bg-emerald-500', 'text' => $totals['available'] < 0 ? 'text-red-600' : 'text-emerald-600']] as $metric)
+                @foreach ([['label' => __('Projects'), 'value' => $totals['projects'], 'money' => false, 'accent' => 'bg-indigo-500', 'text' => 'text-indigo-600'], ['label' => __('Budgeted'), 'value' => $totals['budgeted'], 'money' => true, 'accent' => 'bg-sky-500', 'text' => 'text-sky-600'], ['label' => __('Approved'), 'value' => $totals['approved'], 'money' => true, 'accent' => 'bg-blue-500', 'text' => 'text-blue-600'], ['label' => __('Booked (Real SAP)'), 'value' => $totals['booked'], 'money' => true, 'accent' => 'bg-amber-500', 'text' => 'text-amber-600'], ['label' => __('Committed'), 'value' => $totals['committed'], 'money' => true, 'accent' => 'bg-orange-500', 'text' => 'text-orange-600'], ['label' => __('Available'), 'value' => $totals['available'], 'money' => true, 'accent' => $totals['available'] < 0 ? 'bg-red-500' : 'bg-emerald-500', 'text' => $totals['available'] < 0 ? 'text-red-600' : 'text-emerald-600']] as $metric)
                     <article class="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                         <span class="{{ $metric['accent'] }} absolute inset-y-0 left-0 w-1"></span>
                         <div class="flex items-center gap-3">
@@ -192,7 +192,7 @@
                     </p>
                 </div>
                 <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                    {{ $rows->count() }} years
+                    {{ trans_choice('ui.years', $rows->count(), ['count' => $rows->count()]) }}
                 </span>
             </div>
 
@@ -200,13 +200,13 @@
                 <table class="unified-data-table cursor-pointer">
                     <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
                         <tr>
-                            <th class="whitespace-nowrap px-4 py-3 text-left">Year</th>
-                            <th class="whitespace-nowrap px-4 py-3 text-right">Number of projects</th>
-                            <th class="whitespace-nowrap px-4 py-3 text-right">Budgeted {{ $currencySymbol }}</th>
-                            <th class="whitespace-nowrap px-4 py-3 text-right">Approved {{ $currencySymbol }}</th>
-                            <th class="whitespace-nowrap px-4 py-3 text-right">Booked (Real SAP) {{ $currencySymbol }}</th>
-                            <th class="whitespace-nowrap px-4 py-3 text-right">Committed {{ $currencySymbol }}</th>
-                            <th class="whitespace-nowrap px-4 py-3 text-right">Available {{ $currencySymbol }}</th>
+                            <th class="whitespace-nowrap px-4 py-3 text-left">{{ __('cash_flow_projection.year') }}</th>
+                            <th class="whitespace-nowrap px-4 py-3 text-right">{{ __('Number of projects') }}</th>
+                            <th class="whitespace-nowrap px-4 py-3 text-right">{{ __('Budgeted') }} {{ $currencySymbol }}</th>
+                            <th class="whitespace-nowrap px-4 py-3 text-right">{{ __('Approved') }} {{ $currencySymbol }}</th>
+                            <th class="whitespace-nowrap px-4 py-3 text-right">{{ __('Booked (Real SAP)') }} {{ $currencySymbol }}</th>
+                            <th class="whitespace-nowrap px-4 py-3 text-right">{{ __('Committed') }} {{ $currencySymbol }}</th>
+                            <th class="whitespace-nowrap px-4 py-3 text-right">{{ __('Available') }} {{ $currencySymbol }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
@@ -231,8 +231,7 @@
                                 <td colspan="7" class="px-6 py-14 text-center">
                                     <p class="font-semibold text-slate-700">
                                         {{ __('No projects match the selected filters.') }}</p>
-                                    <p class="mt-1 text-sm text-slate-500">Clear or change the filters to view the
-                                        resume.</p>
+                                    <p class="mt-1 text-sm text-slate-500">{{ __('Clear or change the filters to view the resume.') }}</p>
                                 </td>
                             </tr>
                         @endforelse
@@ -243,48 +242,47 @@
 
         @if ($rows->isNotEmpty())
             <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <x-dashboard-chart-card title="Stacked financial position"
-                    subtitle="Years on X axis and financial values on Y axis"
+                <x-dashboard-chart-card title="{{ __('Stacked financial position') }}"
+                    subtitle="{{ __('Years on X axis and financial values on Y axis') }}"
                     filename="annual-stacked-financial-position" height="34rem">
                     <livewire:livewire-column-chart key="{{ $stackedChart->reactiveKey() }}" :column-chart-model="$stackedChart" />
                     <x-slot:footer>
-                        Committed = Assigned &minus; Booked (Real SAP). Available = Approved &minus; Assigned.
+                        {{ __('Committed = Assigned − Booked (Real SAP). Available = Approved − Assigned.') }}
                     </x-slot:footer>
                 </x-dashboard-chart-card>
 
-                <x-dashboard-chart-card title="Financial value comparison"
-                    subtitle="Financial evolution shown as a smooth area chart" filename="annual-financial-comparison"
+                <x-dashboard-chart-card title="{{ __('Financial value comparison') }}"
+                    subtitle="{{ __('Financial evolution shown as a smooth area chart') }}" filename="annual-financial-comparison"
                     height="34rem">
                     <x-dashboard-apex-chart :options="$comparisonChartOptions"
                         chart-key="resume-comparison-{{ md5(json_encode($comparisonChartOptions)) }}" />
                 </x-dashboard-chart-card>
 
-                <x-dashboard-chart-card title="Projects by year"
-                    subtitle="Project columns with Budgeted, Assigned and Executed value lines"
+                <x-dashboard-chart-card title="{{ __('Projects by year') }}"
+                    subtitle="{{ __('Project columns with Budgeted, Assigned and Executed value lines') }}"
                     filename="annual-project-count" height="34rem">
                     <x-dashboard-apex-chart :options="$projectsChartOptions"
                         chart-key="resume-projects-{{ md5(json_encode($projectsChartOptions)) }}" />
                 </x-dashboard-chart-card>
 
-                <x-dashboard-chart-card title="Available value trend"
-                    subtitle="Budgeted, Approved, Booked (Real SAP), Committed and Available values by year"
+                <x-dashboard-chart-card title="{{ __('Available value trend') }}"
+                    subtitle="{{ __('Budgeted, Approved, Booked (Real SAP), Committed and Available values by year') }}"
                     filename="annual-available-trend" height="34rem">
                     <livewire:livewire-line-chart key="{{ $availableChart->reactiveKey() }}" :line-chart-model="$availableChart" />
                 </x-dashboard-chart-card>
 
-                <x-dashboard-chart-card title="Financial coverage ratios"
-                    subtitle="Financial coverage by approval year, with a 100% target"
+                <x-dashboard-chart-card title="{{ __('Financial coverage ratios') }}"
+                    subtitle="{{ __('Financial coverage by approval year, with a 100% target') }}"
                     filename="annual-financial-coverage" height="34rem">
                     <x-dashboard-apex-chart :options="$coverageChartOptions"
                         chart-key="resume-coverage-{{ md5(json_encode($coverageChartOptions)) }}" />
                     <x-slot:footer>
-                        Approved / Budgeted measures budget approval. Booked (Real SAP), Committed and Available
-                        are shown as percentages of Approved.
+                        {{ __('Approved / Budgeted measures budget approval. Booked (Real SAP), Committed and Available are shown as percentages of Approved.') }}
                     </x-slot:footer>
                 </x-dashboard-chart-card>
 
-                <x-dashboard-chart-card title="Average value per project"
-                    subtitle="Average Budgeted, Approved, Booked (Real SAP), Committed and Available per project"
+                <x-dashboard-chart-card title="{{ __('Average value per project') }}"
+                    subtitle="{{ __('Average Budgeted, Approved, Booked (Real SAP), Committed and Available per project') }}"
                     filename="annual-average-project-value" height="34rem">
                     <x-dashboard-apex-chart :options="$averageChartOptions"
                         chart-key="resume-average-{{ md5(json_encode($averageChartOptions)) }}" />

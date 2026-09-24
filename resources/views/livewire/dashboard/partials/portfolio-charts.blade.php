@@ -1,7 +1,7 @@
 <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
     <x-dashboard-chart-card
-        title="Projects by investment"
-        subtitle="Number of projects by investment category"
+        title="{{ __('Projects by investment') }}"
+        subtitle="{{ __('Number of projects by investment category') }}"
         filename="projects-by-investment"
     >
         <livewire:livewire-column-chart
@@ -12,8 +12,8 @@
 
     @if ($hasFinancialData)
         <x-dashboard-chart-card
-            title="Budget by investment"
-            subtitle="Financial distribution by investment category"
+            title="{{ __('Budget by investment') }}"
+            subtitle="{{ __('Financial distribution by investment category') }}"
             filename="budget-by-investment"
         >
             <livewire:livewire-column-chart
@@ -26,8 +26,8 @@
 
 <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
     <x-dashboard-chart-card
-        title="Projects by state"
-        subtitle="Current portfolio status distribution"
+        title="{{ __('Projects by state') }}"
+        subtitle="{{ __('Current portfolio status distribution') }}"
         filename="projects-by-state"
     >
         <livewire:livewire-pie-chart
@@ -38,8 +38,8 @@
 
     @if ($hasFinancialData)
         <x-dashboard-chart-card
-            title="Budget by state"
-            subtitle="Budget allocation across project states"
+            title="{{ __('Budget by state') }}"
+            subtitle="{{ __('Budget allocation across project states') }}"
             filename="budget-by-state"
         >
             <livewire:livewire-pie-chart
@@ -52,8 +52,8 @@
 
 <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
     <x-dashboard-chart-card
-        title="Project status count"
-        subtitle="Number of projects in each state"
+        title="{{ __('Project status count') }}"
+        subtitle="{{ __('Number of projects in each state') }}"
         filename="project-status-count"
     >
         <livewire:livewire-column-chart
@@ -64,8 +64,8 @@
 
     @if ($hasFinancialData)
         <x-dashboard-chart-card
-            title="Project status value"
-            subtitle="Financial value grouped by project state"
+            title="{{ __('Project status value') }}"
+            subtitle="{{ __('Financial value grouped by project state') }}"
             filename="project-status-value"
         >
             <livewire:livewire-column-chart

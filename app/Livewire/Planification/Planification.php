@@ -276,7 +276,7 @@ class Planification extends Component
         $this->percentage = '0';
         // $this->resetPage();
 
-        session()->flash('planification-status', $wasEditing ? 'Milestone updated successfully.' : 'Milestone added successfully.'
+        session()->flash('planification-status', $wasEditing ? __('Milestone updated successfully.') : __('Milestone added successfully.')
         );
     }
 
@@ -305,7 +305,7 @@ class Planification extends Component
 
         $this->reset(['pendingDeleteId', 'pendingDeleteLabel']);
 
-        session()->flash('planification-status', 'Milestone removed successfully.');
+        session()->flash('planification-status', __('Milestone removed successfully.'));
     }
 
     public function openWeeklyActivity(int $projectId, int $weekOffset, PlanificationAccessService $access): void
@@ -467,7 +467,7 @@ class Planification extends Component
             'assignmentNotices' => auth()->user()->planificationAssignments()->get()->keyBy('data.activity_id'),
             'assigneeOptions' => $this->activityProjectId && ($activityProject = $access->authorizedProjects()->find($this->activityProjectId))
                 ? app(\App\Services\Planification\PlanificationActivityService::class)->eligibleUsers($activityProject)->orderBy('name')->get(['id', 'name']) : collect(),
-            'fixedColumnOptions' => self::COLUMN_OPTIONS,
+            'fixedColumnOptions' => array_map(fn ($label) => __($label), self::COLUMN_OPTIONS),
             'canUpdatePlanification' => $access->can(ProjectPermissionEnum::Update),
             'editableCompanyIds' => $access->allowedCompanyIds(ProjectPermissionEnum::Update)->pluck('companies.id')->all(),
             'deletableCompanyIds' => $access->allowedCompanyIds(ProjectPermissionEnum::Delete)->pluck('companies.id')->all(),

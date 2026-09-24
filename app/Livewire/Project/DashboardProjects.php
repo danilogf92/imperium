@@ -274,7 +274,7 @@ class DashboardProjects extends Component
 
     private function groupTitle(): string
     {
-        return $this->textTransform($this->searchData);
+        return __($this->textTransform($this->searchData));
     }
 
     private function valueTitle(): string
@@ -285,14 +285,14 @@ class DashboardProjects extends Component
             default => null,
         };
         if ($label !== null) {
-            return $label.($this->dollarOrEuro === 'dollar' ? ' (USD)' : ' (EUR)');
+            return __($label).($this->dollarOrEuro === 'dollar' ? ' (USD)' : ' (EUR)');
         }
 
         $value = $this->dollarOrEuro === 'dollar'
             ? str_replace('_euros', '_dollars', $this->investments)
             : str_replace('_dollars', '_euros', $this->investments);
 
-        return $this->textTransform($value);
+        return __($this->textTransform($value));
     }
 
     public function downloadChart()
@@ -363,16 +363,16 @@ class DashboardProjects extends Component
                     $realValue = $this->convertAndUpdate($data->realValue);
 
                     return $multiColumnChartModel
-                        ->addSeriesColumn($type, 'Budgeted', $budgetedValue)
-                        ->addSeriesColumn($type, 'Executed', $executedValue)
-                        ->addSeriesColumn($type, 'Assigned', $bookedValue)
-                        ->addSeriesColumn($type, 'Booked (Real SAP)', $realValue);
+                        ->addSeriesColumn($type, __('Budgeted'), $budgetedValue)
+                        ->addSeriesColumn($type, __('Executed'), $executedValue)
+                        ->addSeriesColumn($type, __('Assigned'), $bookedValue)
+                        ->addSeriesColumn($type, __('Booked (Real SAP)'), $realValue);
                 },
                 LivewireCharts::multiColumnChartModel()
                     ->setAnimated($this->firstRun)
                     ->withOnColumnClickEventName('onColumnClick')
-                    // ->setTitle('Comparison')
-                    ->setTitle('Resume for '.$this->groupTitle())
+                    // ->setTitle(__('Comparison'))
+                    ->setTitle(__('Resume for :group', ['group' => $this->groupTitle()]))
                     ->stacked()
                     ->withGrid()
                     ->withDataLabels()
@@ -497,7 +497,7 @@ class DashboardProjects extends Component
         $pieChartModel =
             (new PieChartModel)
             // ->setTitle($this->searchData . " " . $this->investments)
-                ->setTitle($title)
+                ->setTitle(__($title))
                 ->setAnimated($this->firstRun)
                 ->setLegendVisibility(true)
                 ->withOnSliceClickEvent('onSliceClick')
@@ -509,7 +509,7 @@ class DashboardProjects extends Component
 
         foreach ($data as $element) {
             if ($this->validateNumberNew($element['total']) && $element['label'] != null) {
-                $pieChartModel->addSlice($element['label'], round($element['total'] * $rate, 2), $this->resumePieColors[$element['label']]);
+                $pieChartModel->addSlice(__($element['label']), round($element['total'] * $rate, 2), $this->resumePieColors[$element['label']]);
             }
         }
 
@@ -520,11 +520,11 @@ class DashboardProjects extends Component
     {
         $columnChartModel =
             (new ColumnChartModel)
-            // ->addColumn('Total', $this->total, $this->generateColor())
+            // ->addColumn(__('activity_control.total'), $this->total, $this->generateColor())
                 ->withOnColumnClickEventName('onColumnClick')
             // ->setTitle($this->searchData . " " . $this->investments)
             // ->setTitle("Clasification for " . $this->textTransform($this->searchData))
-                ->setTitle($this->textTransform($title))
+                ->setTitle(__($this->textTransform($title)))
                 ->setAnimated($this->firstRun)
                 ->setLegendVisibility(true)
                 ->setOpacity(1)
@@ -550,7 +550,7 @@ class DashboardProjects extends Component
         $columnChartModel =
             (new ColumnChartModel)
                 ->withOnColumnClickEventName('onColumnClick')
-                ->setTitle($this->textTransform($title))
+                ->setTitle(__($this->textTransform($title)))
                 ->setAnimated($this->firstRun)
                 ->setLegendVisibility(true)
                 ->setOpacity(1)
@@ -568,7 +568,7 @@ class DashboardProjects extends Component
 
         foreach ($data as $element) {
             if ($this->validateNumber($element['total']) && $element['label'] != null) {
-                $columnChartModel->addColumn($element['label'], round((float) $element['total'], 2), $this->resumeColors[$element['label']]);
+                $columnChartModel->addColumn(__($element['label']), round((float) $element['total'], 2), $this->resumeColors[$element['label']]);
             }
         }
 
@@ -686,11 +686,11 @@ class DashboardProjects extends Component
                 $group = (string) $data->{$this->searchData};
 
                 return $chart
-                    ->addSeriesColumn($group, 'Budgeted', $this->convertAndUpdate($data->budgeted_value))
-                    ->addSeriesColumn($group, 'Booked (Real SAP)', $this->convertAndUpdate($data->real_value));
+                    ->addSeriesColumn($group, __('Budgeted'), $this->convertAndUpdate($data->budgeted_value))
+                    ->addSeriesColumn($group, __('Booked (Real SAP)'), $this->convertAndUpdate($data->real_value));
             },
             LivewireCharts::multiColumnChartModel()
-                ->setTitle("Budgeted vs Booked (Real SAP) by {$this->groupTitle()}")
+                ->setTitle(__('Budgeted vs Booked (Real SAP) by :value1', ['value1' => $this->groupTitle()]))
                 ->setAnimated($this->firstRun)
                 ->withOnColumnClickEventName('onColumnClick')
                 ->stacked()

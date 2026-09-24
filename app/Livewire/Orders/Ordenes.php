@@ -138,13 +138,13 @@ class Ordenes extends Component
             ->get(['description', 'qty', 'code']);
 
         abort_if($items->isEmpty(), 404);
-        abort_if($items->count() > 16, 422, 'The order exceeds the template capacity.');
+        abort_if($items->count() > 16, 422, __('The order exceeds the template capacity.'));
 
         $template = ExcelTemplate::activeFor('order_export');
         $templatePath = $template
             ? Storage::disk($template->disk)->path($template->file_path)
             : storage_path('app/templateExcel/FormatoODT.xlsx');
-        abort_unless(File::isFile($templatePath), 404, 'Order template not found.');
+        abort_unless(File::isFile($templatePath), 404, __('Order template not found.'));
 
         $spreadsheet = IOFactory::load($templatePath);
         $sheet = $spreadsheet->getActiveSheet();

@@ -4,7 +4,7 @@
     data-export-url="{{ route('charts.export-excel') }}"
     onclick="event.preventDefault(); event.stopPropagation(); window.downloadDashboardChartExcel(this)"
     class="chart-excel-export inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border shadow-md transition duration-150 hover:-translate-y-px hover:brightness-95 hover:shadow-lg active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-50"
-    title="Export chart data to Excel" aria-label="Export chart data to Excel">
+    title="{{ __('Export chart data to Excel') }}" aria-label="{{ __('Export chart data to Excel') }}">
 
     <svg class="pointer-events-none h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor"
         stroke-width="1.8" aria-hidden="true">

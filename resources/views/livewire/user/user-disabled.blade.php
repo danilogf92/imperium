@@ -13,21 +13,21 @@
         </div>
 
         <h1 class="mt-6 text-center text-3xl font-bold text-gray-800 dark:text-white">
-            User Disabled
+            {{ __('User Disabled') }}
         </h1>
 
         <p class="mt-4 text-center text-gray-600 dark:text-gray-300">
-            Your account has been disabled.
+            {{ __('Your account has been disabled.') }}
         </p>
 
         <p class="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">
-            Please contact your system administrator if you believe this is an error.
+            {{ __('Please contact your system administrator if you believe this is an error.') }}
         </p>
 
         <div class="mt-8 flex justify-center">
             <a href="{{ route('dashboard') }}"
                 class="inline-flex items-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500">
-                Return to Dashboard
+                {{ __('Return to Dashboard') }}
             </a>
         </div>
 

@@ -2,11 +2,11 @@
                 <section x-show="activeSection === 'dates'" x-cloak class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                     <div class="border-b border-gray-200 bg-gray-50 px-5 py-4">
                         <h3 class="font-semibold text-gray-900">
-                            Project dates
+                            {{ __('Project dates') }}
                         </h3>
 
                         <p class="mt-1 text-sm text-gray-500">
-                            Define the planning and execution dates.
+                            {{ __('Define the planning and execution dates.') }}
                         </p>
                     </div>
 
@@ -14,7 +14,7 @@
                         <div>
                             <label for="start-date{{ $fieldSuffix }}"
                                 class="mb-2 block text-sm font-medium text-gray-700">
-                                Forecast Start date
+                                {{ __('Forecast Start date') }}
                             </label>
 
                             <input id="start-date{{ $fieldSuffix }}" type="date"
@@ -37,7 +37,7 @@
                         <div>
                             <label for="finish-date{{ $fieldSuffix }}"
                                 class="mb-2 block text-sm font-medium text-gray-700">
-                                Forecast End Date
+                                {{ __('Forecast End Date') }}
                             </label>
 
                             <input id="finish-date{{ $fieldSuffix }}" type="date"
@@ -59,14 +59,14 @@
 
                         @if ($form->state === 'Postponed')
                             <p class="lg:col-span-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                                Forecast dates are not required while the project is Postponed. Previous values will be restored if another state is selected before saving.
+                                {{ __('Forecast dates are not required while the project is Postponed. Previous values will be restored if another state is selected before saving.') }}
                             </p>
                         @endif
 
                         <div>
                             <label for="approve-date{{ $fieldSuffix }}"
                                 class="mb-2 block text-sm font-medium text-gray-700">
-                                Approve date
+                                {{ __('Approve date') }}
                             </label>
 
                             <input id="approve-date{{ $fieldSuffix }}" type="date"
@@ -84,7 +84,7 @@
                         <div>
                             <label for="close-date{{ $fieldSuffix }}"
                                 class="mb-2 block text-sm font-medium text-gray-700">
-                                Close date
+                                {{ __('Close date') }}
                             </label>
 
                             <input id="close-date{{ $fieldSuffix }}" type="date" wire:model="form.close_date"

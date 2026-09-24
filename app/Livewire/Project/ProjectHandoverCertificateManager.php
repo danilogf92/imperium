@@ -54,10 +54,10 @@ class ProjectHandoverCertificateManager extends Component
         $this->validate([
             'document' => ['required', 'file', 'extensions:pdf', 'mimes:pdf', 'max:10240'],
         ], [
-            'document.required' => 'Select a Project Handover Certificate PDF.',
-            'document.extensions' => 'The Project Handover Certificate must be a PDF file.',
-            'document.mimes' => 'Only a valid PDF file is allowed.',
-            'document.max' => 'The Project Handover Certificate may not be larger than 10 MB.',
+            'document.required' => __('Select a Project Handover Certificate PDF.'),
+            'document.extensions' => __('The Project Handover Certificate must be a PDF file.'),
+            'document.mimes' => __('Only a valid PDF file is allowed.'),
+            'document.max' => __('The Project Handover Certificate may not be larger than 10 MB.'),
         ]);
 
         $originalName = $this->document->getClientOriginalName();
@@ -80,7 +80,7 @@ class ProjectHandoverCertificateManager extends Component
         }
 
         $this->dispatch('project-updated', projectId: $project->id);
-        $this->dispatch('alert', type: 'success', title: 'Project Handover Certificate uploaded', position: 'center', timer: 1800);
+        $this->dispatch('alert', type: 'success', title: __('Project Handover Certificate uploaded'), position: 'center', timer: 1800);
         $this->close();
     }
 
@@ -114,7 +114,7 @@ class ProjectHandoverCertificateManager extends Component
         }
 
         $this->dispatch('project-updated', projectId: $project->id);
-        $this->dispatch('alert', type: 'success', title: 'Project Handover Certificate deleted', position: 'center', timer: 1800);
+        $this->dispatch('alert', type: 'success', title: __('Project Handover Certificate deleted'), position: 'center', timer: 1800);
         $this->close();
     }
 

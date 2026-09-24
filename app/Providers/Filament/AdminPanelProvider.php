@@ -5,12 +5,12 @@ namespace App\Providers\Filament;
 use App\Http\Middleware\SetUserLocale;
 use App\Models\BrandSetting;
 use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Dashboard;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -45,6 +45,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook('tables::toolbar.start', fn () => view('filament.mobile-table-toggle'))
             ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, fn () => view('filament.panel-switcher'))
+            ->renderHook(PanelsRenderHook::STYLES_AFTER, fn () => view('filament.pagination-styles'))
             ->colors([
                 'primary' => Color::Sky,
                 'warning' => Color::Orange,

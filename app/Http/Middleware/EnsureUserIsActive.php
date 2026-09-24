@@ -24,7 +24,7 @@ class EnsureUserIsActive
 
         return redirect()->route('login')->with(
             'status',
-            'Your account is disabled. Contact an administrator to enable it.'
+            __('Your account is disabled. Contact an administrator to enable it.')
         );
     }
 }

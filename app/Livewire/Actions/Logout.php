@@ -16,5 +16,6 @@ class Logout
 
         Session::invalidate();
         Session::regenerateToken();
+        Session::put('locale', app()->getLocale());
     }
 }

@@ -21,19 +21,23 @@ class ProjectImporter extends Importer
 
         return [
             ImportColumn::make('company')
-                ->label('Company code')
+                ->label(__('Company code'))
                 ->requiredMapping()
                 ->relationship(resolveUsing: 'company_code')
                 ->rules(['required']),
             ImportColumn::make('order')
+                ->label(__('Order'))
                 ->rules(['nullable', 'regex:/^\d+[a-z]*$/i', 'max:20']),
             ImportColumn::make('name')
+                ->label(__('Name'))
                 ->requiredMapping()
                 ->rules(['required', 'max:255']),
             ImportColumn::make('pda_code')
+                ->label(__('PDA Code'))
                 ->requiredMapping()
                 ->rules(['required', 'max:255']),
             ImportColumn::make('rate')
+                ->label(__('Rate'))
                 ->numeric()
                 ->rules([
                     'nullable',
@@ -42,26 +46,37 @@ class ProjectImporter extends Importer
                     'max:' . $rateSettings->max_rate,
                 ]),
             ImportColumn::make('state')
+                ->label(__('State'))
                 ->rules(['nullable', 'in:Capex,Planning,Execution,Finished']),
             ImportColumn::make('investments')
+                ->label(__('Investments'))
                 ->rules(['nullable', 'max:255']),
             ImportColumn::make('justification')
+                ->label(__('Justification'))
                 ->rules(['nullable', 'in:Normal Capex,Special Project']),
             ImportColumn::make('classification_of_investments')
+                ->label(__('Classification Of Investments'))
                 ->rules(['nullable', 'max:255']),
             ImportColumn::make('quartile_date')
+                ->label(__('Quartile Date'))
                 ->rules(['date']),
             ImportColumn::make('forecast_start_date')
+                ->label(__('Forecast Start Date'))
                 ->rules(['date']),
             ImportColumn::make('forecast_end_date')
+                ->label(__('Forecast End Date'))
                 ->rules(['date']),
             ImportColumn::make('file_name')
+                ->label(__('File Name'))
                 ->rules(['max:255']),
             ImportColumn::make('upload_pda')
+                ->label(__('Upload PDA'))
                 ->rules(['max:255']),
             ImportColumn::make('approve_date')
+                ->label(__('Approve Date'))
                 ->rules(['date']),
             ImportColumn::make('close_date')
+                ->label(__('Close Date'))
                 ->rules(['date']),
         ];
     }
@@ -91,10 +106,10 @@ class ProjectImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'La importacion termino: ' . Number::format($import->successful_rows) . ' proyectos procesados.';
+        $body = __('Import completed: :count projects processed.', ['count' => Number::format($import->successful_rows)]);
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . Number::format($failedRowsCount) . ' filas no pudieron importarse.';
+            $body .= ' ' . __(':count rows could not be imported.', ['count' => Number::format($failedRowsCount)]);
         }
 
         return $body;

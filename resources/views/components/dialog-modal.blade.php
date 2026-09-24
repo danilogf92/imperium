@@ -13,7 +13,7 @@
                     '!text-red-600 hover:bg-red-50 hover:!text-red-700 focus:ring-red-500' => $closeButtonRed,
                     'text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus:ring-blue-500' => ! $closeButtonRed,
                 ])
-                aria-label="Close modal">
+                aria-label="{{ __('Close modal') }}">
                 <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" d="m5 5 10 10M15 5 5 15" />
                 </svg>

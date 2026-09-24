@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum InvestmentClassificationEnum: string
+enum InvestmentClassificationEnum: string implements \Filament\Support\Contracts\HasLabel
 {
     case Buildings = 'Buildings';
     case Furniture = 'Furniture';
@@ -14,6 +14,11 @@ enum InvestmentClassificationEnum: string
     case Vehicles = 'Vehicles';
     case VesselFishingEquipment = 'Vessel & Fishing Equipment';
     case WarehouseDistribution = 'Warenhouse & Distrib';
+
+    public function getLabel(): string
+    {
+        return __($this->value);
+    }
 
     public static function values(): array
     {

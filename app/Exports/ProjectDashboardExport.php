@@ -46,9 +46,9 @@ class ProjectDashboardExport
 
         $spreadsheet = new Spreadsheet();
         $dashboard = $spreadsheet->getActiveSheet();
-        $dashboard->setTitle('Dashboard');
-        $projectsSheet = $spreadsheet->createSheet()->setTitle('Projects');
-        $planificationSheet = $spreadsheet->createSheet()->setTitle('Planification');
+        $dashboard->setTitle(__('Dashboard'));
+        $projectsSheet = $spreadsheet->createSheet()->setTitle(__('Projects'));
+        $planificationSheet = $spreadsheet->createSheet()->setTitle(__('Planification'));
 
         $this->buildProjectsSheet($projectsSheet, $projects);
         $this->buildPlanificationSheet($planificationSheet, $projects);
@@ -57,8 +57,8 @@ class ProjectDashboardExport
         $spreadsheet->setActiveSheetIndex(0);
         $spreadsheet->getProperties()
             ->setCreator('DA Imperium')
-            ->setTitle('Project Dashboard')
-            ->setSubject('Project portfolio dashboard and planification');
+            ->setTitle(__('Project Dashboard'))
+            ->setSubject(__('Project portfolio dashboard and planification'));
 
         $directory = storage_path('app/private/exports');
         if (! is_dir($directory)) {
@@ -88,7 +88,7 @@ class ProjectDashboardExport
             'Investment', 'Classification', 'Justification', 'Forecast Start Date',
             'Forecast End Date', 'Approved Date', 'Close Date', 'Data Rows', 'Milestones',
         ];
-        $sheet->fromArray($headers, null, 'A1');
+        $sheet->fromArray(array_map(fn ($label) => __($label), $headers), null, 'A1');
 
         $row = 2;
         foreach ($projects as $project) {
@@ -98,11 +98,11 @@ class ProjectDashboardExport
                 $project->company?->company_name,
                 $project->name,
                 $project->pda_code,
-                $project->state?->value,
+                $project->state?->getLabel(),
                 (float) $project->rate,
-                $project->investments?->value,
-                $project->classification_of_investments?->value,
-                $project->justification?->value,
+                $project->investments?->getLabel(),
+                $project->classification_of_investments?->getLabel(),
+                $project->justification?->getLabel(),
                 $project->forecast_start_date,
                 $project->forecast_end_date,
                 $project->approve_date,
@@ -139,7 +139,7 @@ class ProjectDashboardExport
     private function buildPlanificationSheet(Worksheet $sheet, $projects): void
     {
         $sheet->fromArray(
-            ['Project ID', 'Plant', 'Project', 'Status', 'Year', 'Month', 'Milestone Code', 'Milestone Name'],
+            array_map(fn ($label) => __($label), ['Project ID', 'Plant', 'Project', 'Status', 'Year', 'Month', 'Milestone Code', 'Milestone Name']),
             null,
             'A1'
         );
@@ -151,7 +151,7 @@ class ProjectDashboardExport
                     $project->id,
                     $project->company?->company_name,
                     $project->name,
-                    $project->state?->value,
+                    $project->state?->getLabel(),
                     $projectMilestone->cycle_year,
                     $projectMilestone->month,
                     $projectMilestone->milestone?->code,
@@ -180,24 +180,27 @@ class ProjectDashboardExport
     {
         $sheet->setShowGridlines(false);
         $sheet->mergeCells('A1:L2');
-        $sheet->setCellValue('A1', 'PROJECT PORTFOLIO DASHBOARD');
+        $sheet->setCellValue('A1', __('PROJECT PORTFOLIO DASHBOARD'));
         $sheet->getStyle('A1:L2')->applyFromArray([
             'font' => ['bold' => true, 'size' => 22, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => self::DARK_BLUE]],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
 
+        $projectSheet = str_replace("'", "''", __('Projects'));
+        $executionState = __('Execution');
+        $finishedState = __('Finished');
         $projectLastRow = max(2, $projects->count() + 1);
         $cards = [
-            ['A4:C4', 'A5:C7', 'Total Projects', "=COUNTA('Projects'!D2:D{$projectLastRow})", self::BLUE],
-            ['D4:F4', 'D5:F7', 'In Execution', "=COUNTIF('Projects'!F2:F{$projectLastRow},\"Execution\")", '2563EB'],
-            ['G4:I4', 'G5:I7', 'Finished', "=COUNTIF('Projects'!F2:F{$projectLastRow},\"Finished\")", '059669'],
-            ['J4:L4', 'J5:L7', 'Milestones', "=SUM('Projects'!P2:P{$projectLastRow})", '7C3AED'],
+            ['A4:C4', 'A5:C7', 'Total Projects', "=COUNTA('{$projectSheet}'!D2:D{$projectLastRow})", self::BLUE],
+            ['D4:F4', 'D5:F7', 'In Execution', "=COUNTIF('{$projectSheet}'!F2:F{$projectLastRow},\"{$executionState}\")", '2563EB'],
+            ['G4:I4', 'G5:I7', 'Finished', "=COUNTIF('{$projectSheet}'!F2:F{$projectLastRow},\"{$finishedState}\")", '059669'],
+            ['J4:L4', 'J5:L7', 'Milestones', "=SUM('{$projectSheet}'!P2:P{$projectLastRow})", '7C3AED'],
         ];
         foreach ($cards as [$labelRange, $valueRange, $label, $formula, $color]) {
             $sheet->mergeCells($labelRange);
             $sheet->mergeCells($valueRange);
-            $sheet->setCellValue(explode(':', $labelRange)[0], $label);
+            $sheet->setCellValue(explode(':', $labelRange)[0], __($label));
             $sheet->setCellValue(explode(':', $valueRange)[0], $formula);
             $sheet->getStyle($labelRange)->applyFromArray([
                 'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
@@ -213,11 +216,11 @@ class ProjectDashboardExport
         }
 
         $statusStart = 28;
-        $sheet->fromArray(['Status', 'Projects'], null, "A{$statusStart}");
+        $sheet->fromArray([__('Status'), __('Projects')], null, "A{$statusStart}");
         $statusRow = $statusStart + 1;
         foreach (ProjectStateEnum::cases() as $state) {
-            $sheet->setCellValue("A{$statusRow}", $state->value);
-            $sheet->setCellValue("B{$statusRow}", "=COUNTIF('Projects'!F2:F{$projectLastRow},A{$statusRow})");
+            $sheet->setCellValue("A{$statusRow}", $state->getLabel());
+            $sheet->setCellValue("B{$statusRow}", "=COUNTIF('{$projectSheet}'!F2:F{$projectLastRow},A{$statusRow})");
             $sheet->getStyle("A{$statusRow}")->applyFromArray([
                 'font' => ['bold' => true, 'color' => ['rgb' => ltrim($state->textColor(), '#')]],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => ltrim($state->softColor(), '#')]],
@@ -228,7 +231,7 @@ class ProjectDashboardExport
 
         $plants = $projects->pluck('company.company_name')->filter()->countBy()->sortDesc()->take(10);
         $plantStart = 28;
-        $sheet->fromArray(['Plant', 'Projects'], null, "D{$plantStart}");
+        $sheet->fromArray([__('Plant'), __('Projects')], null, "D{$plantStart}");
         $plantRow = $plantStart + 1;
         foreach ($plants as $plant => $count) {
             $sheet->fromArray([$plant, $count], null, "D{$plantRow}");
@@ -240,7 +243,7 @@ class ProjectDashboardExport
             ->map->count()
             ->sortKeys();
         $yearStart = 28;
-        $sheet->fromArray(['Creation Year', 'Projects'], null, "G{$yearStart}");
+        $sheet->fromArray([__('Creation Year'), __('Projects')], null, "G{$yearStart}");
         $yearRow = $yearStart + 1;
         foreach ($years as $year => $count) {
             $sheet->fromArray([(int) $year, $count], null, "G{$yearRow}");
@@ -250,7 +253,7 @@ class ProjectDashboardExport
 
         $statusData = collect(ProjectStateEnum::cases())->mapWithKeys(
             fn (ProjectStateEnum $state) => [
-                $state->value => [
+                $state->getLabel() => [
                     'value' => $projects->where('state', $state)->count(),
                     'color' => ltrim($state->color(), '#'),
                 ],
@@ -258,21 +261,21 @@ class ProjectDashboardExport
         )->all();
         $this->addDashboardImage(
             $sheet,
-            $this->createDoughnutImage('Projects by Status', $statusData),
+            $this->createDoughnutImage(__('Projects by Status'), $statusData),
             'A9',
             520,
             320
         );
         $this->addDashboardImage(
             $sheet,
-            $this->createBarImage('Top Plants by Projects', $plants->all()),
+            $this->createBarImage(__('Top Plants by Projects'), $plants->all()),
             'G9',
             520,
             320
         );
         $this->addDashboardImage(
             $sheet,
-            $this->createLineImage('Projects by Creation Year', $years->all()),
+            $this->createLineImage(__('Projects by Creation Year'), $years->all()),
             'A28',
             720,
             320
@@ -319,6 +322,12 @@ class ProjectDashboardExport
         $drawing->setWorksheet($sheet);
     }
 
+    private function drawText(\GdImage $image, int $font, int $x, int $y, string $text, int $color): void
+    {
+        // GD's built-in bitmap fonts expect Latin-1; all supported languages fit this encoding.
+        imagestring($image, $font, $x, $y, mb_convert_encoding($text, 'ISO-8859-1', 'UTF-8'), $color);
+    }
+
     private function createDoughnutImage(string $title, array $data): string
     {
         [$image, $colors] = $this->createChartCanvas($title, 760, 440);
@@ -336,14 +345,14 @@ class ProjectDashboardExport
 
             $percentage = round(($value / $total) * 100);
             imagefilledrectangle($image, 410, 120 + ($index * 60), 430, 140 + ($index * 60), $sliceColor);
-            imagestring($image, 5, 445, 116 + ($index * 60), "{$label}: {$value} ({$percentage}%)", $colors['text']);
+            $this->drawText($image, 5, 445, 116 + ($index * 60), "{$label}: {$value} ({$percentage}%)", $colors['text']);
             $startAngle = $endAngle;
             $index++;
         }
 
         imagefilledellipse($image, 220, 235, 135, 135, $colors['white']);
-        imagestring($image, 5, 187, 224, (string) array_sum(array_column($data, 'value')), $colors['dark']);
-        imagestring($image, 3, 184, 245, 'projects', $colors['muted']);
+        $this->drawText($image, 5, 187, 224, (string) array_sum(array_column($data, 'value')), $colors['dark']);
+        $this->drawText($image, 3, 184, 245, __('Projects'), $colors['muted']);
 
         return $this->saveChartImage($image, 'status');
     }
@@ -356,16 +365,16 @@ class ProjectDashboardExport
         $row = 0;
 
         if ($data === []) {
-            imagestring($image, 5, 320, 220, 'No data', $colors['muted']);
+            $this->drawText($image, 5, 320, 220, __('No data'), $colors['muted']);
         }
 
         foreach ($data as $label => $value) {
             $y = 95 + ($row * 40);
             $barWidth = (int) (($value / $max) * 410);
             $shortLabel = mb_strimwidth((string) $label, 0, 25, '...');
-            imagestring($image, 3, 25, $y + 4, $shortLabel, $colors['text']);
+            $this->drawText($image, 3, 25, $y + 4, $shortLabel, $colors['text']);
             imagefilledrectangle($image, 220, $y, 220 + $barWidth, $y + 24, $colors['blue']);
-            imagestring($image, 4, 230 + $barWidth, $y + 3, (string) $value, $colors['dark']);
+            $this->drawText($image, 4, 230 + $barWidth, $y + 3, (string) $value, $colors['dark']);
             $row++;
         }
 
@@ -383,7 +392,7 @@ class ProjectDashboardExport
         imageline($image, $left, $bottom, $right, $bottom, $colors['grid']);
 
         if ($data === []) {
-            imagestring($image, 5, 440, 220, 'No data', $colors['muted']);
+            $this->drawText($image, 5, 440, 220, __('No data'), $colors['muted']);
 
             return $this->saveChartImage($image, 'years');
         }
@@ -406,8 +415,8 @@ class ProjectDashboardExport
 
         foreach ($points as [$x, $y, $value, $year]) {
             imagefilledellipse($image, $x, $y, 12, 12, $colors['blue']);
-            imagestring($image, 4, $x - 8, $y - 25, (string) $value, $colors['dark']);
-            imagestring($image, 4, $x - 18, $bottom + 12, $year, $colors['text']);
+            $this->drawText($image, 4, $x - 8, $y - 25, (string) $value, $colors['dark']);
+            $this->drawText($image, 4, $x - 18, $bottom + 12, $year, $colors['text']);
         }
 
         return $this->saveChartImage($image, 'years');
@@ -427,7 +436,7 @@ class ProjectDashboardExport
         ];
         imagefill($image, 0, 0, $colors['white']);
         imagerectangle($image, 0, 0, $width - 1, $height - 1, $colors['grid']);
-        imagestring($image, 5, 24, 22, $title, $colors['dark']);
+        $this->drawText($image, 5, 24, 22, $title, $colors['dark']);
 
         return [$image, $colors];
     }

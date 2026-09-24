@@ -19,24 +19,24 @@ class ExcelTemplateForm
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label('Name')
+                    ->label(__('Name'))
                     ->required()
                     ->maxLength(120),
 
                 Select::make('template_key')
-                    ->label('System use')
+                    ->label(__('System use'))
                     ->options([
-                        'order_export' => 'Orders - generated order file',
-                        'project_data_import' => 'Project Data - import base file',
-                        'project_ideas_template' => 'Project Ideas - downloadable template',
+                        'order_export' => __('Orders - generated order file'),
+                        'project_data_import' => __('Project Data - import base file'),
+                        'project_ideas_template' => __('Project Ideas - downloadable template'),
                     ])
-                    ->placeholder('Library only (no system use)')
+                    ->placeholder(__('Library only (no system use)'))
                     ->unique(ignoreRecord: true)
                     ->live()
-                    ->helperText('Optional. Select this only when the application must use this file automatically. Each system use accepts one template.'),
+                    ->helperText(__('Optional. Select this only when the application must use this file automatically. Each system use accepts one template.')),
 
                 // TextInput::make('category')
-                //     ->label('Category')
+                //     ->label(__('Category'))
                 //     ->required()
                 //     ->maxLength(40)
                 //     ->datalist(fn (): array => ExcelTemplate::query()
@@ -45,10 +45,10 @@ class ExcelTemplateForm
                 //         ->orderBy('category')
                 //         ->pluck('category')
                 //         ->all())
-                //     ->helperText('Select an existing category or type a new one.'),
+                //     ->helperText(__('Select an existing category or type a new one.')),
 
                 Select::make('category')
-                    ->label('Category')
+                    ->label(__('Category'))
                     ->options(function (?string $state): array {
                         $categories = ExcelTemplate::query()
                             ->whereNotNull('category')
@@ -68,7 +68,7 @@ class ExcelTemplateForm
                     ->preload()
                     ->createOptionForm([
                         TextInput::make('category')
-                            ->label('New category')
+                            ->label(__('New category'))
                             ->required()
                             ->maxLength(40),
                     ])
@@ -78,21 +78,21 @@ class ExcelTemplateForm
                     ->required(),
 
                 Textarea::make('description')
-                    ->label('Description')
+                    ->label(__('Description'))
                     ->rows(3)
                     ->maxLength(500)
                     ->columnSpanFull(),
 
                 Toggle::make('is_global')
-                    ->label('All users')
-                    ->helperText('Enabled: available in General for every user. Disabled: only the selected plants can see and download the file.')
+                    ->label(__('All users'))
+                    ->helperText(__('Enabled: available in General for every user. Disabled: only the selected plants can see and download the file.'))
                     ->default(true)
                     ->live()
                     ->required(),
 
                 Select::make('companies')
-                    ->label('Allowed plants')
-                    ->helperText('Users can see and download this file when their assigned roles include any of the selected companies.')
+                    ->label(__('Allowed plants'))
+                    ->helperText(__('Users can see and download this file when their assigned roles include any of the selected companies.'))
                     ->relationship('companies', 'company_name')
                     ->multiple()
                     ->searchable()
@@ -101,7 +101,7 @@ class ExcelTemplateForm
                     ->required(fn (Get $get): bool => ! $get('is_global')),
 
                 FileUpload::make('file_path')
-                    ->label('File')
+                    ->label(__('File'))
                     ->disk('local')
                     ->directory('excel-templates')
                     ->visibility('private')
@@ -114,14 +114,14 @@ class ExcelTemplateForm
                     ->storeFileNamesIn('original_file_name')
                     ->downloadable()
                     ->required()
-                    ->helperText('PDF, Excel (.xlsx, .xls), PowerPoint (.pptx, .ppt). Maximum: 10 MB. System order and data templates must remain Excel files.')
+                    ->helperText(__('PDF, Excel (.xlsx, .xls), PowerPoint (.pptx, .ppt). Maximum: 10 MB. System order and data templates must remain Excel files.'))
                     ->columnSpanFull(),
 
                 Hidden::make('is_active')
                     ->default(true)
                     ->dehydrateStateUsing(fn (): bool => true),
 
-                TextInput::make('disk')
+                TextInput::make('disk')->label(__('Disk'))
                     ->default('local')
                     ->hidden()
                     ->dehydrated(),

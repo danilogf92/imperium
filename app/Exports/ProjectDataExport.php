@@ -41,7 +41,7 @@ class ProjectDataExport
         $columns = array_values(array_intersect($columns, array_keys(self::HEADERS)));
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Project Data');
+        $sheet->setTitle(__('Project Data'));
         $sheet->setShowGridlines(false);
         $sheet->fromArray(array_map(fn (string $column): string => __(self::HEADERS[$column]), $columns), null, 'A1');
 
@@ -93,8 +93,8 @@ class ProjectDataExport
         $sheet->freezePane('A2');
         $spreadsheet->getProperties()
             ->setCreator('DA Imperium')
-            ->setTitle("Project Data - {$project->name}")
-            ->setSubject('Project Data Export');
+            ->setTitle(__('Project Data - :value1', ['value1' => $project->name]))
+            ->setSubject(__('Project Data Export'));
 
         $directory = storage_path('app/private/exports');
         if (! is_dir($directory)) {

@@ -17,9 +17,9 @@ trait ManagesProjectHandoverCertificate
         $this->validate([
             'handoverCertificate' => ['required', 'file', 'extensions:pdf', 'mimes:pdf', 'max:10240'],
         ], [
-            'handoverCertificate.extensions' => 'The Project Handover Certificate must be a PDF file.',
-            'handoverCertificate.mimes' => 'Only a valid PDF file is allowed.',
-            'handoverCertificate.max' => 'The Project Handover Certificate may not be larger than 10 MB.',
+            'handoverCertificate.extensions' => __('The Project Handover Certificate must be a PDF file.'),
+            'handoverCertificate.mimes' => __('Only a valid PDF file is allowed.'),
+            'handoverCertificate.max' => __('The Project Handover Certificate may not be larger than 10 MB.'),
         ]);
     }
 

@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div>
-            <h2 class="text-xl font-bold tracking-tight text-slate-900">Account settings</h2>
-            <p class="mt-1 text-sm text-slate-500">Manage your personal information and account security.</p>
+            <h2 class="text-xl font-bold tracking-tight text-slate-900">{{ __('Account settings') }}</h2>
+            <p class="mt-1 text-sm text-slate-500">{{ __('Manage your personal information and account security.') }}</p>
         </div>
     </x-slot>
 
@@ -34,7 +34,7 @@
                         </div>
 
                         <div class="min-w-0">
-                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-200">Personal profile</p>
+                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-200">{{ __('Personal profile') }}</p>
                             <h1 class="mt-1 break-words text-2xl font-bold tracking-tight text-white sm:text-3xl">
                                 {{ $profileUser->name }}
                             </h1>
@@ -55,13 +55,13 @@
                     <div class="flex flex-wrap justify-center gap-2 lg:justify-end">
                         <span class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white shadow-sm backdrop-blur">
                             <span class="h-2 w-2 rounded-full bg-emerald-400 ring-2 ring-emerald-400/20"></span>
-                            Active account
+                            {{ __('Active account') }}
                         </span>
                         <span class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white shadow-sm backdrop-blur">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 3 4.5 6v5.25c0 4.77 3.22 8.66 7.5 9.75 4.28-1.09 7.5-4.98 7.5-9.75V6L12 3Z" />
                             </svg>
-                            MFA {{ $mfaEnabled ? 'enabled' : 'disabled' }}
+                            MFA {{ $mfaEnabled ? __('Enabled') : __('Disabled') }}
                         </span>
                     </div>
                 </div>

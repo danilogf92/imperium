@@ -35,7 +35,7 @@ class RedirectToProjectDataController extends Controller
 
         if (! $project) {
             return to_route('projects')
-                ->with('warning', 'No accessible projects are available yet.');
+                ->with('warning', __('No accessible projects are available yet.'));
         }
 
         return to_route('projects.data', ['project' => $project->slug]);

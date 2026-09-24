@@ -36,7 +36,7 @@
             <div class="flex flex-wrap items-center justify-start gap-3">
 
                 {{-- Compañías o plantas --}}
-                <x-dashboard-filter-dropdown label="Companies" model="plantFilter" :options="$companies->map(
+                <x-dashboard-filter-dropdown label="{{ __('Companies') }}" model="plantFilter" :options="$companies->map(
                     fn($company) => [
                         'value' => $company->company_code,
                         'label' => $company->company_name,
@@ -48,7 +48,7 @@
                 <div class="shrink-0">
                     <button wire:click="projectOrder" wire:loading.attr="disabled" wire:target="projectOrder"
                         type="button"
-                        title="{{ $orderByProject ? 'Return to the default project order' : 'Prioritize projects by remaining budget' }}"
+                        title="{{ $orderByProject ? __('Return to the default project order') : __('Prioritize projects by remaining budget') }}"
                         class="group inline-flex h-11 min-w-44 items-center justify-between gap-3 rounded-lg border px-3 text-sm font-semibold shadow-sm transition duration-150 hover:-translate-y-px hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-60
                             {{ $orderByProject
                                 ? 'border-blue-700 bg-blue-600 text-white hover:bg-blue-500 focus:ring-blue-500'
@@ -80,7 +80,7 @@
                 </div>
 
                 {{-- Año --}}
-                <x-dashboard-filter-dropdown label="Years" model="yearSearch" :options="collect($years)->map(
+                <x-dashboard-filter-dropdown label="{{ __('Years') }}" model="yearSearch" :options="collect($years)->map(
                     fn($year) => [
                         'value' => $year,
                         'label' => $year,
@@ -89,35 +89,35 @@
                     multiple />
 
                 {{-- Clasificación del proyecto --}}
-                <x-dashboard-filter-dropdown label="Classifications" model="typeOfProjectSearch" :options="collect($classificationOptions)->map(
+                <x-dashboard-filter-dropdown label="{{ __('Classifications') }}" model="typeOfProjectSearch" :options="collect($classificationOptions)->map(
                     fn($classification) => [
                         'value' => $classification->value,
-                        'label' => $classification->value,
+                        'label' => $classification->getLabel(),
                     ],
                 )"
                     :selected="$typeOfProjectSearch" multiple />
 
                 {{-- Estado --}}
-                <x-dashboard-filter-dropdown label="States" model="stateSearch" :options="collect($stateOptions)->map(
+                <x-dashboard-filter-dropdown label="{{ __('States') }}" model="stateSearch" :options="collect($stateOptions)->map(
                     fn($state) => [
                         'value' => $state->value,
-                        'label' => $state->value,
+                        'label' => $state->getLabel(),
                     ],
                 )" :selected="$stateSearch"
                     multiple />
 
                 {{-- Inversión --}}
-                <x-dashboard-filter-dropdown label="Investments" model="investmentFilter" :options="collect($investmentOptions)->map(
+                <x-dashboard-filter-dropdown label="{{ __('Investments') }}" model="investmentFilter" :options="collect($investmentOptions)->map(
                     fn($investment) => [
                         'value' => $investment->value,
-                        'label' => $investment->value,
+                        'label' => $investment->getLabel(),
                     ],
                 )"
                     :selected="$investmentFilter" multiple />
 
-                <x-dashboard-filter-dropdown label="Project ideas" model="projectIdeaFilter" :options="collect([
-                    ['value' => 'with', 'label' => 'With project ideas'],
-                    ['value' => 'without', 'label' => 'Without project ideas'],
+                <x-dashboard-filter-dropdown label="{{ __('Project ideas') }}" model="projectIdeaFilter" :options="collect([
+                    ['value' => 'with', 'label' => __('With project ideas')],
+                    ['value' => 'without', 'label' => __('Without project ideas')],
                 ])"
                     :selected="$projectIdeaFilter" multiple />
 
@@ -137,5 +137,5 @@
 
     </div>
 
-<x-filter-chips clear="resetAll" :filters="[['model' => 'plantFilter', 'label' => 'Plants', 'value' => $plantFilter, 'options' => $companies->pluck('company_name', 'company_code')->all()],['model' => 'yearSearch', 'label' => 'Years', 'value' => $yearSearch],['model' => 'stateSearch', 'label' => 'Status', 'value' => $stateSearch],['model' => 'typeOfProjectSearch', 'label' => 'Classification', 'value' => $typeOfProjectSearch],['model' => 'investmentFilter', 'label' => 'Investments', 'value' => $investmentFilter],['model' => 'projectIdeaFilter', 'label' => 'Project ideas', 'value' => $projectIdeaFilter],['model' => 'search', 'label' => 'Search', 'value' => $search, 'action' => 'clearSearch'], ['model' => 'orderByProject', 'label' => 'Order', 'value' => $orderByProject, 'default' => false, 'options' => [1 => 'Order by remaining'], 'action' => 'projectOrder'] ]" />
+<x-filter-chips clear="resetAll" :filters="[['model' => 'plantFilter', 'label' => __('Plants'), 'value' => $plantFilter, 'options' => $companies->pluck('company_name', 'company_code')->all()],['model' => 'yearSearch', 'label' => __('Years'), 'value' => $yearSearch],['model' => 'stateSearch', 'translate' => true, 'label' => __('Status'), 'value' => $stateSearch],['model' => 'typeOfProjectSearch', 'translate' => true, 'label' => __('Classification'), 'value' => $typeOfProjectSearch],['model' => 'investmentFilter', 'translate' => true, 'label' => __('Investments'), 'value' => $investmentFilter],['model' => 'projectIdeaFilter', 'label' => __('Project ideas'), 'value' => $projectIdeaFilter, 'options' => ['with' => __('With project ideas'), 'without' => __('Without project ideas')]],['model' => 'search', 'label' => __('activity_control.search'), 'value' => $search, 'action' => 'clearSearch'], ['model' => 'orderByProject', 'translate' => true, 'label' => __('Order'), 'value' => $orderByProject, 'default' => false, 'options' => [1 => 'Order by remaining'], 'action' => 'projectOrder'] ]" />
 </div>

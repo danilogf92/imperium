@@ -46,7 +46,7 @@ class LoginForm extends Form
 
         if (! $user->is_active) {
             throw ValidationException::withMessages([
-                'form.email' => 'Your account is disabled. Contact an administrator to enable it.',
+                'form.email' => __('Your account is disabled. Contact an administrator to enable it.'),
             ]);
         }
 

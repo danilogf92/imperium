@@ -18,15 +18,21 @@ class AuditLogResource extends Resource
     protected static string|BackedEnum|null $navigationIcon =
         Heroicon::OutlinedClipboardDocumentList;
 
-    protected static ?string $navigationLabel = 'Audit Logs';
+    public static function getNavigationLabel(): string
+    {
+        return __('Audit Logs');
+    }
 
-    protected static ?string $pluralModelLabel = 'audit logs';
+    public static function getPluralModelLabel(): string
+    {
+        return __('audit logs');
+    }
 
     protected static ?int $navigationSort = 99;
 
     public static function getNavigationGroup(): ?string
     {
-        return 'System';
+        return __('System');
     }
 
     public static function table(Table $table): Table
@@ -50,4 +56,9 @@ class AuditLogResource extends Resource
             'index' => ListAuditLogs::route('/'),
         ];
     }
+    public static function getModelLabel(): string
+    {
+        return __('Audit Log');
+    }
+
 }

@@ -32,11 +32,11 @@ class ProjectChartExcelExportController extends Controller
         abort_unless(
             preg_match('/^data:image\/png;base64,(.+)$/s', $validated['image'], $matches) === 1,
             422,
-            'Invalid chart image.'
+            __('Invalid chart image.')
         );
 
         $image = base64_decode($matches[1], true);
-        abort_if($image === false || strlen($image) > 10 * 1024 * 1024, 422, 'Invalid chart image.');
+        abort_if($image === false || strlen($image) > 10 * 1024 * 1024, 422, __('Invalid chart image.'));
 
         $directory = storage_path('app/private/exports');
         File::ensureDirectoryExists($directory);
@@ -46,7 +46,7 @@ class ProjectChartExcelExportController extends Controller
         File::put($imagePath, $image);
 
         $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet()->setTitle('Chart and data');
+        $sheet = $spreadsheet->getActiveSheet()->setTitle(__('Chart and data'));
         $sheet->setShowGridlines(false);
         $sheet->mergeCells('A1:H1')->setCellValue('A1', $validated['title']);
         $sheet->getStyle('A1:H1')->applyFromArray([

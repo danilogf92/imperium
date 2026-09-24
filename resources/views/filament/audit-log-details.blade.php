@@ -9,29 +9,29 @@
 
     $event = match ($record->event) {
         'created' => [
-            'label' => 'Record created',
-            'description' => 'A new record was added to the system.',
+            'label' => __('Record created'),
+            'description' => __('A new record was added to the system.'),
             'color' => '#059669',
             'soft' => '#ecfdf5',
             'icon' => 'plus',
         ],
         'updated' => [
-            'label' => 'Record updated',
-            'description' => 'One or more values were changed.',
+            'label' => __('Record updated'),
+            'description' => __('One or more values were changed.'),
             'color' => '#d97706',
             'soft' => '#fffbeb',
             'icon' => 'pencil',
         ],
         'deleted' => [
-            'label' => 'Record deleted',
-            'description' => 'The record was removed from the system.',
+            'label' => __('Record deleted'),
+            'description' => __('The record was removed from the system.'),
             'color' => '#dc2626',
             'soft' => '#fef2f2',
             'icon' => 'trash',
         ],
         default => [
             'label' => str($record->event)->headline(),
-            'description' => 'An activity was registered.',
+            'description' => __('An activity was registered.'),
             'color' => '#475569',
             'soft' => '#f8fafc',
             'icon' => 'activity',
@@ -40,15 +40,15 @@
 
     $formatValue = static function (mixed $value, bool $exists): string {
         if (! $exists) {
-            return 'Not available';
+            return __('Not available');
         }
 
         if ($value === null) {
-            return 'Empty';
+            return __('Empty');
         }
 
         if (is_bool($value)) {
-            return $value ? 'Yes' : 'No';
+            return $value ? __('Yes') : __('No');
         }
 
         if (is_array($value)) {
@@ -59,7 +59,7 @@
         }
 
         if ($value === '') {
-            return 'Empty';
+            return __('Empty');
         }
 
         return (string) $value;
@@ -350,46 +350,46 @@
             </div>
         </div>
         <span class="audit-details__record">
-            {{ str(class_basename($record->auditable_type))->headline() }} #{{ $record->auditable_id }}
+            {{ __((string) str(class_basename($record->auditable_type))->headline()) }} #{{ $record->auditable_id }}
         </span>
     </div>
 
     <div class="audit-details__meta">
         <div class="audit-details__meta-item">
-            <span class="audit-details__meta-label">Performed by</span>
+            <span class="audit-details__meta-label">{{ __('Performed by') }}</span>
             <span class="audit-details__meta-value" title="{{ $record->user?->email }}">
-                {{ $record->user?->name ?? 'System' }}
+                {{ $record->user?->name ?? __('System') }}
             </span>
         </div>
         <div class="audit-details__meta-item">
-            <span class="audit-details__meta-label">Date and time</span>
+            <span class="audit-details__meta-label">{{ __('Date and time') }}</span>
             <span class="audit-details__meta-value">
-                {{ $record->created_at?->format('M d, Y · H:i:s') }}
+                {{ $record->created_at?->translatedFormat('M d, Y · H:i:s') }}
             </span>
         </div>
         <div class="audit-details__meta-item">
-            <span class="audit-details__meta-label">Company</span>
+            <span class="audit-details__meta-label">{{ __('Company') }}</span>
             <span class="audit-details__meta-value">
-                {{ $record->company?->company_name ?? 'Global' }}
+                {{ $record->company?->company_name ?? __('Global') }}
             </span>
         </div>
         <div class="audit-details__meta-item">
-            <span class="audit-details__meta-label">Project</span>
+            <span class="audit-details__meta-label">{{ __('activity_control.project') }}</span>
             <span class="audit-details__meta-value" title="{{ $record->project?->name }}">
-                {{ $record->project?->name ?? 'Not related' }}
+                {{ $record->project?->name ?? __('Not related') }}
             </span>
         </div>
     </div>
 
     <div class="audit-details__section-header">
-        <span class="audit-details__section-title">Changed information</span>
+        <span class="audit-details__section-title">{{ __('Changed information') }}</span>
         <span class="audit-details__count">
             {{ $fields->count() }} {{ str('field')->plural($fields->count()) }}
         </span>
     </div>
 
     @if ($fields->isEmpty())
-        <div class="audit-details__empty">No field values were recorded for this event.</div>
+        <div class="audit-details__empty">{{ __('No field values were recorded for this event.') }}</div>
     @else
         <div class="audit-details__changes">
             @foreach ($fields as $field)
@@ -399,7 +399,7 @@
                 @endphp
                 <div class="audit-details__change">
                     <div class="audit-details__field">
-                        {{ str($field)->replace('_', ' ')->headline() }}
+                        {{ __((string) str($field)->replace('_', ' ')->headline()) }}
                     </div>
                     <div class="audit-details__value">
                         <pre>{{ $formatValue($oldValues[$field] ?? null, $hasBefore) }}</pre>
@@ -418,9 +418,9 @@
     @endif
 
     <div class="audit-details__technical">
-        <span>IP: {{ $record->ip_address ?? 'Not available' }}</span>
+        <span>IP: {{ $record->ip_address ?? __('Not available') }}</span>
         <span title="{{ $record->user_agent }}">
-            Browser: {{ $record->user_agent ? str($record->user_agent)->limit(90) : 'Not available' }}
+            {{ __('Browser') }}: {{ $record->user_agent ? str($record->user_agent)->limit(90) : __('Not available') }}
         </span>
     </div>
 </div>

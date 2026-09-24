@@ -18,7 +18,7 @@ class CityForm
         return $schema
             ->components([
                 Select::make('country_id')
-                    ->label('Country')
+                    ->label(__('Country'))
                     ->relationship('country', 'country_name')
                     ->searchable()
                     ->preload()
@@ -26,7 +26,7 @@ class CityForm
                     ->afterStateUpdated(fn (Set $set) => $set('city_catalog', null))
                     ->required(),
                 Select::make('city_catalog')
-                    ->label('City')
+                    ->label(__('City'))
                     ->searchable()
                     ->native(false)
                     ->required()
@@ -71,16 +71,16 @@ class CityForm
                         $set('state', $city?->state());
                     }),
                 TextInput::make('name')
-                    ->label('City Name')
+                    ->label(__('City Name'))
                     ->disabled()
                     ->dehydrated()
                     ->required(),
                 TextInput::make('city_code')
-                    ->label('City Code')
+                    ->label(__('City Code'))
                     ->disabled()
                     ->dehydrated(),
                 TextInput::make('state')
-                    ->label('State / Province')
+                    ->label(__('State / Province'))
                     ->disabled()
                     ->dehydrated(),
             ]);

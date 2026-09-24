@@ -10,8 +10,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-lg font-bold text-slate-900">Delete data record</h2>
-                        <p class="mt-1 text-sm text-slate-500">This action cannot be undone.</p>
+                        <h2 class="text-lg font-bold text-slate-900">{{ __('Delete data record') }}</h2>
+                        <p class="mt-1 text-sm text-slate-500">{{ __('This action cannot be undone.') }}</p>
                     </div>
                 </div>
 
@@ -23,14 +23,14 @@
                     <button x-on:click="$dispatch('close-modal', 'delete-project-data')" wire:click="closeDeleteModal"
                         data-no-global-loading type="button"
                         class="data-modal-cancel inline-flex h-10 items-center rounded-lg px-4 text-sm font-semibold">
-                        Cancel
+                        {{ __('Cancel') }}
                     </button>
                     <button wire:click="deleteData" data-global-loading wire:loading.attr="disabled"
                         wire:target="deleteData" type="button"
                         class="inline-flex h-10 items-center rounded-lg px-4 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
                         style="background-color: #dc2626;">
-                        <span wire:loading.remove wire:target="deleteData">Delete record</span>
-                        <span wire:loading wire:target="deleteData">Deleting...</span>
+                        <span wire:loading.remove wire:target="deleteData">{{ __('Delete record') }}</span>
+                        <span wire:loading wire:target="deleteData">{{ __('Deleting...') }}</span>
                     </button>
                 </div>
             </div>

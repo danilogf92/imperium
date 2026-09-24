@@ -97,7 +97,7 @@
             'gap-1.5 px-3 sm:w-28 sm:px-2.5' => $compact,
             'min-w-0 max-w-full sm:!w-full sm:!min-w-0' => $truncateSelection,
         ])>
-        <span @class(['truncate' => $compact || $truncateSelection, 'min-w-0 text-left' => $truncateSelection])>{{ $selectedOptionLabel ? __($selectedOptionLabel) : __($label) }}</span>
+        <span @class(['truncate' => $compact || $truncateSelection, 'min-w-0 text-left' => $truncateSelection])>{{ $selectedOptionLabel ?: __($label) }}</span>
         <span class="flex shrink-0 items-center gap-2">
             @if ($selectedCount > 0)
                 <span
@@ -134,7 +134,7 @@
                     @php
                         $value = (string) data_get($option, 'value');
                         $optionLabel = (string) data_get($option, 'label', $value);
-                        $translatedOptionLabel = __($optionLabel);
+                        $translatedOptionLabel = $optionLabel;
                     @endphp
 
                     <label x-show="search === '' || @js(mb_strtolower($translatedOptionLabel)).includes(search.toLowerCase())"
@@ -162,7 +162,7 @@
                     <button type="button" wire:click="{{ $createAction }}" @click="open = false; search = ''"
                         class="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm font-semibold text-blue-600 transition hover:bg-blue-50">
                         <span class="inline-flex h-5 w-5 items-center justify-center rounded border border-blue-300 text-base leading-none">+</span>
-                        <span>{{ __($createLabel ?: 'Create new') }}</span>
+                        <span>{{ __($createLabel ?: __('Create new')) }}</span>
                     </button>
                 </div>
             @endif

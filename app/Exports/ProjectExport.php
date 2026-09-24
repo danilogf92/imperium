@@ -96,8 +96,8 @@ class ProjectExport
         $projects = $query->get();
         $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Projects');
-        $sheet->fromArray(array_map(fn (string $column) => self::HEADERS[$column], $columns), null, 'A1');
+        $sheet->setTitle(__('Projects'));
+        $sheet->fromArray(array_map(fn (string $column) => __(self::HEADERS[$column]), $columns), null, 'A1');
         foreach ($projects as $index => $project) {
             $sheet->fromArray(array_map(fn (string $column) => $this->value($project, $column), $columns), null, 'A'.($index + 2));
         }
@@ -132,16 +132,16 @@ class ProjectExport
     {
         return match ($column) {
             'links' => route('projects.data', ['project' => $project->slug]),
-            'upload_pda' => filled($project->upload_pda) ? 'Yes' : 'No',
-            'handover_certificate' => filled($project->handover_certificate_path) ? 'Yes' : 'No',
-            'project_ideas' => filled($project->project_idea_path) ? 'Yes' : 'No',
-            'state', 'investments', 'justification' => $project->{$column}?->value,
-            'classification' => $project->classification_of_investments?->value,
+            'upload_pda' => filled($project->upload_pda) ? __('Yes') : __('No'),
+            'handover_certificate' => filled($project->handover_certificate_path) ? __('Yes') : __('No'),
+            'project_ideas' => filled($project->project_idea_path) ? __('Yes') : __('No'),
+            'state', 'investments', 'justification' => $project->{$column}?->getLabel(),
+            'classification' => $project->classification_of_investments?->getLabel(),
             'plant' => $project->company?->company_name,
             'creator' => $project->creator?->name,
             'responsible' => $project->responsible?->name,
             'owner' => $project->owners->pluck('name')->join(', '),
-            'data_uploaded' => $project->data_uploaded ? 'Yes' : 'No',
+            'data_uploaded' => $project->data_uploaded ? __('Yes') : __('No'),
             'forecast_start_year' => $project->forecast_start_date?->format('Y'),
             'forecast_start_date' => $project->forecast_start_date?->format('Y-m-d'),
             'forecast_end_date', 'quartile_date', 'approve_date', 'close_date' => $project->{$column}?->format('Y-m-d'),

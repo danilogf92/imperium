@@ -54,4 +54,14 @@ class CompanyResource extends Resource
             'edit' => EditCompany::route('/{record}/edit'),
         ];
     }
+    public static function getModelLabel(): string
+    {
+        return __('Company');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Companies');
+    }
+
 }

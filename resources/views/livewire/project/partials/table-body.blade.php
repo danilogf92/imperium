@@ -39,7 +39,7 @@
                     @if ($project->data_uploaded)
                         <a href="{{ route('projects.dashboard', ['project' => $project->slug]) }}" wire:navigate
                             class="text-red-500 hover:text-red-600 hover:underline">
-                            Dashboard
+                            {{ __('Dashboard') }}
                         </a>
 
                         <span class="text-slate-300">|</span>
@@ -48,7 +48,7 @@
                     @if ($project->has_orders)
                         <a href="{{ route('projects.orders', ['project' => $project->slug]) }}" wire:navigate
                             class="font-semibold text-blue-600 hover:text-blue-500 hover:underline">
-                            Orders
+                            {{ __('Orders') }}
                         </a>
 
                         @if ($project->data_uploaded)
@@ -59,7 +59,7 @@
                     @if ($project->data_uploaded)
                         <a href="{{ route('projects.data', ['project' => $project->slug]) }}" wire:navigate
                             class="text-emerald-600 hover:text-emerald-500 hover:underline">
-                            Data
+                            {{ __('Data') }}
                         </a>
                     @endif
 
@@ -81,7 +81,7 @@
                                 wire:click="$dispatch('open-project-document-manager', { projectId: {{ $project->id }} })"
                                 data-no-global-loading type="button"
                                 class="inline-flex h-8 w-8 items-center justify-center rounded-md text-white shadow-sm transition hover:-translate-y-px hover:shadow-md hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 active:translate-y-0"
-                                style="background-color: #16a34a" title="Manage document" aria-label="Manage document">
+                                style="background-color: #16a34a" title="{{ __('Manage document') }}" aria-label="{{ __('Manage document') }}">
 
                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="1.8">
@@ -95,7 +95,7 @@
                                 wire:click="$dispatch('open-project-document-manager', { projectId: {{ $project->id }} })"
                                 type="button" data-no-global-loading
                                 class="inline-flex h-8 w-8 items-center justify-center rounded-md text-white shadow-sm transition hover:-translate-y-px hover:shadow-md hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 active:translate-y-0"
-                                style="background-color: #eab308" title="Upload document" aria-label="Upload document">
+                                style="background-color: #eab308" title="{{ __('Upload document') }}" aria-label="{{ __('Upload document') }}">
 
                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="1.8">
@@ -125,7 +125,7 @@
             <td class="whitespace-nowrap px-2 py-2">
                 <button wire:click="$dispatch('open-project-idea-manager', { projectId: {{ $project->id }} })"
                     type="button" data-no-global-loading
-                    title="{{ filled($project->project_idea_path) ? 'Manage project ideas' : 'Upload project ideas' }}"
+                    title="{{ filled($project->project_idea_path) ? __('Manage project ideas') : __('Upload project ideas') }}"
                     class="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-px hover:brightness-110"
                     style="background-color: {{ filled($project->project_idea_path) ? '#16a34a' : '#d97706' }}">
 
@@ -134,7 +134,7 @@
                             d="M6 3.75h8.25L18 7.5v12.75H6V3.75Zm8.25 0V7.5H18M9 11.25l6 6m0-6-6 6" />
                     </svg>
 
-                    {{ filled($project->project_idea_path) ? 'Manage' : 'Upload' }}
+                    {{ filled($project->project_idea_path) ? __('Manage') : __('Upload') }}
                 </button>
             </td>
 
@@ -145,7 +145,7 @@
                     <button
                         wire:click="$dispatch('open-project-handover-certificate-manager', { projectId: {{ $project->id }} })"
                         type="button" data-no-global-loading
-                        title="{{ filled($project->handover_certificate_path) ? 'Manage Project Handover Certificate' : 'Upload Project Handover Certificate' }}"
+                        title="{{ filled($project->handover_certificate_path) ? __('Manage Project Handover Certificate') : __('Upload Project Handover Certificate') }}"
                         class="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-px hover:brightness-110"
                         style="background-color: {{ filled($project->handover_certificate_path) ? '#16a34a' : '#7c3aed' }}">
 
@@ -155,12 +155,12 @@
                                 d="M6 3.75h8.25L18 7.5v12.75H6V3.75Zm8.25 0V7.5H18M9 14.25l2 2 4-4" />
                         </svg>
 
-                        {{ filled($project->handover_certificate_path) ? 'Manage' : 'Upload' }}
+                        {{ filled($project->handover_certificate_path) ? __('Manage') : __('Upload') }}
 
                     </button>
                 @else
                     <span class="text-sm text-slate-500">
-                        {{ filled($project->handover_certificate_path) ? 'Uploaded' : '—' }}
+                        {{ filled($project->handover_certificate_path) ? __('Uploaded') : '—' }}
                     </span>
                 @endif
 
@@ -180,7 +180,7 @@
                             background-color: {{ $project->state->softColor() }};
                             color: {{ $project->state->textColor() }};
                         ">
-                        {{ $project->state->value }}
+                        {{ $project->state->getLabel() }}
                     </span>
                 @else
                     —
@@ -190,18 +190,18 @@
 
             {{-- Inversión --}}
             <td class="whitespace-nowrap px-2 py-2">
-                {{ $project->investments?->value }}
+                {{ $project->investments?->getLabel() }}
             </td>
 
             {{-- Clasificación --}}
             <td class="whitespace-nowrap px-2 py-2">
-                {{ $project->classification_of_investments?->value }}
+                {{ $project->classification_of_investments?->getLabel() }}
             </td>
 
             {{-- Justificación --}}
             <td class="px-2 py-2">
                 <div class="max-w-xs">
-                    {{ \Illuminate\Support\Str::limit($project->justification?->value, 100) }}
+                    {{ \Illuminate\Support\Str::limit($project->justification?->getLabel(), 100) }}
                 </div>
             </td>
 
@@ -257,7 +257,7 @@
                         background-color: {{ $project->data_uploaded ? '#D1FAE5' : '#F1F5F9' }};
                         color: {{ $project->data_uploaded ? '#065F46' : '#475569' }};
                     ">
-                    {{ $project->data_uploaded ? 'Yes' : 'No' }}
+                    {{ $project->data_uploaded ? __('Yes') : __('No') }}
                 </span>
             </td>
 
@@ -350,8 +350,8 @@
                             data-no-global-loading type="button"
                             class="inline-flex h-8 w-8 items-center justify-center rounded-md text-white shadow-sm transition hover:-translate-y-px hover:shadow-md hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-1 active:translate-y-0"
                             style="background-color: {{ $project->data_uploaded ? '#dc2626' : '#0891b2' }}"
-                            title="{{ $project->data_uploaded ? 'Delete imported project data' : 'Import project data from Excel' }}"
-                            aria-label="{{ $project->data_uploaded ? 'Delete imported project data' : 'Import project data from Excel' }}">
+                            title="{{ $project->data_uploaded ? __('Delete imported project data') : __('Import project data from Excel') }}"
+                            aria-label="{{ $project->data_uploaded ? __('Delete imported project data') : __('Import project data from Excel') }}">
 
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="1.8">
@@ -400,11 +400,11 @@
                     </svg>
 
                     <p class="font-semibold">
-                        No projects found
+                        {{ __('No projects found') }}
                     </p>
 
                     <p class="mt-1 text-sm">
-                        Change the search or selected filters.
+                        {{ __('Change the search or selected filters.') }}
                     </p>
 
                 </div>

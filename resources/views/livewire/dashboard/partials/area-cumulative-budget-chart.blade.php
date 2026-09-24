@@ -1,7 +1,7 @@
 @if ($areaCumulativeChart['hasData'])
     <x-dashboard-chart-card
-        title="Area budget vs cumulative budget"
-        subtitle="Monthly area investment and cumulative portfolio budget"
+        title="{{ __('Area budget vs cumulative budget') }}"
+        subtitle="{{ __('Monthly area investment and cumulative portfolio budget') }}"
         filename="area-budget-vs-cumulative-budget"
         height="40rem"
     >
@@ -23,7 +23,7 @@
                         const divisor = absolute >= 1000000 ? 1000000 : (absolute >= 1000 ? 1000 : 1);
                         const suffix = divisor === 1000000 ? ' M' : (divisor === 1000 ? ' K' : '');
 
-                        return currencySymbol + ' ' + (number / divisor).toLocaleString(undefined, {
+                        return currencySymbol + ' ' + (number / divisor).toLocaleString(document.documentElement.lang, {
                             minimumFractionDigits: 0,
                             maximumFractionDigits: 2
                         }) + suffix;
@@ -77,7 +77,7 @@
                             {
                                 seriesName: areaSeriesNames,
                                 title: {
-                                    text: 'Budget by area'
+                                    text: @js(__('Budget by area'))
                                 },
                                 labels: {
                                     formatter: money
@@ -86,10 +86,10 @@
                                 forceNiceScale: true
                             },
                             {
-                                seriesName: 'Cumulative budget',
+                                seriesName: cumulativeSeries.name,
                                 opposite: true,
                                 title: {
-                                    text: 'Cumulative budget'
+                                    text: @js(__('Cumulative budget'))
                                 },
                                 labels: {
                                     formatter: money
@@ -149,8 +149,7 @@
         </div>
 
         <x-slot:footer>
-            Left axis: monthly budget grouped by project area.
-            Right axis: cumulative total budget by project creation month.
+            {{ __('Left axis: monthly budget grouped by project area. Right axis: cumulative total budget by project creation month.') }}
         </x-slot:footer>
     </x-dashboard-chart-card>
 @else

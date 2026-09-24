@@ -20,13 +20,19 @@ class BrandSettingResource extends Resource
 {
     protected static ?string $model = BrandSetting::class;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhoto;
-    protected static ?string $navigationLabel = 'Logo and brand';
-    protected static ?string $modelLabel = 'brand settings';
+    public static function getNavigationLabel(): string
+    {
+        return __('Logo and brand');
+    }
+    public static function getModelLabel(): string
+    {
+        return __('brand settings');
+    }
     protected static ?int $navigationSort = 1;
 
     public static function getNavigationGroup(): ?string
     {
-        return 'System Configuration';
+        return __('System Configuration');
     }
 
     public static function canCreate(): bool
@@ -42,36 +48,36 @@ class BrandSettingResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            TextInput::make('name')->label('Application name')->required()->maxLength(80),
+            TextInput::make('name')->label(__('Application name'))->required()->maxLength(80),
             FileUpload::make('logo_path')
-                ->label('Application logo')
+                ->label(__('Application logo'))
                 ->disk('public')
                 ->directory('branding')
                 ->image()
                 ->imageEditor()
                 ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'])
                 ->maxSize(4096)
-                ->helperText('PNG, JPG, WEBP or SVG. Recommended: transparent background and horizontal format.')
+                ->helperText(__('PNG, JPG, WEBP or SVG. Recommended: transparent background and horizontal format.'))
                 ->columnSpanFull(),
             ColorPicker::make('accent_color')
-                ->label('Main accent color')
+                ->label(__('Main accent color'))
                 ->default('#7DB9F1')
                 ->required()
-                ->helperText('Controls module top lines and PNG chart export buttons.'),
+                ->helperText(__('Controls module top lines and PNG chart export buttons.')),
             ColorPicker::make('excel_color')
-                ->label('Excel export color')
+                ->label(__('Excel export color'))
                 ->default('#FDBA74')
                 ->required()
-                ->helperText('Controls chart Excel export buttons.'),
+                ->helperText(__('Controls chart Excel export buttons.')),
         ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table->columns([
-            ImageColumn::make('logo_path')->label('Logo')->disk('public')->height(48),
-            TextColumn::make('name')->label('Application name'),
-            TextColumn::make('updated_at')->label('Last update')->dateTime(),
+            ImageColumn::make('logo_path')->label(__('Logo'))->disk('public')->height(48),
+            TextColumn::make('name')->label(__('Application name')),
+            TextColumn::make('updated_at')->label(__('Last update'))->dateTime(),
         ])->recordUrl(fn (BrandSetting $record): string => self::getUrl('edit', ['record' => $record]));
     }
 
@@ -82,4 +88,9 @@ class BrandSettingResource extends Resource
             'edit' => EditBrandSetting::route('/{record}/edit'),
         ];
     }
+    public static function getPluralModelLabel(): string
+    {
+        return __('Brand Settings');
+    }
+
 }

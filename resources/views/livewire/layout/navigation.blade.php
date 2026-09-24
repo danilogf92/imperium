@@ -54,7 +54,8 @@ new class extends Component {
                     </x-nav-link>
 
                     <x-nav-link :href="route('planification')" :active="request()->routeIs('planification')" wire:navigate>
-                        Planning
+                        {{ __('Planification') }}
+
                         @if ($assignmentNoticeCount)<span class="ml-1 rounded-full bg-cyan-700 px-2 py-0.5 text-xs text-white" aria-label="{{ __('planification_activities.unread', ['count' => $assignmentNoticeCount]) }}">{{ $assignmentNoticeCount }}</span>@endif
                     </x-nav-link>
 
@@ -63,7 +64,7 @@ new class extends Component {
                     </x-nav-link>
 
                     <x-nav-link :href="route('resume')" :active="request()->routeIs('resume')" wire:navigate>
-                        Summary
+                        {{ __('Summary') }}
                     </x-nav-link>
 
                     <x-nav-link :href="route('templates')" :active="request()->routeIs('templates', 'templates.*')" wire:navigate>
@@ -153,7 +154,8 @@ new class extends Component {
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('planification')" :active="request()->routeIs('planification')" wire:navigate>
-                Planning
+                {{ __('Planification') }}
+
                 @if ($assignmentNoticeCount)<span class="ml-1 rounded-full bg-cyan-700 px-2 py-0.5 text-xs text-white" aria-label="{{ __('planification_activities.unread', ['count' => $assignmentNoticeCount]) }}">{{ $assignmentNoticeCount }}</span>@endif
             </x-responsive-nav-link>
 
@@ -162,7 +164,7 @@ new class extends Component {
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('resume')" :active="request()->routeIs('resume')" wire:navigate>
-                Summary
+                {{ __('Summary') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('templates')" :active="request()->routeIs('templates', 'templates.*')" wire:navigate>

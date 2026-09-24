@@ -43,7 +43,7 @@ trait ManagesSuppliers
                 Rule::unique('suppliers', 'name')->where('company_id', $this->project->company_id)],
         ]);
         if ($this->supplierNames()->contains(fn ($name) => mb_strtolower(trim($name)) === mb_strtolower($this->newSupplierName))) {
-            $this->addError('newSupplierName', 'This supplier already exists. Select it from the list.');
+            $this->addError('newSupplierName', __('This supplier already exists. Select it from the list.'));
             return;
         }
         $supplier = Supplier::create([
@@ -51,7 +51,7 @@ trait ManagesSuppliers
         ]);
         $this->editData['supplier'] = $supplier->name;
         $this->resetSupplierCreator();
-        $this->dispatch('alert', type: 'success', title: 'Supplier created and selected', position: 'center', timer: 1800);
+        $this->dispatch('alert', type: 'success', title: __('Supplier created and selected'), position: 'center', timer: 1800);
     }
 
     protected function validateSupplierSelection(): void

@@ -40,7 +40,7 @@ class DashboardCumulativeChartService
         $projectPercentages = [];
         $budgetValues = [];
 
-        $months = config('dashboard_charts.months');
+        $months = array_map(fn ($month) => __($month), config('dashboard_charts.months'));
 
         foreach ($months as $number => $month) {
             $cumulativeProjects += (int) $projects->get($number, 0);

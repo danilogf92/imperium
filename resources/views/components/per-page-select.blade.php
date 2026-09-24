@@ -1,7 +1,7 @@
 @props([
     'model' => 'perPage',
     'id' => 'per-page',
-    'label' => 'Show',
+    'label' => __('Show'),
     'ariaLabel' => 'Records per page',
     'options' => [5, 10, 20, 50, 100],
 ])

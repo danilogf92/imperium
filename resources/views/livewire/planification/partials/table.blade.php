@@ -55,7 +55,7 @@
                                     <th rowspan="2"
                                         class="sticky z-30 border-r border-blue-300 bg-[#7DB9F1] px-2 py-2 text-center text-[10px] font-bold uppercase tracking-wide"
                                         style="left: {{ $fixedOffsets[$activityColumn] }}px; width: {{ $fixedWidths[$activityColumn] }}px">
-                                        {{ $week['offset'] === 0 ? 'Actual Week' : 'Next Week' }}
+                                        {{ $week['offset'] === 0 ? __('Actual Week') : __('Next Week') }}
                                         <div class="mt-1 flex items-center justify-center gap-2">
                                             <button type="button" wire:click="moveActivityWeek(-1)" wire:loading.attr="disabled" wire:target="moveActivityWeek" data-no-global-loading
                                                 title="{{ __('planification_activities.previous_week') }}" aria-label="{{ __('planification_activities.previous_week') }}"
@@ -88,7 +88,7 @@
                                     @continue($monthIndex + 1 < $firstMonthOfYear)
                                     <th
                                         class="{{ (int) $year === now()->year && $monthIndex + 1 === now()->month ? '!border-x-2 !border-x-blue-500 !bg-[#7DB9F1] text-slate-900' : '' }} {{ $loop->last ? 'border-r-2 border-blue-300' : '' }} w-48 border-r border-blue-300 px-1 py-1.5 text-center text-xs font-semibold">
-                                        {{ $monthLabel }}
+                                        {{ mb_strtoupper(\Carbon\CarbonImmutable::create(2000, $monthIndex + 1, 1)->translatedFormat('M')) }}
                                     </th>
                                 @endforeach
                             @endforeach
@@ -247,7 +247,7 @@
                                     <td data-mobile-secondary="true" style="left: {{ $fixedOffsets['status'] }}px"
                                         class="planification-sticky-cell sticky z-10 w-28 border-b border-r-2 border-gray-200 px-2 py-1.5 text-center">
                                         @php
-                                            $statusValue = $plannedProject->state?->value ?? '—';
+                                            $statusValue = $plannedProject->state?->getLabel() ?? '—';
                                             $statusBackground = $plannedProject->state?->softColor() ?? '#F1F5F9';
                                             $statusText = $plannedProject->state?->textColor() ?? '#334155';
                                         @endphp
@@ -302,7 +302,7 @@
                                                     x-on:blur="tooltipOpen = false"
                                                     aria-describedby="activity-tooltip-{{ $plannedProject->id }}-{{ $week['offset'] }}"
                                                 @else
-                                                    title="{{ __($canUpdateProject ? 'Add activity' : 'View activities') }}" @endif
+                                                    title="{{ __($canUpdateProject ? __('Add activity') : __('View activities')) }}" @endif
                                                     class="inline-flex max-w-full cursor-pointer items-center gap-1.5 rounded-lg border border-cyan-500 bg-cyan-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-px hover:bg-cyan-500 hover:shadow-md">
                                                     @if ($weeklyActivity)
                                                         <span
@@ -313,12 +313,12 @@
                                                     <span
                                                         class="text-base leading-none">{{ $canUpdateProject ? '+' : 'i' }}</span>
                                                     <span
-                                                        class="truncate">{{ $weeklyActivity ? $weeklyActivitiesForWeek->count() . ' activities' : ($canUpdateProject ? 'Add activity' : 'View activities') }}</span>
+                                                        class="truncate">{{ $weeklyActivity ? trans_choice('ui.activities', $weeklyActivitiesForWeek->count(), ['count' => $weeklyActivitiesForWeek->count()]) : ($canUpdateProject ? __('Add activity') : __('View activities')) }}</span>
                                                 </button>
                                                 @if ($weeklyActivity)
                                                     <button type="button" data-no-global-loading
                                                         x-on:click.stop="tooltipOpen ? tooltipOpen = false : showTooltip($event)"
-                                                        class="planification-activity-info" aria-label="Show activities"
+                                                        class="planification-activity-info" aria-label="{{ __('Show activities') }}"
                                                         aria-controls="activity-tooltip-{{ $plannedProject->id }}-{{ $week['offset'] }}">i</button>
                                                     <template x-teleport="body">
                                                         <div x-cloak x-show="tooltipOpen" x-transition.opacity
@@ -328,10 +328,10 @@
                                                             <div
                                                                 class="flex items-center justify-between border-b border-cyan-400/20 pb-2">
                                                                 <span
-                                                                    class="font-bold text-cyan-100">{{ $week['offset'] === 0 ? 'Actual week' : 'Next week' }}</span>
+                                                                    class="font-bold text-cyan-100">{{ $week['offset'] === 0 ? __('Actual week') : __('planification_activities.next_week') }}</span>
                                                                 <span
                                                                     class="rounded-full bg-cyan-400/15 px-2 py-0.5 text-[10px] font-semibold text-cyan-100">{{ $weeklyActivitiesForWeek->count() }}
-                                                                    {{ $weeklyActivitiesForWeek->count() === 1 ? 'activity' : 'activities' }}</span>
+                                                                    {{ trans_choice('ui.activity_noun', $weeklyActivitiesForWeek->count()) }}</span>
                                                             </div>
                                                             <ol class="mt-2 space-y-2">
                                                                 @foreach ($weeklyActivitiesForWeek as $activity)
@@ -344,14 +344,14 @@
                                                                             <span
                                                                                 class="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-400/20 px-2 py-0.5 text-[10px] font-bold text-emerald-200">
                                                                                 <span aria-hidden="true">✓</span>
-                                                                                Executed
+                                                                                {{ __('Executed') }}
                                                                             </span>
                                                                         @else
                                                                             <span
                                                                                 class="{{ $weekExpired ? 'bg-red-400/20 text-red-200' : 'bg-amber-300/20 text-amber-100' }} inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold">
                                                                                 <span
                                                                                     aria-hidden="true">{{ $weekExpired ? '×' : '○' }}</span>
-                                                                                Not executed
+                                                                                {{ __('Not executed') }}
                                                                             </span>
                                                                         @endif
                                                                     </li>
@@ -421,7 +421,7 @@
                                                         style="background-color: {{ $item->milestone->view_color ?: $item->milestone->color }}; color: {{ $item->milestone->viewTextColor() }}">
                                                         @if (!$milestoneIsFuture)
                                                             <span
-                                                                title="{{ $milestoneExecuted ? 'Executed' : ($milestoneExpired ? 'Not executed' : 'Pending execution') }}"
+                                                                title="{{ $milestoneExecuted ? __('Executed') : ($milestoneExpired ? __('Not executed') : __('Pending execution')) }}"
                                                                 class="{{ $milestoneExecuted ? 'bg-green-600 text-white' : ($milestoneExpired ? 'bg-red-600 text-white' : 'bg-white/20') }} m-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold leading-none shadow-sm ring-1 ring-white/40">
                                                                 {{ $milestoneExecuted ? '✓' : ($milestoneExpired ? '×' : '○') }}
                                                             </span>
@@ -441,7 +441,7 @@
                                                                 wire:click="requestDeleteMilestone({{ $item->id }})"
                                                                 data-no-global-loading
                                                                 class="border-l border-white/30 px-1 py-0.5 text-xs leading-4 hover:bg-black/20"
-                                                                title="Remove milestone">×</button>
+                                                                title="{{ __('Remove milestone') }}">×</button>
                                                         @endif
                                                     </span>
                                                 @endforeach
@@ -460,7 +460,7 @@
                         @empty
                             <tr>
                                 <td colspan="{{ $visibleFixedColumns->count() + $timelineColumnCount }}"
-                                    class="px-5 py-12 text-center text-sm text-gray-500">No project plans found.</td>
+                                    class="px-5 py-12 text-center text-sm text-gray-500">{{ __('No project plans found.') }}</td>
                             </tr>
                         @endforelse
                     </tbody>

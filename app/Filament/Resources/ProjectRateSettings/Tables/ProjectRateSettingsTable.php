@@ -12,11 +12,11 @@ class ProjectRateSettingsTable
     {
         return $table
             ->columns([
-                TextColumn::make('min_rate')->label('Minimum rate')->numeric(decimalPlaces: 4),
-                TextColumn::make('max_rate')->label('Maximum rate')->numeric(decimalPlaces: 4),
+                TextColumn::make('min_rate')->label(__('Minimum rate'))->numeric(decimalPlaces: 4),
+                TextColumn::make('max_rate')->label(__('Maximum rate'))->numeric(decimalPlaces: 4),
                 TextColumn::make('updated_at')
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
-                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])->label('Last updated')->dateTime(),
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])->label(__('Last updated'))->dateTime(),
             ])
             ->recordActions([
                 EditAction::make()->button()->outlined()->labeledFrom('md'),

@@ -19,10 +19,10 @@ class ResumeChartService
             ->map(fn ($year): string => (string) $year)->values()->all();
         $moneyFormatter = ChartValueFormatter::compactMoney($symbol);
         $coverageSeries = [
-            ['name' => 'Approved / Budgeted', 'data' => $this->ratios($coverageRows, 'approved', 'budgeted')],
-            ['name' => 'Booked (Real SAP) / Approved', 'data' => $this->ratios($coverageRows, 'booked', 'approved')],
-            ['name' => 'Committed / Approved', 'data' => $this->ratios($coverageRows, 'committed', 'approved')],
-            ['name' => 'Available / Approved', 'data' => $this->ratios($coverageRows, 'available', 'approved')],
+            ['name' => __('Approved / Budgeted'), 'data' => $this->ratios($coverageRows, 'approved', 'budgeted')],
+            ['name' => __('Booked (Real SAP) / Approved'), 'data' => $this->ratios($coverageRows, 'booked', 'approved')],
+            ['name' => __('Committed / Approved'), 'data' => $this->ratios($coverageRows, 'committed', 'approved')],
+            ['name' => __('Available / Approved'), 'data' => $this->ratios($coverageRows, 'available', 'approved')],
         ];
         $coverageMaximum = max(
             100,
@@ -40,7 +40,7 @@ class ResumeChartService
                 'xaxis' => ['categories' => $coverageYears],
                 'yaxis' => [
                     'labels' => ['formatter' => "function(value) { return Number(value).toFixed(1) + '%'; }"],
-                    'title' => ['text' => 'Coverage (%)'],
+                    'title' => ['text' => __('Coverage (%)')],
                     'min' => min(0, floor((float) collect($coverageSeries)->pluck('data')->flatten()->min() / 10) * 10),
                     'max' => $coverageMaximum,
                     'forceNiceScale' => false,
@@ -63,11 +63,11 @@ class ResumeChartService
             ],
             'averageChartOptions' => [
                 'series' => [
-                    ['name' => 'Average budgeted', 'type' => 'column', 'data' => $this->averages($rows, 'budgeted')],
-                    ['name' => 'Average approved', 'type' => 'line', 'data' => $this->averages($rows, 'approved')],
-                    ['name' => 'Average Booked (Real SAP)', 'type' => 'line', 'data' => $this->averages($rows, 'booked')],
-                    ['name' => 'Average Committed', 'type' => 'line', 'data' => $this->averages($rows, 'committed')],
-                    ['name' => 'Average Available', 'type' => 'line', 'data' => $this->averages($rows, 'available')],
+                    ['name' => __('Average budgeted'), 'type' => 'column', 'data' => $this->averages($rows, 'budgeted')],
+                    ['name' => __('Average approved'), 'type' => 'line', 'data' => $this->averages($rows, 'approved')],
+                    ['name' => __('Average Booked (Real SAP)'), 'type' => 'line', 'data' => $this->averages($rows, 'booked')],
+                    ['name' => __('Average Committed'), 'type' => 'line', 'data' => $this->averages($rows, 'committed')],
+                    ['name' => __('Average Available'), 'type' => 'line', 'data' => $this->averages($rows, 'available')],
                 ],
                 'chart' => ['type' => 'line', 'height' => '100%', 'toolbar' => ['show' => false]],
                 'colors' => ['#2563EB', '#7C3AED', '#059669', '#F59E0B', '#0891B2'],
@@ -78,7 +78,7 @@ class ResumeChartService
                 'xaxis' => ['categories' => $years],
                 'yaxis' => [
                     'labels' => ['formatter' => $moneyFormatter, 'minWidth' => 80, 'maxWidth' => 130],
-                    'title' => ['text' => "Average value ({$symbol})"],
+                    'title' => ['text' => __('Average value (:value1)', ['value1' => $symbol])],
                 ],
                 'tooltip' => ['y' => ['formatter' => $moneyFormatter]],
                 'legend' => ['show' => true, 'position' => 'top'],

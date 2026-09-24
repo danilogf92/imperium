@@ -1,6 +1,6 @@
 <x-dashboard-chart-card
-    title="Financial commitment flow"
-    subtitle="Budgeted, booked, executed and real value in the selected currency"
+    title="{{ __('Financial commitment flow') }}"
+    subtitle="{{ __('Budgeted, booked, executed and real value in the selected currency') }}"
     filename="financial-commitment-flow"
     height="30rem">
     <livewire:livewire-column-chart

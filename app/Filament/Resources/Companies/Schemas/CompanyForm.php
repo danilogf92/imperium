@@ -13,25 +13,25 @@ class CompanyForm
         return $schema
             ->components([
                 TextInput::make('company_name')
-                    ->label('Company Name')
+                    ->label(__('Company Name'))
                     ->required(),
                 Select::make('city_id')
-                    ->label('City')
+                    ->label(__('City'))
                     ->relationship('city', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
                 TextInput::make('company_code')
-                    ->label('Company Code')
+                    ->label(__('Company Code'))
                     ->required(),
                 TextInput::make('multiplier')
-                    ->label('Budget Multiplier')
+                    ->label(__('Budget Multiplier'))
                     ->numeric()
                     ->minValue(0)
                     ->step(0.000001)
                     ->default(1)
                     ->required()
-                    ->helperText('Project Budgeted values are calculated as Base × Multiplier.'),
+                    ->helperText(__('Project Budgeted values are calculated as Base × Multiplier.')),
             ]);
     }
 }

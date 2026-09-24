@@ -55,4 +55,14 @@ class CountryResource extends Resource
             'edit' => EditCountry::route('/{record}/edit'),
         ];
     }
+    public static function getModelLabel(): string
+    {
+        return __('Country');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Countries');
+    }
+
 }

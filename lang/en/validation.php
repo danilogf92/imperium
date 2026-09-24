@@ -1,18 +1,6 @@
 <?php
 
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | Validation Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines contain the default error messages used by
-    | the validator class. Some of these rules have multiple versions such
-    | as the size rules. Feel free to tweak each of these messages here.
-    |
-    */
-
     'accepted' => 'The :attribute field must be accepted.',
     'accepted_if' => 'The :attribute field must be accepted when :other is :value.',
     'active_url' => 'The :attribute field must be a valid URL.',
@@ -166,35 +154,201 @@ return [
     'url' => 'The :attribute field must be a valid URL.',
     'ulid' => 'The :attribute field must be a valid ULID.',
     'uuid' => 'The :attribute field must be a valid UUID.',
-
-    /*
-    |--------------------------------------------------------------------------
-    | Custom Validation Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify custom validation messages for attributes using the
-    | convention "attribute.rule" to name the lines. This makes it quick to
-    | specify a specific custom language line for a given attribute rule.
-    |
-    */
-
     'custom' => [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Custom Validation Attributes
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines are used to swap our attribute placeholder
-    | with something more reader friendly such as "E-Mail Address" instead
-    | of "email". This simply helps us make our message more expressive.
-    |
-    */
-
-    'attributes' => [],
-
+    'attributes' => [
+        'name' => 'Name',
+        'form.name' => 'Name',
+        'editData.name' => 'Name',
+        'email' => 'Email',
+        'form.email' => 'Email',
+        'editData.email' => 'Email',
+        'password' => 'Password',
+        'form.password' => 'Password',
+        'editData.password' => 'Password',
+        'password_confirmation' => 'Confirm Password',
+        'form.password_confirmation' => 'Confirm Password',
+        'editData.password_confirmation' => 'Confirm Password',
+        'current_password' => 'Current password',
+        'form.current_password' => 'Current password',
+        'editData.current_password' => 'Current password',
+        'currentPassword' => 'Current password',
+        'form.currentPassword' => 'Current password',
+        'editData.currentPassword' => 'Current password',
+        'locale' => 'Language',
+        'form.locale' => 'Language',
+        'editData.locale' => 'Language',
+        'photo' => 'Photo',
+        'form.photo' => 'Photo',
+        'editData.photo' => 'Photo',
+        'file' => 'File',
+        'form.file' => 'File',
+        'editData.file' => 'File',
+        'company_id' => 'Plant',
+        'form.company_id' => 'Plant',
+        'editData.company_id' => 'Plant',
+        'company_code' => 'Company code',
+        'form.company_code' => 'Company code',
+        'editData.company_code' => 'Company code',
+        'owner_ids' => 'Owners',
+        'form.owner_ids' => 'Owners',
+        'editData.owner_ids' => 'Owners',
+        'sap_order' => 'SAP Order',
+        'form.sap_order' => 'SAP Order',
+        'editData.sap_order' => 'SAP Order',
+        'pda_code' => 'PDA Code',
+        'form.pda_code' => 'PDA Code',
+        'editData.pda_code' => 'PDA Code',
+        'order' => 'Order',
+        'form.order' => 'Order',
+        'editData.order' => 'Order',
+        'rate' => 'Rate',
+        'form.rate' => 'Rate',
+        'editData.rate' => 'Rate',
+        'state' => 'State',
+        'form.state' => 'State',
+        'editData.state' => 'State',
+        'investments' => 'Investments',
+        'form.investments' => 'Investments',
+        'editData.investments' => 'Investments',
+        'justification' => 'Justification',
+        'form.justification' => 'Justification',
+        'editData.justification' => 'Justification',
+        'classification_of_investments' => 'Classification',
+        'form.classification_of_investments' => 'Classification',
+        'editData.classification_of_investments' => 'Classification',
+        'forecast_start_date' => 'Forecast Start Date',
+        'form.forecast_start_date' => 'Forecast Start Date',
+        'editData.forecast_start_date' => 'Forecast Start Date',
+        'forecast_end_date' => 'Forecast End Date',
+        'form.forecast_end_date' => 'Forecast End Date',
+        'editData.forecast_end_date' => 'Forecast End Date',
+        'approve_date' => 'Approved Date',
+        'form.approve_date' => 'Approved Date',
+        'editData.approve_date' => 'Approved Date',
+        'close_date' => 'Close Date',
+        'form.close_date' => 'Close Date',
+        'editData.close_date' => 'Close Date',
+        'quartile_date' => 'Quartile Date',
+        'form.quartile_date' => 'Quartile Date',
+        'editData.quartile_date' => 'Quartile Date',
+        'description' => 'Description',
+        'form.description' => 'Description',
+        'editData.description' => 'Description',
+        'area' => 'Area',
+        'form.area' => 'Area',
+        'editData.area' => 'Area',
+        'qty' => 'Qty',
+        'form.qty' => 'Qty',
+        'editData.qty' => 'Qty',
+        'unit_price' => 'Unit price',
+        'form.unit_price' => 'Unit price',
+        'editData.unit_price' => 'Unit price',
+        'global_price' => 'Budgeted $',
+        'form.global_price' => 'Budgeted $',
+        'editData.global_price' => 'Budgeted $',
+        'percentage' => 'Percentage',
+        'form.percentage' => 'Percentage',
+        'editData.percentage' => 'Percentage',
+        'supplier' => 'Supplier',
+        'form.supplier' => 'Supplier',
+        'editData.supplier' => 'Supplier',
+        'order_no' => 'Order no.',
+        'form.order_no' => 'Order no.',
+        'editData.order_no' => 'Order no.',
+        'order_year' => 'Order year',
+        'form.order_year' => 'Order year',
+        'editData.order_year' => 'Order year',
+        'input_num' => 'Input no.',
+        'form.input_num' => 'Input no.',
+        'editData.input_num' => 'Input no.',
+        'activityTitle' => 'Title',
+        'form.activityTitle' => 'Title',
+        'editData.activityTitle' => 'Title',
+        'activityDescription' => 'Description',
+        'form.activityDescription' => 'Description',
+        'editData.activityDescription' => 'Description',
+        'activityDueDate' => 'Due date',
+        'form.activityDueDate' => 'Due date',
+        'editData.activityDueDate' => 'Due date',
+        'activityAssigneeId' => 'Assigned to',
+        'form.activityAssigneeId' => 'Assigned to',
+        'editData.activityAssigneeId' => 'Assigned to',
+        'activityPeriod' => 'Week',
+        'form.activityPeriod' => 'Week',
+        'editData.activityPeriod' => 'Week',
+        'milestoneId' => 'Milestone',
+        'form.milestoneId' => 'Milestone',
+        'editData.milestoneId' => 'Milestone',
+        'milestoneMonth' => 'Month',
+        'form.milestoneMonth' => 'Month',
+        'editData.milestoneMonth' => 'Month',
+        'milestoneYear' => 'Year',
+        'form.milestoneYear' => 'Year',
+        'editData.milestoneYear' => 'Year',
+        'supplierName' => 'Supplier',
+        'form.supplierName' => 'Supplier',
+        'editData.supplierName' => 'Supplier',
+        'dataImportFile' => 'File',
+        'form.dataImportFile' => 'File',
+        'editData.dataImportFile' => 'File',
+        'columnViewName' => 'View name',
+        'form.columnViewName' => 'View name',
+        'editData.columnViewName' => 'View name',
+        'code' => 'Code',
+        'form.code' => 'Code',
+        'editData.code' => 'Code',
+        'recovery_code' => 'Recovery code',
+        'form.recovery_code' => 'Recovery code',
+        'editData.recovery_code' => 'Recovery code',
+        'newOwnerName' => 'Name',
+        'form.newOwnerName' => 'Name',
+        'editData.newOwnerName' => 'Name',
+        'newOwnerCompanyIds' => 'Plants',
+        'form.newOwnerCompanyIds' => 'Plants',
+        'editData.newOwnerCompanyIds' => 'Plants',
+        'newOwnerCompanyIds.*' => 'Plant',
+        'form.newOwnerCompanyIds.*' => 'Plant',
+        'editData.newOwnerCompanyIds.*' => 'Plant',
+        'newSupplierName' => 'Supplier',
+        'form.newSupplierName' => 'Supplier',
+        'editData.newSupplierName' => 'Supplier',
+        'projectId' => 'Project',
+        'form.projectId' => 'Project',
+        'editData.projectId' => 'Project',
+        'month' => 'Month',
+        'form.month' => 'Month',
+        'editData.month' => 'Month',
+        'cycleYear' => 'Year',
+        'form.cycleYear' => 'Year',
+        'editData.cycleYear' => 'Year',
+        'milestoneExecuted' => 'Completed',
+        'form.milestoneExecuted' => 'Completed',
+        'editData.milestoneExecuted' => 'Completed',
+        'weeklyActivity' => 'Activity',
+        'form.weeklyActivity' => 'Activity',
+        'editData.weeklyActivity' => 'Activity',
+        'activityDueAt' => 'Due date',
+        'form.activityDueAt' => 'Due date',
+        'editData.activityDueAt' => 'Due date',
+    ],
+    'values' => [
+        'state' => [
+            'Capex' => 'Capex',
+            'Planning' => 'Planning',
+            'Execution' => 'Execution',
+            'Finished' => 'Finished',
+            'Postponed' => 'Postponed',
+        ],
+        'form.state' => [
+            'Capex' => 'Capex',
+            'Planning' => 'Planning',
+            'Execution' => 'Execution',
+            'Finished' => 'Finished',
+            'Postponed' => 'Postponed',
+        ],
+    ],
 ];

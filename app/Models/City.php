@@ -44,7 +44,7 @@ class City extends Model
 
             if ($duplicateExists) {
                 throw ValidationException::withMessages([
-                    'city_catalog' => 'This city is already registered for the selected country.',
+                    'city_catalog' => __('This city is already registered for the selected country.'),
                 ]);
             }
         });

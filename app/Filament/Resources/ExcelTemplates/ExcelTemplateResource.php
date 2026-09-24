@@ -20,11 +20,20 @@ class ExcelTemplateResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentArrowDown;
 
-    protected static ?string $navigationLabel = 'Files & Templates';
+    public static function getNavigationLabel(): string
+    {
+        return __('Files & Templates');
+    }
 
-    protected static ?string $modelLabel = 'file or template';
+    public static function getModelLabel(): string
+    {
+        return __('file or template');
+    }
 
-    protected static ?string $pluralModelLabel = 'Files & Templates';
+    public static function getPluralModelLabel(): string
+    {
+        return __('Files & Templates');
+    }
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -32,7 +41,7 @@ class ExcelTemplateResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Project Configuration';
+        return __('Project Configuration');
     }
 
     public static function form(Schema $schema): Schema

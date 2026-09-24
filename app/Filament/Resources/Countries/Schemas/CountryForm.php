@@ -16,7 +16,7 @@ class CountryForm
         return $schema
             ->components([
                 Select::make('country_code')
-                    ->label('Country')
+                    ->label(__('Country'))
                     ->required()
                     ->searchable()
                     ->native(false)
@@ -42,23 +42,23 @@ class CountryForm
                     })
                     ->unique(ignoreRecord: true),
                 TextInput::make('country_name')
-                    ->label('Country Name')
+                    ->label(__('Country Name'))
                     ->disabled()
                     ->dehydrated(),
                 TextInput::make('iso_code')
-                    ->label('Country Code')
-                    ->helperText('ISO 3166-1 Alpha-2')
+                    ->label(__('Country Code'))
+                    ->helperText(__('ISO 3166-1 Alpha-2'))
                     ->formatStateUsing(fn (?Country $record): ?string => $record?->country_code)
                     ->disabled()
                     ->dehydrated(false),
                 TextInput::make('flag')
-                    ->label('Flag')
-                    ->helperText('Generated automatically from the country code')
+                    ->label(__('Flag'))
+                    ->helperText(__('Generated automatically from the country code'))
                     ->disabled()
                     ->dehydrated(),
                 TextInput::make('phone_code')
-                    ->label('Phone Code')
-                    ->helperText('Generated automatically from the selected country')
+                    ->label(__('Phone Code'))
+                    ->helperText(__('Generated automatically from the selected country'))
                     ->maxLength(10)
                     ->disabled()
                     ->dehydrated(),

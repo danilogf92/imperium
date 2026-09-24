@@ -1,5 +1,5 @@
 @if ($pendingDeleteId)
-    <div wire:key="planification-delete-modal" role="dialog" aria-modal="true" aria-label="Confirm deletion" data-modal-open="true" class="app-modal fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4" x-data
+    <div wire:key="planification-delete-modal" role="dialog" aria-modal="true" aria-label="{{ __('Confirm deletion') }}" data-modal-open="true" class="app-modal fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4" x-data
         x-on:keydown.escape.window="$wire.cancelDelete()">
 
         {{-- ============================================================
@@ -38,13 +38,13 @@
 
                 {{-- Título --}}
                 <h2 class="mt-4 text-lg font-bold text-slate-900">
-                    Remove milestone?
+                    {{ __('Remove milestone?') }}
                 </h2>
 
 
                 {{-- Descripción --}}
                 <p class="mt-2 text-sm text-slate-600">
-                    This milestone will be removed from the project timeline.
+                    {{ __('This milestone will be removed from the project timeline.') }}
                 </p>
 
 
@@ -63,7 +63,7 @@
                 {{-- Cancelar --}}
                 <button type="button" wire:click="cancelDelete" data-no-global-loading
                     class="inline-flex h-10 cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
-                    Cancel
+                    {{ __('Cancel') }}
                 </button>
 
 
@@ -82,13 +82,13 @@
 
                     {{-- Texto normal --}}
                     <span wire:loading.remove wire:target="confirmDeleteMilestone">
-                        Remove milestone
+                        {{ __('Remove milestone') }}
                     </span>
 
 
                     {{-- Texto durante eliminación --}}
                     <span wire:loading wire:target="confirmDeleteMilestone">
-                        Removing...
+                        {{ __('Removing...') }}
                     </span>
                 </button>
             </div>

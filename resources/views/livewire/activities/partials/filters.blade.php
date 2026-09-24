@@ -39,7 +39,7 @@
         </div>
         <div class="dashboard-filter-controls grid grid-cols-1 min-[375px]:grid-cols-2 items-end gap-2 sm:flex sm:flex-wrap sm:items-center">
             <x-dashboard-filter-dropdown
-                label="Companies"
+                label="{{ __('Companies') }}"
                 model="companyFilter"
                 :options="$companies->map(
                     fn ($company) => [
@@ -52,7 +52,7 @@
             />
 
             <x-dashboard-filter-dropdown
-                label="Years"
+                label="{{ __('Years') }}"
                 model="yearSearch"
                 :options="collect($years)->map(fn ($year) => ['value' => $year, 'label' => $year])"
                 :selected="$yearSearch"
@@ -60,12 +60,12 @@
             />
 
             <x-dashboard-filter-dropdown
-                label="States"
+                label="{{ __('States') }}"
                 model="stateSearch"
                 :options="collect($stateOptions)->map(
                     fn ($option) => [
                         'value' => $option->value,
-                        'label' => $option->value,
+                        'label' => $option->getLabel(),
                     ],
                 )"
                 :selected="$stateSearch"
@@ -73,12 +73,12 @@
             />
 
             <x-dashboard-filter-dropdown
-                label="Classifications"
+                label="{{ __('Classifications') }}"
                 model="typeOfProjectSearch"
                 :options="collect($classificationOptions)->map(
                     fn ($option) => [
                         'value' => $option->value,
-                        'label' => $option->value,
+                        'label' => $option->getLabel(),
                     ],
                 )"
                 :selected="$typeOfProjectSearch"
@@ -86,12 +86,12 @@
             />
 
             <x-dashboard-filter-dropdown
-                label="Investments"
+                label="{{ __('Investments') }}"
                 model="investmentSearch"
                 :options="collect($investmentOptions)->map(
                     fn ($option) => [
                         'value' => $option->value,
-                        'label' => $option->value,
+                        'label' => $option->getLabel(),
                     ],
                 )"
                 :selected="$investmentSearch"
@@ -99,12 +99,12 @@
             />
 
             <x-dashboard-filter-dropdown
-                label="Justifications"
+                label="{{ __('Justifications') }}"
                 model="justificationSearch"
                 :options="collect($justificationOptions)->map(
                     fn ($option) => [
                         'value' => $option->value,
-                        'label' => $option->value,
+                        'label' => $option->getLabel(),
                     ],
                 )"
                 :selected="$justificationSearch"

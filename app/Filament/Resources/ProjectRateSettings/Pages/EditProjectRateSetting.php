@@ -17,8 +17,8 @@ class EditProjectRateSetting extends EditRecord
 
         if ($minimum >= $maximum) {
             throw ValidationException::withMessages([
-                'data.min_rate' => 'The minimum rate must be lower than the maximum rate.',
-                'data.max_rate' => 'The maximum rate must be greater than the minimum rate.',
+                'data.min_rate' => __('The minimum rate must be lower than the maximum rate.'),
+                'data.max_rate' => __('The maximum rate must be greater than the minimum rate.'),
             ]);
         }
 

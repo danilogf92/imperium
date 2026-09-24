@@ -54,4 +54,14 @@ class PermissionResource extends Resource
             'edit' => EditPermission::route('/{record}/edit'),
         ];
     }
+    public static function getModelLabel(): string
+    {
+        return __('Permission');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Permissions');
+    }
+
 }

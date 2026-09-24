@@ -46,7 +46,7 @@ trait ManagesProjectOwners
 
         if ($this->form->company_id
             && ! in_array((int) $this->form->company_id, array_map('intval', $validated['newOwnerCompanyIds']), true)) {
-            $this->addError('newOwnerCompanyIds', 'Select the project company for this owner.');
+            $this->addError('newOwnerCompanyIds', __('Select the project company for this owner.'));
 
             return;
         }

@@ -14,31 +14,31 @@ class CountriesTable
     {
         return $table
             ->columns([
-                TextColumn::make('country_name')
+                TextColumn::make('country_name')->label(__('Country name'))
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->searchable(),
-                TextColumn::make('country_code')
+                TextColumn::make('country_code')->label(__('Country code'))
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->searchable(),
                 TextColumn::make('flag')
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
-                    ->label('Flag')
+                    ->label(__('Flag'))
                     ->alignCenter()
                     ->size('lg'),
-                TextColumn::make('phone_code')
+                TextColumn::make('phone_code')->label(__('Phone code'))
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->searchable(),
-                TextColumn::make('created_at')
+                TextColumn::make('created_at')->label(__('Created at'))
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
+                TextColumn::make('updated_at')->label(__('Updated at'))
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->dateTime()

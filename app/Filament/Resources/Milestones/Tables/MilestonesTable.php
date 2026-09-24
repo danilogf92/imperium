@@ -16,12 +16,12 @@ class MilestonesTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Name')
+                    ->label(__('Name'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('code')
-                    ->label('Code')
+                    ->label(__('Code'))
                     ->badge()
                     ->searchable()
                     ->sortable(),
@@ -29,19 +29,19 @@ class MilestonesTable
                 ColorColumn::make('color')
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
-                    ->label('Export color')
+                    ->label(__('Export color'))
                     ->copyable(),
 
                 ColorColumn::make('view_color')
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
-                    ->label('View color')
+                    ->label(__('View color'))
                     ->copyable(),
 
                 TextColumn::make('created_at')
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
-                    ->label('Created')
+                    ->label(__('Created'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -49,7 +49,7 @@ class MilestonesTable
                 TextColumn::make('updated_at')
                     ->extraCellAttributes(['data-mobile-secondary' => 'true'])
                     ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
-                    ->label('Updated')
+                    ->label(__('notes.updated'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

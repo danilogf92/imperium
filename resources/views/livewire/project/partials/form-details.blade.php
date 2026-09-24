@@ -3,11 +3,11 @@
                     <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                         <div class="border-b border-gray-200 bg-gray-50 px-5 py-4">
                             <h3 class="font-semibold text-gray-900">
-                                Project identification
+                                {{ __('Project identification') }}
                             </h3>
 
                             <p class="mt-1 text-sm text-gray-500">
-                                Select the company and enter the project identification.
+                                {{ __('Select the company and enter the project identification.') }}
                             </p>
                         </div>
 
@@ -20,14 +20,14 @@
                                 <div class="mb-5">
                                     <label for="company-id{{ $fieldSuffix }}"
                                         class="mb-2 block text-sm font-medium text-gray-700">
-                                        Company
+                                        {{ __('Company') }}
                                         <span class="text-red-500">*</span>
                                     </label>
 
                                     <select id="company-id{{ $fieldSuffix }}" wire:model.live="form.company_id"
                                         data-no-global-loading data-no-global-loading
                                         class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                        <option value="">Select a company</option>
+                                        <option value="">{{ __('Select a company') }}</option>
 
                                         @foreach ($companies as $company)
                                             <option value="{{ $company->id }}">
@@ -49,16 +49,16 @@
                                 <div class="mb-5">
                                     <label for="project-order{{ $fieldSuffix }}"
                                         class="mb-2 block text-sm font-medium text-gray-700">
-                                        Order
+                                        {{ __('Order') }}
                                         <span class="text-red-500">*</span>
                                     </label>
 
                                     <input id="project-order{{ $fieldSuffix }}" type="text" wire:model="form.order"
                                         inputmode="text" maxlength="20"
                                         class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        placeholder="Examples: 1, 5a, 100b">
+                                        placeholder="{{ __('Examples: 1, 5a, 100b') }}">
 
-                                    <p class="mt-1 text-xs text-gray-500">Must be unique within the selected plant.</p>
+                                    <p class="mt-1 text-xs text-gray-500">{{ __('Must be unique within the selected plant.') }}</p>
 
                                     @error('form.order')
                                         <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
@@ -72,13 +72,13 @@
                                 <div class="mb-5">
                                     <label for="project-name{{ $fieldSuffix }}"
                                         class="mb-2 block text-sm font-medium text-gray-700">
-                                        Project name
+                                        {{ __('Project name') }}
                                         <span class="text-red-500">*</span>
                                     </label>
 
                                     <input id="project-name{{ $fieldSuffix }}" type="text" wire:model="form.name"
                                         class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        placeholder="Enter the project name">
+                                        placeholder="{{ __('Enter the project name') }}">
 
                                     @error('form.name')
                                         <p class="mt-1.5 text-sm text-red-600">
@@ -92,12 +92,12 @@
                             <div class="col-span-full">
                                 <div class="mb-2 flex items-center justify-between gap-3">
                                     <label for="project-owner{{ $fieldSuffix }}" class="block text-sm font-medium text-gray-700">
-                                        Owner
+                                        {{ __('Owner') }}
                                     </label>
                                 </div>
 
                                 <div id="project-owner{{ $fieldSuffix }}" class="w-full">
-                                    <x-dashboard-filter-dropdown label="Select owners" model="form.owner_ids"
+                                    <x-dashboard-filter-dropdown label="{{ __('Select owners') }}" model="form.owner_ids"
                                         :options="$owners
                                             ->filter(fn ($owner) => $owner->companies->contains('id', (int) $form->company_id))
                                             ->map(fn ($owner) => ['value' => $owner->id, 'label' => $owner->name])
@@ -112,15 +112,15 @@
                                 @if ($showOwnerCreator)
                                     <div data-modal-open="true" class="app-modal fixed inset-0 z-[190] flex items-center justify-center p-4" role="dialog"
                                         aria-modal="true" aria-labelledby="new-owner-title{{ $fieldSuffix }}">
-                                        <button type="button" wire:click="toggleOwnerCreator" aria-label="Close"
+                                        <button type="button" wire:click="toggleOwnerCreator" aria-label="{{ __('notes.close') }}"
                                             class="absolute inset-0 bg-slate-950/50"></button>
 
                                         <div class="relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto overscroll-contain rounded-lg bg-white shadow-2xl">
                                             <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
                                                 <h3 id="new-owner-title{{ $fieldSuffix }}" class="text-base font-semibold text-slate-900">
-                                                    Create owner
+                                                    {{ __('Create owner') }}
                                                 </h3>
-                                                <button type="button" wire:click="toggleOwnerCreator" title="Close"
+                                                <button type="button" wire:click="toggleOwnerCreator" title="{{ __('notes.close') }}"
                                                     class="inline-flex h-8 w-8 items-center justify-center rounded-md text-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800">
                                                     &times;
                                                 </button>
@@ -129,19 +129,19 @@
                                             <div class="space-y-5 px-5 py-5">
                                                 <div>
                                                     <label for="new-owner-name{{ $fieldSuffix }}" class="mb-2 block text-sm font-medium text-gray-700">
-                                                        Name <span class="text-red-500">*</span>
+                                                        {{ __('Name') }} <span class="text-red-500">*</span>
                                                     </label>
                                                     <input id="new-owner-name{{ $fieldSuffix }}" type="text" wire:model="newOwnerName"
-                                                        maxlength="255" placeholder="Owner name" autofocus
+                                                        maxlength="255" placeholder="{{ __('Owner name') }}" autofocus
                                                         class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                                     @error('newOwnerName') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
                                                 </div>
 
                                                 <div>
                                                     <p class="mb-2 text-sm font-medium text-gray-700">
-                                                        Companies <span class="text-red-500">*</span>
+                                                        {{ __('Companies') }} <span class="text-red-500">*</span>
                                                     </p>
-                                                    <x-dashboard-filter-dropdown label="Select companies" model="newOwnerCompanyIds"
+                                                    <x-dashboard-filter-dropdown label="{{ __('Select companies') }}" model="newOwnerCompanyIds"
                                                         :options="$companies->map(fn ($company) => [
                                                             'value' => $company->id,
                                                             'label' => $company->company_name ?? $company->company_code,
@@ -156,12 +156,12 @@
                                             <div class="flex flex-wrap justify-end gap-2 border-t border-slate-200 px-5 py-4">
                                                 <button type="button" wire:click="toggleOwnerCreator"
                                                     class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                                    Cancel
+                                                    {{ __('Cancel') }}
                                                 </button>
                                                 <button type="button" wire:click="createOwner" wire:loading.attr="disabled"
                                                     wire:target="createOwner"
                                                     class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
-                                                    Create
+                                                    {{ __('Create') }}
                                                 </button>
                                             </div>
                                         </div>
@@ -171,10 +171,10 @@
 
                             <div>
                                 <label for="sap-order{{ $fieldSuffix }}" class="mb-2 block text-sm font-medium text-gray-700">
-                                    SAP Order
+                                    {{ __('SAP Order') }}
                                 </label>
                                 <input id="sap-order{{ $fieldSuffix }}" type="text" wire:model="form.sap_order"
-                                    maxlength="255" placeholder="Enter SAP order"
+                                    maxlength="255" placeholder="{{ __('Enter SAP order') }}"
                                     class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                 @error('form.sap_order') <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p> @enderror
                             </div>
@@ -183,7 +183,7 @@
                             <div class="col-span-full">
                                 <label for="pda-code{{ $fieldSuffix }}"
                                     class="mb-2 block text-sm font-medium text-gray-700">
-                                    PDA code
+                                    {{ __('PDA code') }}
                                     <span class="text-red-500">*</span>
                                 </label>
 
@@ -202,16 +202,16 @@
                                     {{-- Parte editable --}}
                                     <input id="pda-code{{ $fieldSuffix }}" type="text" wire:model="form.pda_code"
                                         class="block min-w-0 flex-1 rounded-r-lg border-gray-300 bg-white px-3 py-2.5 font-mono text-sm uppercase focus:border-blue-500 focus:ring-blue-500"
-                                        placeholder="Enter project code" @disabled(!$form->company_id)>
+                                        placeholder="{{ __('Enter project code') }}" @disabled(!$form->company_id)>
                                 </div>
 
                                 @if (!$form->company_id)
                                     <p class="mt-1.5 text-xs text-gray-500">
-                                        Select a company before entering the PDA code.
+                                        {{ __('Select a company before entering the PDA code.') }}
                                     </p>
                                 @else
                                     <p class="mt-1.5 text-xs text-gray-500">
-                                        The company code is automatically added as a locked prefix.
+                                        {{ __('The company code is automatically added as a locked prefix.') }}
                                     </p>
                                 @endif
 
@@ -229,11 +229,11 @@
                     <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                         <div class="border-b border-gray-200 bg-gray-50 px-5 py-4">
                             <h3 class="font-semibold text-gray-900">
-                                Classification and investment
+                                {{ __('Classification and investment') }}
                             </h3>
 
                             <p class="mt-1 text-sm text-gray-500">
-                                Define the current state and financial classification.
+                                {{ __('Define the current state and financial classification.') }}
                             </p>
                         </div>
 
@@ -243,7 +243,7 @@
                             <div>
                                 <label for="state{{ $fieldSuffix }}"
                                     class="mb-2 block text-sm font-medium text-gray-700">
-                                    State
+                                    {{ __('State') }}
                                     <span class="text-red-500">*</span>
                                 </label>
 
@@ -253,7 +253,7 @@
 
                                     @foreach ($stateOptions as $stateOption)
                                         <option value="{{ $stateOption->value }}">
-                                            {{ $stateOption->value }}
+                                            {{ $stateOption->getLabel() }}
                                         </option>
                                     @endforeach
 
@@ -270,7 +270,7 @@
                             <div>
                                 <label for="rate{{ $fieldSuffix }}"
                                     class="mb-2 block text-sm font-medium text-gray-700">
-                                    Rate
+                                    {{ __('Rate') }}
                                 </label>
 
                                 <input id="rate{{ $fieldSuffix }}" type="number" wire:model="form.rate"
@@ -279,8 +279,7 @@
                                     placeholder="0.00">
 
                                 <p class="mt-1 text-xs text-gray-500">
-                                    Allowed range:
-                                    {{ (float) $rateLimits->min_rate }}of{{ (float) $rateLimits->max_rate }}.
+                                    {{ __('Allowed range: :min to :max.', ['min' => (float) $rateLimits->min_rate, 'max' => (float) $rateLimits->max_rate]) }}
                                 </p>
 
                                 @error('form.rate')
@@ -294,19 +293,19 @@
                             <div>
                                 <label for="investments{{ $fieldSuffix }}"
                                     class="mb-2 block text-sm font-medium text-gray-700">
-                                    Investment
+                                    {{ __('Investment') }}
                                 </label>
 
                                 <select id="investments{{ $fieldSuffix }}" wire:model="form.investments"
                                     class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
 
                                     <option value="">
-                                        Select investment
+                                        {{ __('Select investment') }}
                                     </option>
 
                                     @foreach ($investmentOptions as $investment)
                                         <option value="{{ $investment->value }}">
-                                            {{ $investment->value }}
+                                            {{ $investment->getLabel() }}
                                         </option>
                                     @endforeach
 
@@ -323,7 +322,7 @@
                             <div>
                                 <label for="classification_of_investments{{ $fieldSuffix }}"
                                     class="mb-2 block text-sm font-medium text-gray-700">
-                                    Investment classification
+                                    {{ __('Investment classification') }}
                                 </label>
 
                                 <select id="classification_of_investments{{ $fieldSuffix }}"
@@ -331,12 +330,12 @@
                                     class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
 
                                     <option value="">
-                                        Select classification
+                                        {{ __('Select classification') }}
                                     </option>
 
                                     @foreach ($classificationOptions as $classificationOption)
                                         <option value="{{ $classificationOption->value }}">
-                                            {{ $classificationOption->value }}
+                                            {{ $classificationOption->getLabel() }}
                                         </option>
                                     @endforeach
 
@@ -353,19 +352,19 @@
                             <div>
                                 <label for="justification{{ $fieldSuffix }}"
                                     class="mb-2 block text-sm font-medium text-gray-700">
-                                    Justification
+                                    {{ __('Justification') }}
                                 </label>
 
                                 <select id="justification{{ $fieldSuffix }}" wire:model="form.justification"
                                     class="block w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
 
                                     <option value="">
-                                        Select justification
+                                        {{ __('Select justification') }}
                                     </option>
 
                                     @foreach ($justificationOptions as $justificationOption)
                                         <option value="{{ $justificationOption->value }}">
-                                            {{ $justificationOption->value }}
+                                            {{ $justificationOption->getLabel() }}
                                         </option>
                                     @endforeach
 

@@ -17,9 +17,9 @@
     @endphp
 
     @if ($editing)
-        <button type="button" wire:click="openModal" data-no-global-loading title="Edit project"
+        <button type="button" wire:click="openModal" data-no-global-loading title="{{ __('Edit project') }}"
             class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-blue-600 text-white shadow-sm transition duration-150 hover:-translate-y-px hover:bg-blue-500 hover:shadow-md active:translate-y-0 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1">
-            <span class="sr-only">Edit project</span>
+            <span class="sr-only">{{ __('Edit project') }}</span>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                 stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -37,13 +37,13 @@
         <x-slot name="title">
             <div>
                 <h2 class="text-xl font-bold text-gray-900">
-                    {{ $editing ? 'Edit project' : 'Create project' }}
+                    {{ $editing ? __('Edit project') : __('Create project') }}
                 </h2>
 
                 <p class="mt-1 text-sm font-normal text-gray-500">
                     {{ $editing
-                        ? 'Update project details, dates and documents.'
-                        : 'Complete the project details, dates and documents.' }}
+                        ? __('Update project details, dates and documents.')
+                        : __('Complete the project details, dates and documents.') }}
                 </p>
             </div>
         </x-slot>
@@ -51,29 +51,31 @@
         <x-slot name="content">
             <div class="min-w-0" x-data="{ activeSection: @js($initialSection) }">
                 <nav class="app-form-tabs mb-3 grid grid-cols-3 gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm sm:mb-5 sm:gap-2 sm:p-1.5"
-                    aria-label="Project form sections">
+                    aria-label="{{ __('Project form sections') }}">
                     <button type="button" x-on:click="activeSection = 'details'"
                         x-bind:class="activeSection === 'details' ? 'bg-blue-600 text-white shadow-sm' :
                             'text-slate-600 hover:bg-slate-100'"
                         class="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition">
-                        <span class="hidden sm:inline">Project</span> Details
+                        <span class="hidden sm:inline">{{ __('activity_control.project') }}</span> {{ __('Details') }}
                     </button>
                     <button type="button" x-on:click="activeSection = 'dates'"
                         x-bind:class="activeSection === 'dates' ? 'bg-blue-600 text-white shadow-sm' :
                             'text-slate-600 hover:bg-slate-100'"
                         class="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition">
-                        Dates
+                        {{ __('Dates') }}
+
                         @if ($dateErrors)
-                            <span class="h-2 w-2 rounded-full bg-red-500" aria-label="Dates contain errors"></span>
+                            <span class="h-2 w-2 rounded-full bg-red-500" aria-label="{{ __('Dates contain errors') }}"></span>
                         @endif
                     </button>
                     <button type="button" x-on:click="activeSection = 'documents'"
                         x-bind:class="activeSection === 'documents' ? 'bg-blue-600 text-white shadow-sm' :
                             'text-slate-600 hover:bg-slate-100'"
                         class="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition">
-                        Documents
+                        {{ __('Documents') }}
+
                         @if ($documentErrors)
-                            <span class="h-2 w-2 rounded-full bg-red-500" aria-label="Documents contain errors"></span>
+                            <span class="h-2 w-2 rounded-full bg-red-500" aria-label="{{ __('Documents contain errors') }}"></span>
                         @endif
                     </button>
                 </nav>

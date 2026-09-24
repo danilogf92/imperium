@@ -15,7 +15,7 @@
             'icon' => 'projects',
         ],
         [
-            'label' => 'Budgeted',
+            'label' => __('Budgeted'),
             'value' => $formatMoney($budgeted),
             'accent' => 'bg-blue-500',
             'text' => 'text-blue-600',
@@ -23,7 +23,7 @@
             'icon' => 'budgeted',
         ],
         [
-            'label' => 'Approved',
+            'label' => __('Approved'),
             'value' => $formatMoney($executionFinishedBudget),
             'accent' => 'bg-gray-500',
             'text' => 'text-gray-600',
@@ -31,7 +31,7 @@
             'icon' => 'execution-finished',
         ],
         [
-            'label' => 'Assigned',
+            'label' => __('Assigned'),
             'value' => $formatMoney($booked),
             'accent' => 'bg-amber-500',
             'text' => 'text-amber-600',
@@ -39,7 +39,7 @@
             'icon' => 'booked',
         ],
         [
-            'label' => 'Executed',
+            'label' => __('Executed'),
             'value' => $formatMoney($executed),
             'accent' => 'bg-emerald-500',
             'text' => 'text-emerald-600',
@@ -47,7 +47,7 @@
             'icon' => 'executed',
         ],
         [
-            'label' => 'Booked',
+            'label' => __('Booked'),
             'value' => $formatMoney($realValue),
             'accent' => 'bg-violet-500',
             'text' => 'text-violet-600',
@@ -55,7 +55,7 @@
             'icon' => 'real',
         ],
         [
-            'label' => 'Available',
+            'label' => __('Available'),
             'value' => $formatMoney($executionFinishedBudget - $booked),
             'accent' => 'bg-emerald-500',
             'text' => 'text-emerald-600',

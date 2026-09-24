@@ -1,6 +1,6 @@
 @props([
     'method',
-    'label' => 'Export Excel',
+    'label' => __('Export Excel'),
     'loadingLabel' => 'Generating...',
 ])
 

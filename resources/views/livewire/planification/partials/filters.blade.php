@@ -88,7 +88,7 @@
 
                         {{-- Planta --}}
                         <x-dashboard-filter-dropdown
-                            label="Plants"
+                            label="{{ __('Plants') }}"
                             model="plantFilter"
                             :options="$plantOptions->map(
                                 fn($plant) => [
@@ -101,12 +101,12 @@
 
                         {{-- Estado --}}
                         <x-dashboard-filter-dropdown
-                            label="Status"
+                            label="{{ __('Status') }}"
                             model="statusFilter"
                             :options="collect($statusOptions)->map(
                                 fn($status) => [
                                     'value' => $status,
-                                    'label' => $status,
+                                    'label' => __($status),
                                 ],
                             )"
                             :selected="$statusFilter"
@@ -114,7 +114,7 @@
 
                         {{-- Año --}}
                         <x-dashboard-filter-dropdown
-                            label="Years"
+                            label="{{ __('Years') }}"
                             model="creationYearFilter"
                             :options="$creationYearOptions->map(
                                 fn($year) => [
@@ -127,7 +127,7 @@
 
                         <div class="flex items-center gap-1">
                             <x-dashboard-filter-dropdown
-                                label="Activity week"
+                                label="{{ __('Activity week') }}"
                                 model="activityWeekFilter"
                                 :options="$activityWeekOptions"
                                 :selected="$activityWeekFilter"
@@ -135,7 +135,7 @@
                                 show-selection />
                             @if ($activityWeekFilter !== '')
                                 <button type="button" wire:click="resetActivityWeekFilter" data-no-global-loading
-                                    title="Return to current week" aria-label="Return to current week"
+                                    title="{{ __('Return to current week') }}" aria-label="{{ __('Return to current week') }}"
                                     class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg bg-red-600 text-lg font-bold text-white shadow-sm hover:bg-red-700">
                                     ×
                                 </button>
@@ -143,22 +143,22 @@
                         </div>
 
                         <label class="shrink-0">
-                            <span class="sr-only">Milestone completion percentage</span>
+                            <span class="sr-only">{{ __('Milestone completion percentage') }}</span>
                             <select wire:model.change="milestoneCompletionFilter" data-no-global-loading
                                 class="h-11 rounded-lg border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                <option value="">All milestones</option>
-                                <option value="completed">Complete milestones (100%)</option>
-                                <option value="incomplete">Incomplete milestones (&lt;100%)</option>
+                                <option value="">{{ __('All milestones') }}</option>
+                                <option value="completed">{{ __('Complete milestones (100%)') }}</option>
+                                <option value="incomplete">{{ __('Incomplete milestones (<100%)') }}</option>
                             </select>
                         </label>
 
                         <label class="shrink-0">
-                            <span class="sr-only">Activity execution</span>
+                            <span class="sr-only">{{ __('Activity execution') }}</span>
                             <select wire:model.change="activityExecutionFilter" data-no-global-loading
                                 class="h-11 rounded-lg border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                <option value="">All activities</option>
-                                <option value="completed">Completed activities</option>
-                                <option value="incomplete">Incomplete activities</option>
+                                <option value="">{{ __('All activities') }}</option>
+                                <option value="completed">{{ __('Completed activities') }}</option>
+                                <option value="incomplete">{{ __('Incomplete activities') }}</option>
                             </select>
                         </label>
 
@@ -178,7 +178,7 @@
                                 class="h-11 rounded-lg border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500">
 
                                 <option value="usd">USD ($)</option>
-                                <option value="eur">EUR (&euro;)</option>
+                                <option value="eur">{{ __('EUR (€)') }}</option>
                             </select>
                         </label>
 
@@ -241,5 +241,5 @@
                     </div>
                 </div>
 
-<x-filter-chips clear="clearFilters" :filters="[['model' => 'plantFilter', 'label' => 'Plants', 'value' => $plantFilter],['model' => 'statusFilter', 'label' => 'Status', 'value' => $statusFilter],['model' => 'creationYearFilter', 'label' => 'Years', 'value' => $creationYearFilter],['model' => 'activityWeekFilter', 'label' => 'Week', 'value' => $activityWeekFilter],['model' => 'milestoneCompletionFilter', 'label' => 'Milestones', 'value' => $milestoneCompletionFilter],['model' => 'activityExecutionFilter', 'label' => 'Activities', 'value' => $activityExecutionFilter],['model' => 'search', 'label' => 'Search', 'value' => $search], ['model' => 'currency', 'label' => 'Currency', 'value' => $currency, 'default' => 'usd'], ['model' => 'cellDisplay', 'label' => 'Display', 'value' => $cellDisplay, 'default' => 'combined'], ['model' => 'onlyWithMilestones', 'label' => 'Milestones', 'value' => $onlyWithMilestones, 'default' => false, 'options' => [1 => 'With milestones']] ]" />
+<x-filter-chips clear="clearFilters" :filters="[['model' => 'plantFilter', 'label' => __('Plants'), 'value' => $plantFilter],['model' => 'statusFilter', 'translate' => true, 'label' => __('Status'), 'value' => $statusFilter],['model' => 'creationYearFilter', 'label' => __('Years'), 'value' => $creationYearFilter],['model' => 'activityWeekFilter', 'label' => __('Week'), 'value' => $activityWeekFilter],['model' => 'milestoneCompletionFilter', 'translate' => true, 'label' => __('Milestones'), 'value' => $milestoneCompletionFilter, 'options' => ['completed' => __('Complete milestones (100%)'), 'incomplete' => __('Incomplete milestones (<100%)')]],['model' => 'activityExecutionFilter', 'translate' => true, 'label' => __('Activities'), 'value' => $activityExecutionFilter, 'options' => ['completed' => __('Completed activities'), 'incomplete' => __('Incomplete activities')]],['model' => 'search', 'label' => __('activity_control.search'), 'value' => $search], ['model' => 'currency', 'translate' => true, 'label' => __('Currency'), 'value' => $currency, 'default' => 'usd', 'options' => ['usd' => 'USD', 'eur' => 'EUR']], ['model' => 'cellDisplay', 'translate' => true, 'label' => __('Display'), 'value' => $cellDisplay, 'default' => 'combined', 'options' => ['combined' => __('Milestone | Value'), 'milestone' => __('Milestone only'), 'value' => __('Value only')]], ['model' => 'onlyWithMilestones', 'translate' => true, 'label' => __('Milestones'), 'value' => $onlyWithMilestones, 'default' => false, 'options' => [1 => 'With milestones']] ]" />
 </div>

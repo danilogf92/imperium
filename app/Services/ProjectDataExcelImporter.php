@@ -140,7 +140,7 @@ class ProjectDataExcelImporter
 
         if ($rate <= 0) {
             throw ValidationException::withMessages([
-                'dataImportFile' => 'The project rate must be greater than zero before importing data.',
+                'dataImportFile' => __('The project rate must be greater than zero before importing data.'),
             ]);
         }
 
@@ -161,7 +161,7 @@ class ProjectDataExcelImporter
 
         if (count($rows) < 2) {
             throw ValidationException::withMessages([
-                'dataImportFile' => 'The workbook must contain a header row and at least one data row.',
+                'dataImportFile' => __('The workbook must contain a header row and at least one data row.'),
             ]);
         }
 
@@ -181,9 +181,7 @@ class ProjectDataExcelImporter
 
         if ($missingFields !== []) {
             throw ValidationException::withMessages([
-                'dataImportFile' => 'Missing required columns: '
-                    . implode(', ', $missingFields)
-                    . '.',
+                'dataImportFile' => __('Missing required columns: :columns.', ['columns' => implode(', ', $missingFields)]),
             ]);
         }
 
@@ -210,7 +208,7 @@ class ProjectDataExcelImporter
                 if (in_array($field, self::NUMERIC_FIELDS, true)) {
                     if (filled($value) && ! is_numeric($value)) {
                         $column = $this->columnLetter($columnIndex);
-                        $errors[] = "Row {$excelRow}, column {$column} ({$header}): value must be numeric.";
+                        $errors[] = __('Row :value1, column :value2 (:value3): value must be numeric.', ['value1' => $excelRow, 'value2' => $column, 'value3' => $header]);
                         continue;
                     }
 
@@ -238,16 +236,16 @@ class ProjectDataExcelImporter
                 if ($value === null || trim((string) $value) === '') {
                     $column = $columnIndex === null ? '?' : $this->columnLetter($columnIndex);
                     $label = str_replace('_', ' ', $field);
-                    $errors[] = "Row {$excelRow}, column {$column} ({$label}): value is required.";
+                    $errors[] = __('Row :value1, column :value2 (:value3): value is required.', ['value1' => $excelRow, 'value2' => $column, 'value3' => $label]);
                 }
             }
 
             if ($record['percentage'] < 0 || $record['percentage'] > 100) {
-                $errors[] = "Row {$excelRow}, percentage: value must be between 0 and 100.";
+                $errors[] = __('Row :value1, percentage: value must be between 0 and 100.', ['value1' => $excelRow]);
             }
 
             if ($record['order_year'] && ($record['order_year'] < 2000 || $record['order_year'] > 2100)) {
-                $errors[] = "Row {$excelRow}, order year: value must be between 2000 and 2100.";
+                $errors[] = __('Row :value1, order year: value must be between 2000 and 2100.', ['value1' => $excelRow]);
             }
 
             foreach (
@@ -267,16 +265,16 @@ class ProjectDataExcelImporter
             ) {
                 if (mb_strlen((string) $record[$field]) > 255) {
                     $label = str_replace('_', ' ', $field);
-                    $errors[] = "Row {$excelRow}, {$label}: exceeds 255 characters.";
+                    $errors[] = __('Row :value1, :value2: exceeds 255 characters.', ['value1' => $excelRow, 'value2' => $label]);
                 }
             }
 
             if (mb_strlen((string) $record['description']) > 10000) {
-                $errors[] = "Row {$excelRow}, description: exceeds 10,000 characters.";
+                $errors[] = __('Row :value1, description: exceeds 10,000 characters.', ['value1' => $excelRow]);
             }
 
             if (mb_strlen((string) $record['observations']) > 10000) {
-                $errors[] = "Row {$excelRow}, observations: exceeds 10,000 characters.";
+                $errors[] = __('Row :value1, observations: exceeds 10,000 characters.', ['value1' => $excelRow]);
             }
 
             $record['project_id'] = $project->id;
@@ -290,7 +288,7 @@ class ProjectDataExcelImporter
 
             if (count($records) > 5000) {
                 throw ValidationException::withMessages([
-                    'dataImportFile' => 'A maximum of 5,000 rows can be imported at once.',
+                    'dataImportFile' => __('A maximum of 5,000 rows can be imported at once.'),
                 ]);
             }
         }
@@ -303,7 +301,7 @@ class ProjectDataExcelImporter
 
         if ($records === []) {
             throw ValidationException::withMessages([
-                'dataImportFile' => 'No data rows were found in the workbook.',
+                'dataImportFile' => __('No data rows were found in the workbook.'),
             ]);
         }
 

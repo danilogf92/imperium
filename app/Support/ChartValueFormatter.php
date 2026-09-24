@@ -11,7 +11,7 @@ class ChartValueFormatter
         return "function(value) { const number = Number(value) || 0; const absolute = Math.abs(number); "
             ."const divisor = absolute >= 1000000 ? 1000000 : (absolute >= 1000 ? 1000 : 1); "
             ."const suffix = divisor === 1000000 ? ' M' : (divisor === 1000 ? ' K' : ''); "
-            ."return {$encodedSymbol} + ' ' + (number / divisor).toLocaleString(undefined, "
+            ."return {$encodedSymbol} + ' ' + (number / divisor).toLocaleString(document.documentElement.lang, "
             ."{minimumFractionDigits: 0, maximumFractionDigits: 2}) + suffix; }";
     }
 }

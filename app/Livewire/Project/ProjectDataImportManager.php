@@ -52,17 +52,17 @@ class ProjectDataImportManager extends Component
         $project = $this->authorizedProject($this->projectId);
         $this->existingRows = Data::query()->where('project_id', $project->id)->count();
         if ($this->existingRows > 0) {
-            $this->addError('file', 'Delete the existing imported data rows before importing another workbook.');
+            $this->addError('file', __('Delete the existing imported data rows before importing another workbook.'));
             return;
         }
 
         $this->validate([
             'file' => ['required', 'file', 'extensions:xlsx,xls', 'mimes:xlsx,xls', 'max:20480'],
         ], [
-            'file.required' => 'Select the completed project data workbook.',
-            'file.extensions' => 'Select an Excel file in .xlsx or .xls format.',
-            'file.mimes' => 'The selected file is not a valid Excel workbook.',
-            'file.max' => 'The workbook may not be larger than 20 MB.',
+            'file.required' => __('Select the completed project data workbook.'),
+            'file.extensions' => __('Select an Excel file in .xlsx or .xls format.'),
+            'file.mimes' => __('tools.error_upload_invalid'),
+            'file.max' => __('The workbook may not be larger than 20 MB.'),
         ]);
 
         try {
@@ -71,12 +71,12 @@ class ProjectDataImportManager extends Component
             throw $exception;
         } catch (Throwable $exception) {
             report($exception);
-            $this->addError('file', 'The workbook could not be read. Verify that it is not damaged and uses the approved template.');
+            $this->addError('file', __('The workbook could not be read. Verify that it is not damaged and uses the approved template.'));
             return;
         }
 
         $this->dispatch('project-updated', projectId: $project->id);
-        $this->dispatch('alert', type: 'success', title: "{$imported} project data rows imported", position: 'center', timer: 2200);
+        $this->dispatch('alert', type: 'success', title: __(':count project data rows imported', ['count' => $imported]), position: 'center', timer: 2200);
         $this->close();
     }
 
@@ -89,7 +89,7 @@ class ProjectDataImportManager extends Component
             $project->update(['data_uploaded' => false]);
         });
         $this->dispatch('project-updated', projectId: $project->id);
-        $this->dispatch('alert', type: 'success', title: 'Imported project data deleted', position: 'center', timer: 1800);
+        $this->dispatch('alert', type: 'success', title: __('Imported project data deleted'), position: 'center', timer: 1800);
         $this->close();
     }
 

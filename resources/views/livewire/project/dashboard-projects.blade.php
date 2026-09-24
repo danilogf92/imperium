@@ -101,10 +101,10 @@
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
-                            <h2 class="font-semibold text-slate-900">Dashboard filters</h2>
+                            <h2 class="font-semibold text-slate-900">{{ __('Dashboard filters') }}</h2>
                             <span class="text-slate-300">|</span>
                             <span class="text-xs font-semibold uppercase tracking-wider text-blue-600">
-                                Project dashboard
+                                {{ __('Project dashboard') }}
                             </span>
                         </div>
                         <h1 class="mt-1 break-words text-xl font-bold tracking-tight text-slate-900">
@@ -115,7 +115,7 @@
                             <span>{{ $project->company?->company_name }}</span>
                             <span class="rounded-full px-2.5 py-1 font-medium"
                                 style="background-color: {{ $project->state->softColor() }}; color: {{ $project->state->textColor() }};">
-                                {{ $project->state->value }}
+                                {{ $project->state->getLabel() }}
                             </span>
                         </div>
                     </div>
@@ -152,14 +152,14 @@
 
                         @if ($hasOrders)
                             <a href="{{ route('projects.orders', ['project' => $project->slug]) }}" wire:navigate
-                                title="View project orders"
+                                title="{{ __('View project orders') }}"
                                 class="project-dashboard-action back-to-projects-action inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2">
                                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor"
                                     stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M4 3.5h12v13H4v-13Zm3 3h6m-6 3h6m-6 3h4" />
                                 </svg>
-                                Orders
+                                {{ __('Orders') }}
                             </a>
                         @else
                             <span class="project-orders-tooltip-wrapper inline-flex" tabindex="0">
@@ -170,10 +170,10 @@
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M4 3.5h12v13H4v-13Zm3 3h6m-6 3h6m-6 3h4" />
                                     </svg>
-                                    Orders
+                                    {{ __('Orders') }}
                                 </button>
                                 <span role="tooltip" class="project-orders-tooltip">
-                                    This project has no orders
+                                    {{ __('This project has no orders') }}
                                 </span>
                             </span>
                         @endif
@@ -185,25 +185,25 @@
                 <div class="mb-2 md:hidden"><x-filter-toggle /></div>
                 <div x-show="open" x-cloak>
                     <div class="dashboard-filter-controls flex flex-wrap items-center gap-3">
-                        <x-dashboard-filter-dropdown label="Group by" model="searchData" :options="collect($columnNames)->map(
+                        <x-dashboard-filter-dropdown label="{{ __('Group by') }}" model="searchData" :options="collect($columnNames)->map(
                             fn($columnName) => [
                                 'value' => $columnName,
-                                'label' => $this->formatText($columnName),
+                                'label' => __($this->formatText($columnName)),
                             ],
                         )"
                             :selected="$searchData" default="area" />
 
-                        <x-dashboard-filter-dropdown label="Financial value" model="investments" :options="[
-                            ['value' => 'global_price_euros', 'label' => 'Budgeted'],
-                            ['value' => 'real_value_euros', 'label' => 'Booked (Real SAP)'],
-                            ['value' => 'booked_euros', 'label' => 'Assigned'],
-                            ['value' => 'executed_euros', 'label' => 'Executed'],
+                        <x-dashboard-filter-dropdown label="{{ __('Financial value') }}" model="investments" :options="[
+                            ['value' => 'global_price_euros', 'label' => __('Budgeted')],
+                            ['value' => 'real_value_euros', 'label' => __('Booked (Real SAP)')],
+                            ['value' => 'booked_euros', 'label' => __('Assigned')],
+                            ['value' => 'executed_euros', 'label' => __('Executed')],
                         ]"
                             :selected="$investments" default="global_price_euros" />
 
-                        <x-dashboard-filter-dropdown label="Currency" model="dollarOrEuro" :options="[
-                            ['value' => 'euro', 'label' => 'Euro (€)'],
-                            ['value' => 'dollar', 'label' => 'Dollar ($)'],
+                        <x-dashboard-filter-dropdown label="{{ __('Currency') }}" model="dollarOrEuro" :options="[
+                            ['value' => 'euro', 'label' => __('Euro (€)')],
+                            ['value' => 'dollar', 'label' => __('Dollar ($)')],
                         ]"
                             :selected="$dollarOrEuro" default="euro" />
 
@@ -221,9 +221,9 @@
                 @endphp
 
                 <x-filter-chips clear="resetAll" :filters="[
-                    ['model' => 'searchData', 'label' => 'Group by', 'value' => $searchData, 'default' => 'area'],
-                    ['model' => 'investments', 'label' => 'Financial value', 'value' => $investments, 'default' => 'global_price_euros', 'options' => $financialFilterLabels],
-                    ['model' => 'dollarOrEuro', 'label' => 'Currency', 'value' => $dollarOrEuro, 'default' => 'euro'],
+                    ['model' => 'searchData', 'translate' => true, 'label' => __('Group by'), 'value' => $searchData, 'default' => 'area'],
+                    ['model' => 'investments', 'translate' => true, 'label' => __('Financial value'), 'value' => $investments, 'default' => 'global_price_euros', 'options' => $financialFilterLabels],
+                    ['model' => 'dollarOrEuro', 'translate' => true, 'label' => __('Currency'), 'value' => $dollarOrEuro, 'default' => 'euro'],
                 ]" />
             </div>
         </section>
@@ -234,41 +234,41 @@
             $available = $approved - $executed;
             $metrics = [
                 [
-                    'label' => 'Budgeted',
+                    'label' => __('Budgeted'),
                     'value' => \App\Support\MoneyValueFormatter::thousands($budgeted, $currencySymbol),
                     'color' => 'blue',
                 ],
                 [
-                    'label' => 'Approved',
+                    'label' => __('Approved'),
                     'value' => \App\Support\MoneyValueFormatter::thousands($approved, $currencySymbol),
                     'color' => 'slate',
                 ],
                 [
-                    'label' => 'Executed',
+                    'label' => __('Executed'),
                     'value' => \App\Support\MoneyValueFormatter::thousands($executed, $currencySymbol),
                     'color' => 'emerald',
                 ],
                 [
-                    'label' => 'Assigned',
+                    'label' => __('Assigned'),
                     'value' => \App\Support\MoneyValueFormatter::thousands($booked, $currencySymbol),
                     'color' => 'amber',
                 ],
                 [
-                    'label' => 'Booked (Real SAP)',
+                    'label' => __('Booked (Real SAP)'),
                     'value' => \App\Support\MoneyValueFormatter::thousands($real_value, $currencySymbol),
                     'color' => 'violet',
                 ],
                 [
-                    'label' => 'Committed',
+                    'label' => __('Committed'),
                     'value' => \App\Support\MoneyValueFormatter::thousands($booked - $real_value, $currencySymbol),
                     'color' => 'amber',
                 ],
                 [
-                    'label' => 'Available',
+                    'label' => __('Available'),
                     'value' => \App\Support\MoneyValueFormatter::thousands($available, $currencySymbol),
                     'color' => 'cyan',
                 ],
-                ['label' => 'Progress', 'value' => number_format($percentage, 2) . '%', 'color' => 'rose'],
+                ['label' => __('Progress'), 'value' => number_format($percentage, 2) . '%', 'color' => 'rose'],
             ];
         @endphp
 
@@ -345,49 +345,49 @@
                 $charts = [
                     [
                         'name' => 'project-classification',
-                        'title' => 'Project classification',
+                        'title' => __('Project classification'),
                         'type' => 'column',
                         'model' => $columnChartModel,
                     ],
                     [
                         'name' => 'project-comparison',
-                        'title' => 'Financial comparison',
+                        'title' => __('Financial comparison'),
                         'type' => 'column',
                         'model' => $multiColumnChartModel,
                     ],
                     [
                         'name' => 'project-progress-percentage',
-                        'title' => 'Project progress',
+                        'title' => __('Project progress'),
                         'type' => 'column',
                         'model' => $resumePercentageGraph,
                     ],
                     [
                         'name' => 'project-financial-summary',
-                        'title' => 'Financial summary',
+                        'title' => __('Financial summary'),
                         'type' => 'column',
                         'model' => $resumeGraph,
                     ],
                     [
                         'name' => 'project-distribution',
-                        'title' => 'Investment distribution',
+                        'title' => __('Investment distribution'),
                         'type' => 'pie',
                         'model' => $pieChartModel,
                     ],
                     [
                         'name' => 'project-real-balance',
-                        'title' => 'Balance with Booked (Real SAP)',
+                        'title' => __('Balance with Booked (Real SAP)'),
                         'type' => 'pie',
                         'model' => $pieChartModelResume,
                     ],
                     [
                         'name' => 'project-radar',
-                        'title' => 'Investment radar',
+                        'title' => __('Investment radar'),
                         'type' => 'radar',
                         'model' => $radarChartModel,
                     ],
                     [
                         'name' => 'project-booked-balance',
-                        'title' => 'Balance with Assigned',
+                        'title' => __('Balance with Assigned'),
                         'type' => 'pie',
                         'model' => $pieChartModelResumeTwo,
                     ],

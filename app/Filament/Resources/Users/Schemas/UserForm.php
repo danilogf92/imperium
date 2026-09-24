@@ -15,43 +15,43 @@ class UserForm
     {
         return $schema
             ->components([
-                TextInput::make('name')
+                TextInput::make('name')->label(__('Name'))
                     ->required(),
 
                 TextInput::make('email')
-                    ->label('Email address')
+                    ->label(__('Email address'))
                     ->email()
                     ->required(),
 
-                DateTimePicker::make('email_verified_at'),
+                DateTimePicker::make('email_verified_at')->label(__('Email verified at')),
 
-                TextInput::make('password')
+                TextInput::make('password')->label(__('Password'))
                     ->password()
                     ->required(fn(string $operation): bool => $operation === 'create')
                     ->dehydrated(fn($state) => filled($state))
                     ->dehydrateStateUsing(fn($state) => Hash::make($state)),
 
-                Toggle::make('is_active')
+                Toggle::make('is_active')->label(__('Active'))
                     ->default(true)
                     ->disabled(fn ($record): bool => $record?->is(auth()->user()) ?? false)
                     ->required(),
 
                 Toggle::make('can_access_admin')
-                    ->label('Admin access')
-                    ->helperText('Admin users can enter Filament. Normal users only access the application.')
+                    ->label(__('Admin access'))
+                    ->helperText(__('Admin users can enter Filament. Normal users only access the application.'))
                     ->default(false)
                     ->disabled(fn ($record): bool => $record?->is(auth()->user()) ?? false)
                     ->required(),
 
                 Select::make('area_id')
-                    ->label('Area')
+                    ->label(__('Area'))
                     ->relationship('area', 'name')
                     ->searchable()
                     ->preload()
                     ->nullable(),
 
                 Select::make('roles')
-                    ->label('Roles')
+                    ->label(__('Roles'))
                     ->relationship('roles', 'name')
                     ->multiple()
                     ->searchable()

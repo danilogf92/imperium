@@ -1,22 +1,22 @@
 <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:col-span-2 lg:col-span-1">
-    <p class="text-xs font-bold uppercase tracking-wider text-blue-600">Financial variance</p>
+    <p class="text-xs font-bold uppercase tracking-wider text-blue-600">{{ __('Financial variance') }}</p>
     <div class="mt-3 grid grid-cols-2 gap-3">
 
-        <div class="rounded-lg bg-emerald-50 p-3"><span class="text-xs text-emerald-700">Available</span>
+        <div class="rounded-lg bg-emerald-50 p-3"><span class="text-xs text-emerald-700">{{ __('Available') }}</span>
             <p class="mt-1 font-bold text-emerald-900">{{ $executiveCurrencySymbol }}
                 {{ \App\Support\MoneyValueFormatter::thousands($executiveFinancial['available']) }}</p>
         </div>
 
-        <div class="rounded-lg bg-violet-50 p-3"><span class="text-xs text-violet-700">Budget - Booked (Real SAP)</span>
+        <div class="rounded-lg bg-violet-50 p-3"><span class="text-xs text-violet-700">{{ __('Budget - Booked (Real SAP)') }}</span>
             <p class="mt-1 font-bold text-violet-900">{{ $executiveCurrencySymbol }}
                 {{ \App\Support\MoneyValueFormatter::thousands($executiveFinancial['real_variance']) }}</p>
         </div>
 
-        <div class="rounded-lg bg-amber-50 p-3"><span class="text-xs text-amber-700">Assigned rate</span>
+        <div class="rounded-lg bg-amber-50 p-3"><span class="text-xs text-amber-700">{{ __('Assigned rate') }}</span>
             <p class="mt-1 font-bold text-amber-900">{{ number_format($executiveFinancial['booked_rate'], 1) }}%</p>
         </div>
 
-        <div class="rounded-lg bg-cyan-50 p-3"><span class="text-xs text-cyan-700">Execution rate</span>
+        <div class="rounded-lg bg-cyan-50 p-3"><span class="text-xs text-cyan-700">{{ __('Execution rate') }}</span>
             <p class="mt-1 font-bold text-cyan-900">{{ number_format($executiveFinancial['execution_rate'], 1) }}%</p>
         </div>
 
@@ -28,7 +28,7 @@
             'text-xs',
             'text-red-700' => $executiveFinancial['execution_variance'] < 0,
             'text-slate-600' => $executiveFinancial['execution_variance'] >= 0,
-        ])>Execution variance</span>
+        ])>{{ __('Execution variance') }}</span>
             <p @class([
                 'mt-1 font-bold',
                 'text-red-900' => $executiveFinancial['execution_variance'] < 0,
@@ -45,7 +45,7 @@
             'text-xs',
             'text-red-700' => $executiveFinancial['execution_overrun'] > 0,
             'text-emerald-700' => $executiveFinancial['execution_overrun'] <= 0,
-        ])>Execution overrun</span>
+        ])>{{ __('Execution overrun') }}</span>
             <p @class([
                 'mt-1 font-bold',
                 'text-red-900' => $executiveFinancial['execution_overrun'] > 0,

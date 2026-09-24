@@ -15,7 +15,7 @@ class ExcelTemplateDownloadController
             ->whereKey($excelTemplate->id)->exists(), 404);
 
         $disk = Storage::disk($excelTemplate->disk);
-        abort_unless($disk->exists($excelTemplate->file_path), 404, 'Template file not found.');
+        abort_unless($disk->exists($excelTemplate->file_path), 404, __('Template file not found.'));
 
         return $disk->download(
             $excelTemplate->file_path,

@@ -1,4 +1,5 @@
 @import './theme.css';
+@import './pagination.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -43,52 +44,6 @@
 @layer components {
     .dashboard-chart-card.annual-projection-chart {
         height: auto !important;
-    }
-
-    .app-pagination [aria-current="page"] > span,
-    .app-pagination .app-pagination-current {
-        position: relative;
-        z-index: 1;
-        border-color: #1d4ed8;
-        background-color: #1d4ed8;
-        color: #ffffff;
-        font-weight: 800;
-        box-shadow: 0 1px 3px rgb(30 64 175 / 25%);
-    }
-
-    .app-pagination .app-pagination-current {
-        flex-shrink: 0;
-        border-radius: 0.5rem;
-        padding: 0.5rem 0.75rem;
-    }
-
-    .app-pagination button:not(:disabled):hover {
-        z-index: 2;
-        color: #1d4ed8;
-        border-color: #60a5fa;
-        background-color: #eff6ff;
-    }
-
-    .app-pagination button:not(:disabled):active {
-        color: #ffffff;
-        background-color: #1e40af;
-        border-color: #1e40af;
-    }
-
-    .app-pagination button:focus-visible {
-        z-index: 3;
-        outline: 2px solid #2563eb;
-        outline-offset: 2px;
-    }
-
-    .app-pagination [aria-disabled="true"] > span,
-    .app-pagination span[aria-disabled="true"].relative,
-    .app-pagination button:disabled {
-        color: #94a3b8;
-        background-color: #f1f5f9;
-        border-color: #e2e8f0;
-        cursor: not-allowed;
-        box-shadow: none;
     }
 
     select.app-per-page-select {
@@ -282,12 +237,6 @@
         background-color: #f8fafc;
     }
 
-    .app-pagination button,
-    .app-pagination [aria-disabled="true"] > span {
-        min-height: 44px;
-        min-width: 44px;
-    }
-
     .planification-activity-tooltip {
         z-index: 99999;
         max-height: min(22rem, calc(100vh - 24px));
@@ -333,7 +282,7 @@
     }
 
     .hero-visual::after {
-        content: "PROJECT  •  PLAN  •  EXECUTE";
+        content: attr(data-caption);
         position: absolute;
         inset: 22% 18% auto;
         padding: 2.75rem 1.25rem;

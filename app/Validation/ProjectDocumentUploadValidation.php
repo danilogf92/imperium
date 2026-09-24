@@ -21,10 +21,10 @@ class ProjectDocumentUploadValidation
     {
         return [
             'document.required' => 'Select a document to upload.',
-            'document.file' => 'The selected item must be a valid file.',
-            'document.extensions' => 'The PDA must use the .pdf extension.',
-            'document.mimes' => 'Only PDF files are allowed.',
-            'document.max' => 'The document may not be larger than 10 MB.',
+            'document.file' => __('The selected item must be a valid file.'),
+            'document.extensions' => __('The PDA must use the .pdf extension.'),
+            'document.mimes' => __('Only PDF files are allowed.'),
+            'document.max' => __('The document may not be larger than 10 MB.'),
         ];
     }
 

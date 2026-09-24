@@ -20,11 +20,20 @@ class MilestoneResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFlag;
 
-    protected static ?string $navigationLabel = 'Milestones';
+    public static function getNavigationLabel(): string
+    {
+        return __('Milestones');
+    }
 
-    protected static ?string $modelLabel = 'milestone';
+    public static function getModelLabel(): string
+    {
+        return __('milestone');
+    }
 
-    protected static ?string $pluralModelLabel = 'milestones';
+    public static function getPluralModelLabel(): string
+    {
+        return __('milestones');
+    }
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -32,7 +41,7 @@ class MilestoneResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Project Configuration';
+        return __('Project Configuration');
     }
 
     public static function form(Schema $schema): Schema

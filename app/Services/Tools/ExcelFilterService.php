@@ -28,7 +28,7 @@ final class ExcelFilterService
         $token = (string) Str::uuid();
         $stored = $upload->storeAs(self::ROOT."/sources/{$userId}", "{$token}.{$extension}", 'local');
         if (! $stored) {
-            throw new RuntimeException('The workbook could not be saved temporarily.');
+            throw new RuntimeException(__('The workbook could not be saved temporarily.'));
         }
 
         return $token;

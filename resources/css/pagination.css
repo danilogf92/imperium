@@ -1,0 +1,98 @@
+/* Shared by the application and Filament. Keep every page target the same size. */
+:is(.app-pagination, .fi-pagination) {
+    --pagination-active-bg: #1d4ed8;
+    --pagination-active-text: #ffffff;
+    --pagination-hover-bg: #eff6ff;
+    --pagination-hover-text: #1e40af;
+    --pagination-disabled-bg: #f1f5f9;
+    --pagination-disabled-text: #94a3b8;
+    --pagination-disabled-border: #e2e8f0;
+}
+
+.dark :is(.app-pagination, .fi-pagination) {
+    --pagination-active-bg: #60a5fa;
+    --pagination-active-text: #0f172a;
+    --pagination-hover-bg: #1e3a5f;
+    --pagination-hover-text: #dbeafe;
+    --pagination-disabled-bg: #1e293b;
+    --pagination-disabled-text: #94a3b8;
+    --pagination-disabled-border: #334155;
+}
+
+.app-pagination button,
+.app-pagination [aria-current="page"] > span,
+.app-pagination .app-pagination-current,
+.app-pagination [aria-disabled="true"] > span,
+.app-pagination span[aria-disabled="true"].relative,
+.fi-pagination .fi-pagination-item-btn {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.25rem;
+}
+
+.app-pagination .app-pagination-current {
+    flex-shrink: 0;
+    border: 1px solid;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.app-pagination button:not(:disabled):hover,
+.fi-pagination .fi-pagination-item:not(.fi-active) .fi-pagination-item-btn:enabled:hover {
+    z-index: 2;
+    color: var(--pagination-hover-text);
+    border-color: #60a5fa;
+    background-color: var(--pagination-hover-bg);
+}
+
+.app-pagination button:not(:disabled):active,
+.fi-pagination .fi-pagination-item-btn:enabled:active {
+    color: var(--pagination-active-text);
+    background-color: var(--pagination-active-bg);
+    border-color: var(--pagination-active-bg);
+}
+
+.app-pagination [aria-current="page"] > span,
+.app-pagination .app-pagination-current,
+.fi-pagination .fi-active .fi-pagination-item-btn {
+    position: relative;
+    z-index: 1;
+    color: var(--pagination-active-text);
+    background-color: var(--pagination-active-bg);
+    border-color: var(--pagination-active-bg);
+    font-size: 1rem;
+    font-weight: 800;
+    box-shadow: inset 0 0 0 1px var(--pagination-active-bg);
+}
+
+.fi-pagination .fi-pagination-item-btn :is(.fi-pagination-item-label, .fi-icon) {
+    color: inherit;
+}
+
+.fi-pagination .fi-active .fi-pagination-item-label {
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+.app-pagination button:focus-visible,
+.fi-pagination .fi-pagination-item-btn:focus-visible {
+    z-index: 3;
+    outline: 2px solid var(--pagination-active-bg);
+    outline-offset: 2px;
+}
+
+.app-pagination [aria-disabled="true"] > span,
+.app-pagination span[aria-disabled="true"].relative,
+.app-pagination button:disabled,
+.fi-pagination .fi-disabled .fi-pagination-item-btn {
+    color: var(--pagination-disabled-text);
+    background-color: var(--pagination-disabled-bg);
+    border-color: var(--pagination-disabled-border);
+    cursor: not-allowed;
+    box-shadow: none;
+}

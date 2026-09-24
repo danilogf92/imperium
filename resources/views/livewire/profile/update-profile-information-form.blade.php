@@ -143,7 +143,7 @@ new class extends Component
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <div class="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-white bg-slate-900 shadow">
                     @if ($photo)
-                        <img src="{{ $photo->temporaryUrl() }}" alt="New profile photo"
+                        <img src="{{ $photo->temporaryUrl() }}" alt="{{ __('New profile photo') }}"
                             class="h-full w-full object-cover">
                     @elseif ($profileFormUser->profile_photo_path)
                         <img src="{{ $profileFormUser->profilePhotoUrl() }}"

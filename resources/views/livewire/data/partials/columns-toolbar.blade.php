@@ -2,7 +2,7 @@
             <div>
                 <p class="text-sm font-semibold text-slate-700">{{ __('Table columns') }}</p>
                 <p class="text-xs text-slate-500">
-                    {{ count($visibleColumns) }} of {{ count($columnOptions) }} visible
+                    {{ __(':shown of :total visible', ['shown' => count($visibleColumns), 'total' => count($columnOptions)]) }}
                 </p>
             </div>
             <div class="ml-auto flex w-full flex-wrap items-center justify-end gap-2 lg:w-auto">
@@ -25,14 +25,14 @@
                 @endif
                 <x-action-message on="column-view-deleted" class="text-sm text-emerald-700">{{ __('View deleted.') }}</x-action-message>
                 <div x-show="columnsOpen" x-transition class="flex flex-wrap items-center gap-2">
-                    <x-dashboard-filter-dropdown label="Columns" model="visibleColumns" :options="collect($columnOptions)
+                    <x-dashboard-filter-dropdown label="{{ __('Columns') }}" model="visibleColumns" :options="collect($columnOptions)
                         ->except('actions')
                         ->map(fn($label, $value) => ['value' => $value, 'label' => $label])
                         ->values()"
                         :selected="$visibleColumns" multiple />
                     <button wire:click="resetColumns" data-global-loading type="button"
                         class="data-action-button data-default-columns inline-flex h-11 items-center justify-center rounded-lg px-3 text-sm font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                        Default columns
+                        {{ __('Default columns') }}
                     </button>
                 </div>
                 <form wire:submit="saveColumnView" class="flex w-full flex-wrap items-start gap-2 sm:w-auto">
@@ -54,7 +54,7 @@
                 <x-action-message on="column-view-saved" class="text-sm text-emerald-700">{{ __('Saved.') }}</x-action-message>
                 <button type="button" x-on:click="columnsOpen = !columnsOpen"
                     class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    title="Collapse column controls">
+                    title="{{ __('Collapse column controls') }}">
                     <svg class="h-5 w-5 transition-transform" x-bind:class="{ 'rotate-180': !columnsOpen }"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m18 15-6-6-6 6" />

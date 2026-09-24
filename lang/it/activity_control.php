@@ -19,7 +19,7 @@ return [
     'summary_all_weeks' => 'Totali di tutte le settimane pianificate, incluse quelle future, secondo i filtri attivi.',
     'summary_date_scope' => 'Totali per scadenza: da :from a :to, secondo i filtri attivi.',
     'no_date_limit' => 'nessun limite',
-    'summary_total_hint' => 'Il totale somma le righe degli utenti visualizzati, indipendentemente dalla paginazione di Activity detail. Le attività senza responsabile sono escluse.',
+    'summary_total_hint' => 'Il totale somma le righe degli utenti visualizzati, indipendentemente dalla paginazione di dettaglio attività. Le attività senza responsabile sono escluse.',
     'summary_hint' => 'Attività assegnate secondo i filtri attivi. In attesa: incomplete e non ancora scadute. La scadenza è la fine della settimana pianificata. Clicca su In ritardo per vedere i dettagli.',
     'show_overdue' => 'Mostra attività in ritardo di :user',
     'no_users' => 'Nessun utente negli stabilimenti selezionati.',

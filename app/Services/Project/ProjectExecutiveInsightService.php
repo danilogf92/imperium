@@ -88,7 +88,7 @@ final class ProjectExecutiveInsightService
                 ->take(4)->map(fn ($item) => [
                     'name' => $item->milestone?->name,
                     'code' => $item->milestone?->code,
-                    'date' => CarbonImmutable::create($item->cycle_year, $item->month)->format('M Y'),
+                    'date' => CarbonImmutable::create($item->cycle_year, $item->month)->translatedFormat('M Y'),
                     'percentage' => (float) $item->percentage,
                     'color' => $item->milestone?->view_color ?: $item->milestone?->color,
                 ])->values()->all(),
@@ -100,7 +100,7 @@ final class ProjectExecutiveInsightService
         $weeks = collect([0, 1])->map(function (int $offset): array {
             $date = CarbonImmutable::now()->startOfWeek()->addWeeks($offset);
 
-            return ['year' => $date->isoWeekYear, 'week' => $date->isoWeek, 'label' => $offset ? 'Next week' : 'Actual week'];
+            return ['year' => $date->isoWeekYear, 'week' => $date->isoWeek, 'label' => __($offset ? 'Next week' : 'Actual week')];
         });
         $rows = ProjectWeeklyActivity::query()->with('author:id,name')->where('project_id', $projectId)
             ->where(function ($query) use ($weeks): void {
@@ -132,16 +132,16 @@ final class ProjectExecutiveInsightService
     private function alerts(Project $project, array $financial, array $activities, array $milestones): array
     {
         return collect([
-            $financial['booked'] > $financial['budgeted'] && $financial['budgeted'] > 0 ? ['level' => 'danger', 'text' => 'Assigned exceeds the project budget.'] : null,
-            $financial['real'] > $financial['budgeted'] && $financial['budgeted'] > 0 ? ['level' => 'danger', 'text' => 'Booked (Real SAP) exceeds the project budget.'] : null,
+            $financial['booked'] > $financial['budgeted'] && $financial['budgeted'] > 0 ? ['level' => 'danger', 'text' => __('Assigned exceeds the project budget.')] : null,
+            $financial['real'] > $financial['budgeted'] && $financial['budgeted'] > 0 ? ['level' => 'danger', 'text' => __('Booked (Real SAP) exceeds the project budget.')] : null,
             $financial['executed'] > $financial['budgeted'] && $financial['budgeted'] > 0 ? [
                 'level' => 'danger',
-                'text' => 'Executed value exceeds budget by '.number_format($financial['executed'] - $financial['budgeted'], 2).'.',
+                'text' => __('Executed value exceeds budget by :amount.', ['amount' => \Illuminate\Support\Number::format($financial['executed'] - $financial['budgeted'], precision: 2)]),
             ] : null,
-            $project->forecast_end_date?->isPast() && $project->state?->value !== 'Finished' ? ['level' => 'danger', 'text' => 'Forecast end date has passed and the project is not finished.'] : null,
-            $financial['rows'] === 0 ? ['level' => 'warning', 'text' => 'The project has no financial data.'] : null,
-            collect($activities)->sum(fn ($week) => count($week['items'])) === 0 ? ['level' => 'warning', 'text' => 'No activities are registered for the current or next week.'] : null,
-            $milestones['total'] === 0 ? ['level' => 'warning', 'text' => 'The project has no planning milestones.'] : null,
+            $project->forecast_end_date?->isPast() && $project->state?->value !== 'Finished' ? ['level' => 'danger', 'text' => __('Forecast end date has passed and the project is not finished.')] : null,
+            $financial['rows'] === 0 ? ['level' => 'warning', 'text' => __('The project has no financial data.')] : null,
+            collect($activities)->sum(fn ($week) => count($week['items'])) === 0 ? ['level' => 'warning', 'text' => __('No activities are registered for the current or next week.')] : null,
+            $milestones['total'] === 0 ? ['level' => 'warning', 'text' => __('The project has no planning milestones.')] : null,
         ])->filter()->values()->all();
     }
 
@@ -151,9 +151,9 @@ final class ProjectExecutiveInsightService
         $level = $project->state?->value === 'Postponed' || $danger ? 'danger' : ($alerts !== [] ? 'warning' : 'healthy');
 
         return match ($level) {
-            'danger' => ['label' => 'Attention required', 'color' => 'red'],
-            'warning' => ['label' => 'Needs review', 'color' => 'amber'],
-            default => ['label' => 'On track', 'color' => 'emerald'],
+            'danger' => ['label' => __('Attention required'), 'color' => 'red'],
+            'warning' => ['label' => __('Needs review'), 'color' => 'amber'],
+            default => ['label' => __('On track'), 'color' => 'emerald'],
         };
     }
 
@@ -161,10 +161,10 @@ final class ProjectExecutiveInsightService
     {
         $axisMaximum = max(100, (int) ceil(max($planned, $financial) / 10) * 10);
 
-        return (new ColumnChartModel)->setTitle('Planned vs financial progress')->setAnimated(true)
+        return (new ColumnChartModel)->setTitle(__('Planned vs financial progress'))->setAnimated(true)
             ->setOpacity(1)->setColors(['#2563EB', '#16A34A'])->disableShades()
-            ->withDataLabels()->withGrid()->addColumn('Planned milestones', round($planned, 1), '#2563eb')
-            ->addColumn('Financial execution', round($financial, 1), '#16a34a')
+            ->withDataLabels()->withGrid()->addColumn(__('Planned milestones'), round($planned, 1), '#2563eb')
+            ->addColumn(__('Financial execution'), round($financial, 1), '#16a34a')
             ->setJsonConfig([
                 'yaxis.max' => $axisMaximum,
                 'yaxis.labels.formatter' => "function(value) { return Number(value).toFixed(0) + '%'; }",

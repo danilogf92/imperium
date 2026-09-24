@@ -17,9 +17,9 @@ trait ManagesProjectIdeaUpload
         $this->validate([
             'projectIdea' => ['required', 'file', 'extensions:xlsx,xls', 'mimes:xlsx,xls', 'max:10240'],
         ], [
-            'projectIdea.extensions' => 'Project ideas must be an Excel file (.xlsx or .xls).',
-            'projectIdea.mimes' => 'Only valid Excel files are allowed.',
-            'projectIdea.max' => 'Project ideas may not be larger than 10 MB.',
+            'projectIdea.extensions' => __('Project ideas must be an Excel file (.xlsx or .xls).'),
+            'projectIdea.mimes' => __('Only valid Excel files are allowed.'),
+            'projectIdea.max' => __('Project ideas may not be larger than 10 MB.'),
         ]);
     }
 

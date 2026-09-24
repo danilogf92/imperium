@@ -52,9 +52,9 @@ class ProjectDetailDashboardExport
         $rows = $project->data()->orderBy('id')->get();
 
         $spreadsheet = new Spreadsheet();
-        $summary = $spreadsheet->getActiveSheet()->setTitle('Summary');
-        $grouping = $spreadsheet->createSheet()->setTitle('Grouping');
-        $detail = $spreadsheet->createSheet()->setTitle('Project Data');
+        $summary = $spreadsheet->getActiveSheet()->setTitle(__('Summary'));
+        $grouping = $spreadsheet->createSheet()->setTitle(__('Grouping'));
+        $detail = $spreadsheet->createSheet()->setTitle(__('Project Data'));
 
         $this->buildSummarySheet($summary, $project, $rows, $currency, $conversionRate);
         $this->buildGroupingSheet(
@@ -70,8 +70,8 @@ class ProjectDetailDashboardExport
         $spreadsheet->setActiveSheetIndex(0);
         $spreadsheet->getProperties()
             ->setCreator('DA Imperium')
-            ->setTitle("Project Dashboard - {$project->name}")
-            ->setSubject('Project dashboard export');
+            ->setTitle(__('Project Dashboard - :value1', ['value1' => $project->name]))
+            ->setSubject(__('Project dashboard export'));
 
         $directory = storage_path('app/private/exports');
         if (! is_dir($directory)) {
@@ -101,25 +101,25 @@ class ProjectDetailDashboardExport
         $symbol = $currency === 'dollar' ? '$' : '€';
         $sheet->setShowGridlines(false);
         $sheet->mergeCells('A1:F2');
-        $sheet->setCellValue('A1', 'PROJECT DASHBOARD');
+        $sheet->setCellValue('A1', __('PROJECT DASHBOARD'));
         $sheet->getStyle('A1:F2')->applyFromArray($this->titleStyle());
 
         $sheet->fromArray([
-            ['Project', $project->name],
-            ['Plant', $project->company?->company_name],
-            ['PDA Code', $project->pda_code],
-            ['Status', $project->state?->value],
-            ['Currency', $currency === 'dollar' ? 'USD' : 'EUR'],
+            [__('activity_control.project'), $project->name],
+            [__('Plant'), $project->company?->company_name],
+            [__('PDA Code'), $project->pda_code],
+            [__('Status'), $project->state?->getLabel()],
+            [__('Currency'), $currency === 'dollar' ? 'USD' : 'EUR'],
         ], null, 'A4');
 
         $metrics = [
-            ['Budgeted', $rows->sum('global_price_euros') * $conversionRate],
-            ['Executed', $rows->sum('executed_euros') * $conversionRate],
-            ['Assigned', $rows->sum('booked_euros') * $conversionRate],
-            ['Booked (Real SAP)', $rows->sum('real_value_euros') * $conversionRate],
-            ['Committed', ($rows->sum('booked_euros') - $rows->sum('real_value_euros')) * $conversionRate],
+            [__('Budgeted'), $rows->sum('global_price_euros') * $conversionRate],
+            [__('Executed'), $rows->sum('executed_euros') * $conversionRate],
+            [__('Assigned'), $rows->sum('booked_euros') * $conversionRate],
+            [__('Booked (Real SAP)'), $rows->sum('real_value_euros') * $conversionRate],
+            [__('Committed'), ($rows->sum('booked_euros') - $rows->sum('real_value_euros')) * $conversionRate],
         ];
-        $sheet->fromArray(['Metric', "Value ({$symbol})"], null, 'D4');
+        $sheet->fromArray([__('Metric'), __('Value (:value1)', ['value1' => $symbol])], null, 'D4');
         $sheet->fromArray($metrics, null, 'D5');
 
         $this->styleHeader($sheet, 'D4:E4');
@@ -144,7 +144,7 @@ class ProjectDetailDashboardExport
     ): void {
         $symbol = $currency === 'dollar' ? '$' : '€';
         $groups = $rows
-            ->groupBy(fn ($row) => filled($row->{$groupColumn}) ? $row->{$groupColumn} : 'Unspecified')
+            ->groupBy(fn ($row) => filled($row->{$groupColumn}) ? $row->{$groupColumn} : __('Unspecified'))
             ->map(fn ($items) => $items->sum($valueColumn) * $conversionRate)
             ->sortDesc();
 
@@ -154,7 +154,7 @@ class ProjectDetailDashboardExport
             default => Str::headline($valueColumn),
         };
         $sheet->fromArray([
-            [Str::headline($groupColumn), $valueLabel." ({$symbol})"],
+            [__(Str::headline($groupColumn)), __($valueLabel)." ({$symbol})"],
             ...$groups->map(fn ($value, $label) => [$label, $value])->values()->all(),
         ], null, 'A1');
 
@@ -176,9 +176,9 @@ class ProjectDetailDashboardExport
         $symbol = $currency === 'dollar' ? '$' : '€';
         $headers = [
             'Area', 'Group 1', 'Group 2', 'Description', 'Classification', 'Item Type',
-            'Stage', 'Supplier', 'Order No.', 'Budgeted', 'Executed', 'Assigned', 'Booked (Real SAP)', 'Committed',
+            'Stage', 'Supplier', __('Order No.'), 'Budgeted', 'Executed', 'Assigned', 'Booked (Real SAP)', 'Committed',
         ];
-        $sheet->fromArray($headers, null, 'A1');
+        $sheet->fromArray(array_map(fn ($label) => __($label), $headers), null, 'A1');
 
         $rowNumber = 2;
         foreach ($rows as $row) {

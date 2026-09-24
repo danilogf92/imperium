@@ -48,7 +48,7 @@ final class DashboardOperationalChartService
     private function chart(array $rows, string $title, bool $money, string $currency): ColumnChartModel
     {
         $chart = (new ColumnChartModel)
-            ->setTitle($title)
+            ->setTitle(__($title))
             ->setAnimated(true)
             ->setHorizontal(true)
             ->setOpacity(1)
@@ -66,8 +66,8 @@ final class DashboardOperationalChartService
             ]);
         } else {
             $chart->setJsonConfig([
-                'dataLabels.formatter' => "function(value) { return Number(value).toLocaleString(); }",
-                'tooltip.y.formatter' => "function(value) { return Number(value).toLocaleString() + ' projects'; }",
+                'dataLabels.formatter' => "function(value) { return Number(value).toLocaleString(document.documentElement.lang); }",
+                'tooltip.y.formatter' => "function(value) { return Number(value).toLocaleString(document.documentElement.lang) + ' ' + ".json_encode(__('Projects'), JSON_HEX_APOS | JSON_HEX_QUOT)."; }",
             ]);
         }
 

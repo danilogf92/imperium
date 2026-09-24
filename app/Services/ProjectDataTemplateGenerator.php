@@ -53,7 +53,7 @@ class ProjectDataTemplateGenerator
         $dataSheet = $spreadsheet->getActiveSheet();
         $dataSheet->setTitle('Project Data');
         $instructions = $spreadsheet->createSheet();
-        $instructions->setTitle('Instructions');
+        $instructions->setTitle(__('Instructions'));
 
         $this->buildDataSheet($dataSheet, $rows);
         $this->buildInstructionsSheet($instructions);
@@ -61,9 +61,9 @@ class ProjectDataTemplateGenerator
         $spreadsheet->setActiveSheetIndex(0);
         $spreadsheet->getProperties()
             ->setCreator('DA Imperium')
-            ->setTitle('Project Data Import Template')
-            ->setSubject('Template for importing project data into DA Imperium')
-            ->setDescription('Keep the header names unchanged and enter one item per row.');
+            ->setTitle(__('Project Data Import Template'))
+            ->setSubject(__('Template for importing project data into DA Imperium'))
+            ->setDescription(__('Keep the header names unchanged and enter one item per row.'));
 
         (new Xlsx($spreadsheet))->save($path);
         $spreadsheet->disconnectWorksheets();
@@ -142,15 +142,15 @@ class ProjectDataTemplateGenerator
 
         $sheet->getComment('A1')->setAuthor('DA Imperium');
         $sheet->getComment('A1')->getText()->createText(
-            'Optional. This value is ignored during import; the database creates a new ID.'
+            __('Optional. This value is ignored during import; the database creates a new ID.')
         );
         $sheet->getComment('O1')->setAuthor('DA Imperium');
         $sheet->getComment('O1')->getText()->createText(
-            'Enter a number from 0 to 100. Example: 25 means 25%.'
+            __('Enter a number from 0 to 100. Example: 25 means 25%.')
         );
         $sheet->getComment('P1')->setAuthor('DA Imperium');
         $sheet->getComment('P1')->getText()->createText(
-            'If only one executed currency is entered, the other is calculated using the project rate.'
+            __('If only one executed currency is entered, the other is calculated using the project rate.')
         );
 
         $percentageValidation = new DataValidation();
@@ -160,8 +160,8 @@ class ProjectDataTemplateGenerator
         $percentageValidation->setFormula2('100');
         $percentageValidation->setAllowBlank(true);
         $percentageValidation->setShowErrorMessage(true);
-        $percentageValidation->setErrorTitle('Invalid percentage');
-        $percentageValidation->setError('Enter a number between 0 and 100.');
+        $percentageValidation->setErrorTitle(__('Invalid percentage'));
+        $percentageValidation->setError(__('Enter a number between 0 and 100.'));
         $sheet->setDataValidation('O2:O5001', $percentageValidation);
 
         foreach (['J', 'K', 'L', 'M', 'N', 'P', 'Q'] as $column) {
@@ -171,8 +171,8 @@ class ProjectDataTemplateGenerator
             $numericValidation->setFormula1('0');
             $numericValidation->setAllowBlank(true);
             $numericValidation->setShowErrorMessage(true);
-            $numericValidation->setErrorTitle('Invalid number');
-            $numericValidation->setError('Enter zero or a positive numeric value.');
+            $numericValidation->setErrorTitle(__('Invalid number'));
+            $numericValidation->setError(__('Enter zero or a positive numeric value.'));
             $sheet->setDataValidation("{$column}2:{$column}5001", $numericValidation);
         }
     }
@@ -181,7 +181,7 @@ class ProjectDataTemplateGenerator
     {
         $sheet->setShowGridlines(false);
         $sheet->mergeCells('A1:F2');
-        $sheet->setCellValue('A1', 'PROJECT DATA IMPORT — INSTRUCTIONS');
+        $sheet->setCellValue('A1', __('PROJECT DATA IMPORT — INSTRUCTIONS'));
         $sheet->getStyle('A1:F2')->applyFromArray([
             'font' => ['bold' => true, 'size' => 18, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => [
@@ -195,15 +195,15 @@ class ProjectDataTemplateGenerator
         ]);
 
         $instructions = [
-            ['Rule', 'Description'],
-            ['1', 'Use the Project Data sheet and keep every header name unchanged.'],
-            ['2', 'Enter one project item per row. Completely empty rows are ignored.'],
-            ['3', 'The ID column is optional and ignored; DA Imperium creates new IDs.'],
-            ['4', 'Required columns: area, description, qty, unit price, and global price. Area and description cells may be blank; numeric cells must contain a number (use 0 when applicable).'],
-            ['5', 'Numeric columns must contain numbers only. Percentage accepts values from 0 to 100.'],
-            ['6', 'Dollar values are converted to euros using the rate configured in the selected project.'],
-            ['7', 'If the project already contains data, the import appends rows and requires confirmation.'],
-            ['8', 'Maximum file size: 20 MB. Maximum rows per import: 5,000.'],
+            [__('Rule'), __('Description')],
+            ['1', __('Use the Project Data sheet and keep every header name unchanged.')],
+            ['2', __('Enter one project item per row. Completely empty rows are ignored.')],
+            ['3', __('The ID column is optional and ignored; DA Imperium creates new IDs.')],
+            ['4', __('Required columns: area, description, qty, unit price, and global price. Area and description cells may be blank; numeric cells must contain a number (use 0 when applicable).')],
+            ['5', __('Numeric columns must contain numbers only. Percentage accepts values from 0 to 100.')],
+            ['6', __('Dollar values are converted to euros using the rate configured in the selected project.')],
+            ['7', __('If the project already contains data, the import appends rows and requires confirmation.')],
+            ['8', __('Maximum file size: 20 MB. Maximum rows per import: 5,000.')],
         ];
         $sheet->fromArray($instructions, null, 'A4');
         $sheet->getStyle('A4:B4')->applyFromArray([

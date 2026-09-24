@@ -50,7 +50,7 @@ class ProjectDocumentManager extends Component
     {
         abort_unless($this->projectId, 404);
         $project = $this->authorizedProject($this->projectId);
-        abort_if(filled($project->upload_pda), 409, 'Delete the current PDA before uploading another one.');
+        abort_if(filled($project->upload_pda), 409, __('Delete the current PDA before uploading another one.'));
         $this->validate(ProjectDocumentUploadValidation::rules(), ProjectDocumentUploadValidation::messages(), ProjectDocumentUploadValidation::attributes());
 
         $originalName = $this->document->getClientOriginalName();
@@ -58,7 +58,7 @@ class ProjectDocumentManager extends Component
         $path = $this->document->storeAs("projects/{$project->id}/documents", Str::uuid().'-'.$baseName.'.pdf', 'public');
         $project->update(['upload_pda' => $path, 'file_name' => $originalName]);
         $this->dispatch('project-updated', projectId: $project->id);
-        $this->dispatch('alert', type: 'success', title: 'PDA uploaded', position: 'center', timer: 1800);
+        $this->dispatch('alert', type: 'success', title: __('PDA uploaded'), position: 'center', timer: 1800);
         $this->close();
     }
 
@@ -82,7 +82,7 @@ class ProjectDocumentManager extends Component
             Storage::disk('public')->delete($path);
         }
         $this->dispatch('project-updated', projectId: $project->id);
-        $this->dispatch('alert', type: 'success', title: 'PDA deleted', position: 'center', timer: 1800);
+        $this->dispatch('alert', type: 'success', title: __('PDA deleted'), position: 'center', timer: 1800);
         $this->close();
     }
 

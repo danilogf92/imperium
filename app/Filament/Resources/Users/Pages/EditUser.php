@@ -19,7 +19,7 @@ class EditUser extends EditRecord
             && ! (bool) $data['is_active']
         ) {
             throw ValidationException::withMessages([
-                'data.is_active' => 'You cannot disable your own account. Another administrator must do it.',
+                'data.is_active' => __('You cannot disable your own account. Another administrator must do it.'),
             ]);
         }
 
@@ -29,7 +29,7 @@ class EditUser extends EditRecord
             && (bool) $data['can_access_admin'] !== (bool) $this->record->can_access_admin
         ) {
             throw ValidationException::withMessages([
-                'data.can_access_admin' => 'You cannot change your own admin access. Another administrator must do it.',
+                'data.can_access_admin' => __('You cannot change your own admin access. Another administrator must do it.'),
             ]);
         }
 

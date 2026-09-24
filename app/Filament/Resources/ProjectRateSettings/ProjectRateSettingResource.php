@@ -19,15 +19,21 @@ class ProjectRateSettingResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
 
-    protected static ?string $navigationLabel = 'Project rate limits';
+    public static function getNavigationLabel(): string
+    {
+        return __('Project rate limits');
+    }
 
-    protected static ?string $modelLabel = 'project rate limits';
+    public static function getModelLabel(): string
+    {
+        return __('project rate limits');
+    }
 
     protected static ?int $navigationSort = 10;
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Project Configuration';
+        return __('Project Configuration');
     }
 
     public static function canCreate(): bool
@@ -52,4 +58,9 @@ class ProjectRateSettingResource extends Resource
             'edit' => EditProjectRateSetting::route('/{record}/edit'),
         ];
     }
+    public static function getPluralModelLabel(): string
+    {
+        return __('Project Rate Settings');
+    }
+
 }

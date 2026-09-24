@@ -11,14 +11,14 @@ class ProjectRateSettingForm
     {
         return $schema->components([
             TextInput::make('min_rate')
-                ->label('Minimum rate')
+                ->label(__('Minimum rate'))
                 ->numeric()
                 ->minValue(0.3)
                 ->maxValue(2)
                 ->step(0.0001)
                 ->required(),
             TextInput::make('max_rate')
-                ->label('Maximum rate')
+                ->label(__('Maximum rate'))
                 ->numeric()
                 ->minValue(0.3)
                 ->maxValue(2)

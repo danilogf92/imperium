@@ -4,14 +4,14 @@
     <div class="flex flex-col items-center gap-3">
         <div class="rounded-full bg-blue-100 p-5 shadow-xl">
             <svg class="h-16 w-16 animate-spin text-blue-500" viewBox="0 0 24 24" fill="none"
-                role="status" aria-label="Loading">
+                role="status" aria-label="{{ __('Loading') }}">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                     stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor"
                     d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4Z"></path>
             </svg>
         </div>
-        <p class="text-base font-semibold tracking-wide text-blue-600">Loading...</p>
+        <p class="text-base font-semibold tracking-wide text-blue-600">{{ __('Loading...') }}</p>
     </div>
 </div>
 <noscript>

@@ -17,7 +17,7 @@ class ListProjects extends ListRecords
         return [
             ImportAction::make()->icon('heroicon-m-arrow-up-tray')->labeledFrom('sm')
                 ->importer(ProjectImporter::class)
-                ->label('Import projects'),
+                ->label(__('Import projects')),
             CreateAction::make()->icon('heroicon-m-plus')->labeledFrom('sm'),
         ];
     }

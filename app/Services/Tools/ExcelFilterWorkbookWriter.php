@@ -17,7 +17,7 @@ final class ExcelFilterWorkbookWriter
         $sheetPath = tempnam(dirname($path), 'excel-sheet-');
 
         if ($sheetPath === false || ($stream = fopen($sheetPath, 'wb')) === false) {
-            throw new RuntimeException('The Excel export could not be prepared.');
+            throw new RuntimeException(__('The Excel export could not be prepared.'));
         }
 
         $lastColumn = Coordinate::stringFromColumnIndex(count($headers));
@@ -102,7 +102,7 @@ final class ExcelFilterWorkbookWriter
             unlink($sheetPath);
 
             throw new RuntimeException(
-                'There are no matching rows to export.'
+                __('There are no matching rows to export.')
             );
         }
 
@@ -117,7 +117,7 @@ final class ExcelFilterWorkbookWriter
             unlink($sheetPath);
 
             throw new RuntimeException(
-                'The Excel export could not be created.'
+                __('The Excel export could not be created.')
             );
         }
 

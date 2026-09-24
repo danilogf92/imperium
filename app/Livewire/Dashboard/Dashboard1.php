@@ -457,7 +457,7 @@ class Dashboard extends Component
 
     private function projectsByInvestmentChart(Collection $values): ColumnChartModel
     {
-        $chart = (new ColumnChartModel)->setTitle('Projects by investment')->setAnimated(true)->setHorizontal(true)->withDataLabels()->withGrid();
+        $chart = (new ColumnChartModel)->setTitle(__('Projects by investment'))->setAnimated(true)->setHorizontal(true)->withDataLabels()->withGrid();
 
         foreach ($values as $value) {
             $label = (string) $value->label;
@@ -470,7 +470,7 @@ class Dashboard extends Component
     private function projectsByStateChart(Collection $values): PieChartModel
     {
         $chart = (new PieChartModel)
-            ->setTitle('Projects by state')->setAnimated(true)->setType('donut')->withDataLabels()->withLegend()
+            ->setTitle(__('Projects by state'))->setAnimated(true)->setType('donut')->withDataLabels()->withLegend()
             ->setJsonConfig(['dataLabels.formatter' => $this->percentFormatter(), 'tooltip.y.formatter' => $this->projectsFormatter()]);
 
         foreach ($values as $value) {
@@ -483,7 +483,7 @@ class Dashboard extends Component
 
     private function projectsByStateColumnChart(Collection $values): ColumnChartModel
     {
-        $chart = (new ColumnChartModel)->setTitle('Project status #')->setAnimated(true)->withDataLabels()->withGrid();
+        $chart = (new ColumnChartModel)->setTitle(__('Project status #'))->setAnimated(true)->withDataLabels()->withGrid();
 
         foreach ($values as $value) {
             $label = (string) $value->label;
@@ -495,7 +495,7 @@ class Dashboard extends Component
 
     private function budgetColumnChart(Collection $values): ColumnChartModel
     {
-        $chart = (new ColumnChartModel)->setTitle('Budget by investment')->setAnimated(true)->setHorizontal(true)->withDataLabels()->withGrid()->setJsonConfig($this->moneyChartConfig('xaxis'));
+        $chart = (new ColumnChartModel)->setTitle(__('Budget by investment'))->setAnimated(true)->setHorizontal(true)->withDataLabels()->withGrid()->setJsonConfig($this->moneyChartConfig('xaxis'));
 
         foreach ($values as $value) {
             $label = (string) $value->label;
@@ -507,7 +507,7 @@ class Dashboard extends Component
 
     private function budgetStateChart(Collection $values): PieChartModel
     {
-        $chart = (new PieChartModel)->setTitle('Budget by state')->setAnimated(true)->setType('donut')->withDataLabels()->withLegend()->setJsonConfig(['dataLabels.formatter' => $this->percentFormatter(), 'tooltip.y.formatter' => $this->moneyFormatter()]);
+        $chart = (new PieChartModel)->setTitle(__('Budget by state'))->setAnimated(true)->setType('donut')->withDataLabels()->withLegend()->setJsonConfig(['dataLabels.formatter' => $this->percentFormatter(), 'tooltip.y.formatter' => $this->moneyFormatter()]);
 
         foreach ($values as $value) {
             $label = (string) $value->label;
@@ -519,7 +519,7 @@ class Dashboard extends Component
 
     private function budgetStateColumnChart(Collection $values): ColumnChartModel
     {
-        $chart = (new ColumnChartModel)->setTitle('Project status value')->setAnimated(true)->withDataLabels()->withGrid()->setJsonConfig($this->moneyChartConfig('yaxis'));
+        $chart = (new ColumnChartModel)->setTitle(__('Project status value'))->setAnimated(true)->withDataLabels()->withGrid()->setJsonConfig($this->moneyChartConfig('yaxis'));
 
         foreach ($values as $value) {
             $label = (string) $value->label;
@@ -531,9 +531,9 @@ class Dashboard extends Component
 
     private function budgetInvestmentRadarChart(Collection $values): RadarChartModel
     {
-        $chart = (new RadarChartModel)->setTitle('Type of Investment')->setAnimated(true)->setJsonConfig($this->moneyChartConfig('yaxis'));
+        $chart = (new RadarChartModel)->setTitle(__('Type of Investment'))->setAnimated(true)->setJsonConfig($this->moneyChartConfig('yaxis'));
         foreach ($values as $value) {
-            $chart->addSeries('Investment', (string) $value->label, round((float) $value->total, 2));
+            $chart->addSeries(__('Investment'), (string) $value->label, round((float) $value->total, 2));
         }
 
         return $chart;
@@ -541,9 +541,9 @@ class Dashboard extends Component
 
     private function budgetAreaRadarChart(Collection $values): RadarChartModel
     {
-        $chart = (new RadarChartModel)->setTitle('Area Classification')->setAnimated(true)->setJsonConfig($this->moneyChartConfig('yaxis'));
+        $chart = (new RadarChartModel)->setTitle(__('Area Classification'))->setAnimated(true)->setJsonConfig($this->moneyChartConfig('yaxis'));
         foreach ($values as $value) {
-            $chart->addSeries('Investment', (string) $value->label, round((float) $value->total, 2));
+            $chart->addSeries(__('Investment'), (string) $value->label, round((float) $value->total, 2));
         }
 
         return $chart;
@@ -551,7 +551,7 @@ class Dashboard extends Component
 
     private function cumulativeLineChart(Collection $values, string $title, bool $money = false): LineChartModel
     {
-        $chart = (new LineChartModel)->setTitle($title)->setAnimated(true)->singleLine()->withDataLabels()->withGrid()->setColors(['#4f46e5']);
+        $chart = (new LineChartModel)->setTitle(__($title))->setAnimated(true)->singleLine()->withDataLabels()->withGrid()->setColors(['#4f46e5']);
         if ($money) {
             $chart->setJsonConfig($this->moneyChartConfig('yaxis'));
         }
@@ -567,7 +567,7 @@ class Dashboard extends Component
 
     private function plannedVsActualExecutionChart(Collection $plannedValues, Collection $actualValues, float $total): LineChartModel
     {
-        $chart = (new LineChartModel)->setTitle('StartDate vs Approved Date')->setAnimated(true)->multiLine()->setStraightCurve()->setStrokeWidth(3)->withGrid()->withLegend()->setColors(['#2563eb', '#ef4444'])->setJsonConfig([
+        $chart = (new LineChartModel)->setTitle(__('StartDate vs Approved Date'))->setAnimated(true)->multiLine()->setStraightCurve()->setStrokeWidth(3)->withGrid()->withLegend()->setColors(['#2563eb', '#ef4444'])->setJsonConfig([
             'yaxis.min' => 0,
             'yaxis.max' => 100,
             'yaxis.tickAmount' => 5,
@@ -582,8 +582,8 @@ class Dashboard extends Component
             $planned += (float) $plannedValues->get($number, 0);
             $actual += (float) $actualValues->get($number, 0);
             $chart
-                ->addSeriesPoint('Planned % (Start date)', $month, $total > 0 ? round(($planned / $total) * 100, 2) : 0)
-                ->addSeriesPoint('Actual % (Approved date)', $month, $total > 0 ? round(($actual / $total) * 100, 2) : 0);
+                ->addSeriesPoint(__('Planned % (Start date)'), $month, $total > 0 ? round(($planned / $total) * 100, 2) : 0)
+                ->addSeriesPoint(__('Actual % (Approved date)'), $month, $total > 0 ? round(($actual / $total) * 100, 2) : 0);
         }
 
         return $chart;
@@ -591,7 +591,7 @@ class Dashboard extends Component
 
     private function forecastVsCloseDateChart(Collection $forecastValues, Collection $closeValues): LineChartModel
     {
-        $chart = (new LineChartModel)->setTitle('Forecast EndDate vs CloseDate')->setAnimated(true)->multiLine()->setStraightCurve()->setStrokeWidth(3)->withGrid()->withLegend()->setColors(['#2563eb', '#16a34a'])->setJsonConfig([
+        $chart = (new LineChartModel)->setTitle(__('Forecast EndDate vs CloseDate'))->setAnimated(true)->multiLine()->setStraightCurve()->setStrokeWidth(3)->withGrid()->withLegend()->setColors(['#2563eb', '#16a34a'])->setJsonConfig([
             'yaxis.min' => 0,
             'yaxis.forceNiceScale' => true,
             'yaxis.labels.formatter' => '(value) => Math.round(value)',
@@ -601,8 +601,8 @@ class Dashboard extends Component
 
         foreach (self::MONTHS as $number => $month) {
             $chart
-                ->addSeriesPoint('Forecast EndDate', $month, (int) $forecastValues->get($number, 0))
-                ->addSeriesPoint('CloseDate', $month, (int) $closeValues->get($number, 0));
+                ->addSeriesPoint(__('Forecast EndDate'), $month, (int) $forecastValues->get($number, 0))
+                ->addSeriesPoint(__('CloseDate'), $month, (int) $closeValues->get($number, 0));
         }
 
         return $chart;
@@ -620,7 +620,7 @@ class Dashboard extends Component
     {
         $symbol = json_encode($this->currency === 'dollar' ? '$' : '€', JSON_THROW_ON_ERROR);
 
-        return "function(value) { return {$symbol} + ' ' + Number(value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); }";
+        return "function(value) { return {$symbol} + ' ' + Number(value).toLocaleString(document.documentElement.lang, {minimumFractionDigits: 2, maximumFractionDigits: 2}); }";
     }
 
     private function percentFormatter(): string
@@ -630,6 +630,6 @@ class Dashboard extends Component
 
     private function projectsFormatter(): string
     {
-        return "function(value) { return Number(value).toLocaleString() + ' projects'; }";
+        return "function(value) { return Number(value).toLocaleString(document.documentElement.lang) + ' ' + ".json_encode(__('Projects'), JSON_HEX_APOS | JSON_HEX_QUOT)."; }";
     }
 }

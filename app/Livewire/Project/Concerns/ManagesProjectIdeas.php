@@ -43,10 +43,10 @@ trait ManagesProjectIdeas
         $this->validate([
             'projectIdeaFile' => ['required', 'file', 'extensions:xlsx,xls', 'mimes:xlsx,xls', 'max:10240'],
         ], [
-            'projectIdeaFile.required' => 'Select an Excel file.',
-            'projectIdeaFile.extensions' => 'Only Excel files (.xlsx or .xls) are allowed.',
-            'projectIdeaFile.mimes' => 'Only valid Excel files are allowed.',
-            'projectIdeaFile.max' => 'The Excel file may not be larger than 10 MB.',
+            'projectIdeaFile.required' => __('Select an Excel file.'),
+            'projectIdeaFile.extensions' => __('Only Excel files (.xlsx or .xls) are allowed.'),
+            'projectIdeaFile.mimes' => __('Only valid Excel files are allowed.'),
+            'projectIdeaFile.max' => __('The Excel file may not be larger than 10 MB.'),
         ]);
 
         $originalName = $this->projectIdeaFile->getClientOriginalName();
@@ -61,7 +61,7 @@ trait ManagesProjectIdeas
             Storage::disk('public')->delete($previousPath);
         }
 
-        $this->notifyProjectChange($project, 'Project ideas updated');
+        $this->notifyProjectChange($project, __('Project ideas updated'));
         $this->closeProjectIdeaModal();
     }
 
@@ -88,7 +88,7 @@ trait ManagesProjectIdeas
             Storage::disk('public')->delete($path);
         }
 
-        $this->notifyProjectChange($project, 'Project ideas deleted');
+        $this->notifyProjectChange($project, __('Project ideas deleted'));
         $this->closeProjectIdeaModal();
     }
 

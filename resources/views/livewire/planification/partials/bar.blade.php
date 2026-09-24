@@ -49,7 +49,7 @@
     {{-- Acciones de la barra superior --}}
     <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
 
-        <div class="w-32 shrink-0"><x-dashboard-filter-dropdown label="Columns" compact model="visibleColumns" :options="collect($fixedColumnOptions)
+        <div class="w-32 shrink-0"><x-dashboard-filter-dropdown label="{{ __('Columns') }}" compact model="visibleColumns" :options="collect($fixedColumnOptions)
             ->map(fn($label, $value) => ['value' => $value, 'label' => $label])
             ->values()" :selected="$visibleColumns"
             multiple /></div>

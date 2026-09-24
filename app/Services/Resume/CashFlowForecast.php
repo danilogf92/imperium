@@ -37,7 +37,7 @@ class CashFlowForecast
                 $base = (float) $planned->get($period, 0);
                 $rows[] = [
                     'period' => $period,
-                    'month' => CarbonImmutable::createFromFormat('!Y-m', $period)->format('M Y'),
+                    'month' => CarbonImmutable::createFromFormat('!Y-m', $period)->translatedFormat('M Y'),
                     'planned' => $base,
                     'actual' => (float) $actual->get($period, 0),
                     'projected' => $period >= $cutoff ? round($base + $perMonth, 2) : null,
@@ -69,7 +69,7 @@ class CashFlowForecast
             $outgoing = round($base + $carry - $spent, 2);
             if ($visiblePeriods->has($period)) {
                 $result[] = [
-                    'period' => $period, 'month' => $month->format('M Y'),
+                    'period' => $period, 'month' => $month->translatedFormat('M Y'),
                     'status' => $closed ? 'Closed month' : ($period === $current ? 'In progress' : 'Forecast'),
                     'base' => $base, 'actual' => $spent, 'incoming' => $carry,
                     'adjusted' => $adjusted, 'remaining' => round(max(0, $adjusted - $spent), 2),

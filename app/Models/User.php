@@ -19,7 +19,7 @@ use Filament\Panel;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, \Illuminate\Contracts\Translation\HasLocalePreference
 {
     /** @use HasFactory<UserFactory> */
     use Auditable, HasFactory, Notifiable, HasRoles, TwoFactorAuthenticatable;
@@ -80,6 +80,16 @@ class User extends Authenticatable implements FilamentUser
             && $this->can_access_admin;
     }
 
+    public function preferredLocale(): string
+    {
+        $preference = $this->preferences()->where('key', 'locale')->first()?->value;
+        $locale = is_array($preference) ? ($preference['locale'] ?? null) : $preference;
+
+        return array_key_exists((string) $locale, config('locales.supported', []))
+            ? $locale
+            : config('locales.default', config('app.locale', 'en'));
+    }
+
     protected static function booted(): void
     {
         static::updating(function (User $user): void {
@@ -89,7 +99,7 @@ class User extends Authenticatable implements FilamentUser
                 && (int) auth()->id() === (int) $user->getKey()
             ) {
                 throw ValidationException::withMessages([
-                    'is_active' => 'You cannot disable your own account. Another administrator must do it.',
+                    'is_active' => __('You cannot disable your own account. Another administrator must do it.'),
                 ]);
             }
 
@@ -99,7 +109,7 @@ class User extends Authenticatable implements FilamentUser
                 && (int) auth()->id() === (int) $user->getKey()
             ) {
                 throw ValidationException::withMessages([
-                    'can_access_admin' => 'You cannot change your own admin access. Another administrator must do it.',
+                    'can_access_admin' => __('You cannot change your own admin access. Another administrator must do it.'),
                 ]);
             }
         });
