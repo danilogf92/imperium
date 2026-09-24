@@ -1,3 +1,4 @@
+@import './theme.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,7 +6,7 @@
 @layer base {
     html {
         scroll-behavior: smooth;
-        font-size: 13px; /* Normalmente son 16px */
+        font-size: 16px;
         width: 100%;
         max-width: 100%;
         overflow-x: hidden;
@@ -22,9 +23,144 @@
     [x-cloak] {
         display: none !important;
     }
+
+    html:has(.app-modal[data-modal-open="true"]),
+    body:has(.app-modal[data-modal-open="true"]) {
+        overflow: hidden;
+        overscroll-behavior: none;
+    }
+
+    :where(input, select, textarea) {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    :where(img, video, canvas) {
+        max-width: 100%;
+    }
 }
 
 @layer components {
+    .dashboard-chart-card.annual-projection-chart {
+        height: auto !important;
+    }
+
+    .app-pagination [aria-current="page"] > span,
+    .app-pagination .app-pagination-current {
+        position: relative;
+        z-index: 1;
+        border-color: #1d4ed8;
+        background-color: #1d4ed8;
+        color: #ffffff;
+        font-weight: 800;
+        box-shadow: 0 1px 3px rgb(30 64 175 / 25%);
+    }
+
+    .app-pagination .app-pagination-current {
+        flex-shrink: 0;
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .app-pagination button:not(:disabled):hover {
+        z-index: 2;
+        color: #1d4ed8;
+        border-color: #60a5fa;
+        background-color: #eff6ff;
+    }
+
+    .app-pagination button:not(:disabled):active {
+        color: #ffffff;
+        background-color: #1e40af;
+        border-color: #1e40af;
+    }
+
+    .app-pagination button:focus-visible {
+        z-index: 3;
+        outline: 2px solid #2563eb;
+        outline-offset: 2px;
+    }
+
+    .app-pagination [aria-disabled="true"] > span,
+    .app-pagination span[aria-disabled="true"].relative,
+    .app-pagination button:disabled {
+        color: #94a3b8;
+        background-color: #f1f5f9;
+        border-color: #e2e8f0;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    select.app-per-page-select {
+        color: var(--app-text);
+        background-color: var(--app-surface);
+        border-color: var(--app-border);
+        border-width: 1px;
+        font-weight: 600;
+    }
+
+    select.app-per-page-select:hover,
+    select.app-per-page-select:focus {
+        border-color: #3b82f6;
+    }
+
+    select.app-per-page-select option:checked {
+        color: #ffffff;
+        background-color: #1d4ed8;
+    }
+
+    select.app-per-page-select:disabled {
+        color: #94a3b8;
+        background-color: #f1f5f9;
+        border-color: #e2e8f0;
+        cursor: not-allowed;
+    }
+
+    /* Shared clear controls for searches, including searches inside filter menus. */
+    input[type="search"]::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 1.875rem;
+        height: 1.875rem;
+        margin-inline-start: 0.5rem;
+        cursor: pointer;
+        border-radius: 0.5rem;
+        background: #fef2f2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dc2626' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='m7 7 10 10M17 7 7 17'/%3E%3C/svg%3E") center / 1.75rem 1.75rem no-repeat;
+        box-shadow: inset 0 0 0 1px #fecaca;
+    }
+
+    input[type="search"]::-webkit-search-cancel-button:hover {
+        background-color: #fee2e2;
+    }
+
+    button[wire\:click="clearSearch"],
+    button[wire\:click="$set('search', '')"] {
+        width: 2rem;
+        height: 2rem;
+        color: #dc2626;
+        background-color: #fef2f2;
+        box-shadow: inset 0 0 0 1px #fecaca;
+    }
+
+    button[wire\:click="clearSearch"]:hover,
+    button[wire\:click="$set('search', '')"]:hover {
+        color: #b91c1c;
+        background-color: #fee2e2;
+    }
+
+    button[wire\:click="clearSearch"]:focus-visible,
+    button[wire\:click="$set('search', '')"]:focus-visible {
+        outline: 2px solid #dc2626;
+        outline-offset: 2px;
+    }
+
+    button[wire\:click="clearSearch"] svg,
+    button[wire\:click="$set('search', '')"] svg {
+        width: 1.5rem;
+        height: 1.5rem;
+        stroke-width: 2.5;
+    }
+
     .module-accent-line {
         position: relative;
         border-top-width: 2px !important;
@@ -56,7 +192,7 @@
     }
 
     .generic-ui-button:hover {
-        color: var(--ui-button-text, #ffffff);
+        color: var(--ui-button-hover-text, var(--ui-button-text, #ffffff));
         background-color: var(--ui-button-hover, #1d4ed8);
     }
 
@@ -80,7 +216,7 @@
         max-width: 100%;
         overflow-x: hidden;
         background: #f1f5f9;
-        padding: 1.5rem 1rem;
+        padding: 0.75rem;
     }
 
     .dashboard-page-content {
@@ -106,8 +242,50 @@
 
     .dashboard-metrics-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
+        gap: 0.75rem;
+    }
+
+    :where(.dashboard-page-shell, .app-modal) :where(.grid, .flex) > :where(div, section, article, label, form) {
+        min-width: 0;
+    }
+
+    :where(.dashboard-page-shell, .app-modal) :where(h1, h2, h3, p, label) {
+        overflow-wrap: anywhere;
+    }
+
+    .dashboard-chart-card {
+        width: 100%;
+        height: auto;
+    }
+
+    .dashboard-chart-body {
+        min-height: 20rem;
+    }
+
+    .annual-projection-chart .dashboard-chart-body {
+        min-height: 0;
+    }
+
+    .app-modal-content {
+        overscroll-behavior: contain;
+        overflow-wrap: anywhere;
+    }
+
+    .app-user-summary-table :is(th, td):first-child {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        max-width: min(45vw, 14rem);
+        white-space: normal;
+        overflow-wrap: anywhere;
+        background-color: #f8fafc;
+    }
+
+    .app-pagination button,
+    .app-pagination [aria-disabled="true"] > span {
+        min-height: 44px;
+        min-width: 44px;
     }
 
     .planification-activity-tooltip {
@@ -177,190 +355,91 @@
 
 @media (min-width: 640px) {
     .dashboard-page-shell {
-        padding-inline: 1.5rem;
+        padding: 1.5rem;
+    }
+
+    .dashboard-chart-card {
+        height: var(--chart-card-height, 38rem);
+    }
+
+    .dashboard-chart-body {
+        min-height: 0;
     }
 }
 
 @media (min-width: 1024px) {
+    html {
+        font-size: 13px;
+    }
+
     .dashboard-page-shell {
         padding-inline: 2rem;
     }
 }
 
+/* Phone layouts keep content readable; only table regions scroll horizontally. */
 @media (max-width: 639px) {
-    html {
-        font-size: 12.5px;
-    }
-
-    .dashboard-page-shell {
-        padding: 0.625rem;
-    }
-
-    .dashboard-page-content {
-        gap: 0.875rem;
-    }
-
-    .dashboard-panel,
-    .unified-table-shell {
-        border-radius: 0.625rem;
-    }
-
-    .unified-table-toolbar {
-        align-items: stretch;
-        padding: 0.75rem;
-    }
-
-    .unified-data-table {
-        font-size: 0.75rem;
-    }
-
-    .unified-data-table thead th,
-    .unified-data-table tbody td,
-    .unified-data-table tbody th {
-        padding-block: 0.55rem;
-        padding-inline: 0;
-    }
-
-    .unified-table-pagination {
-        overflow-x: auto;
-        padding: 0.7rem 0.75rem;
-    }
-
-    .dashboard-page-shell h1 {
-        font-size: 1.35rem;
-        line-height: 1.75rem;
-    }
-
-    .dashboard-page-shell button,
-    .dashboard-page-shell a,
-    .dashboard-page-shell select,
-    .dashboard-page-shell input {
-        max-width: 100%;
-    }
-
-    .dashboard-page-shell img,
-    .dashboard-page-shell svg,
-    .dashboard-page-shell canvas {
-        max-width: 100%;
-    }
-
-    .dashboard-metrics-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.625rem;
-    }
-
-    .dashboard-metrics-grid article {
-        min-height: 94px;
-        padding: 0.75rem;
-    }
-
-    /* One readable chart per row on phone-sized screens. */
-    .dashboard-page-content section.grid {
-        grid-template-columns: minmax(0, 1fr) !important;
-        gap: 0.875rem;
-    }
-
-    .dashboard-chart-card {
-        width: 100%;
-        height: 31rem !important;
-    }
-
-    .dashboard-chart-card > header {
-        min-height: 0;
-        align-items: flex-start;
-        gap: 0.5rem;
-        padding: 0.75rem;
-    }
-
+    .dashboard-page-shell h1 { font-size: 1.35rem; line-height: 1.4; }
+    .dashboard-metrics-grid article { min-width: 0; padding: 0.875rem; }
+    .dashboard-metrics-grid .whitespace-nowrap { white-space: normal; }
+    .dashboard-chart-card > header { flex-wrap: wrap; padding: 0.875rem; }
     .dashboard-chart-card > header h3,
-    .dashboard-chart-card > header p {
-        overflow: visible;
-        white-space: normal;
-    }
+    .dashboard-chart-card > header p { white-space: normal; overflow: visible; }
+    .dashboard-chart-body { padding: 0.75rem; }
+    .dashboard-filter-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+    .dashboard-filter-controls > * { min-width: 0; }
+    .dashboard-filter-controls > * > button { padding-inline: 0.5rem; font-size: 0.75rem; }
+    .unified-table-toolbar { align-items: stretch; }
+    .unified-table-pagination { padding: 0.75rem; }
+    .app-modal :where(.grid, .flex) > * { min-width: 0; }
+    .app-modal-content { padding: 0.75rem; }
+    .app-modal-footer > .flex { flex-wrap: wrap; }
+}
 
-    .dashboard-chart-card > .min-h-0 {
-        padding: 0.625rem;
+/* Pixel minimums also cover tablets with a coarse pointer, regardless of root font size. */
+@media (max-width: 639px), (pointer: coarse) {
+    :is(.app-page-frame, .app-modal, [data-dashboard-filter-menu], .app-guest) :where(input:not([type='checkbox']):not([type='radio']):not([type='hidden']), select, textarea) {
+        font-size: 16px;
     }
-
-    .dashboard-filter-controls > *,
-    .dashboard-filter-controls > * > button,
-    .dashboard-year-filter,
-    .dashboard-year-filter > button {
-        width: 100% !important;
+    :is(.app-page-frame, .app-modal, [data-dashboard-filter-menu], .app-guest) :where(button, summary, a.inline-flex, a.block, [role='button']) {
+        min-height: 44px;
     }
-
+    :is(.app-page-frame, .app-modal, [data-dashboard-filter-menu], .app-guest) button {
+        min-width: 44px;
+    }
+    :is(.app-page-frame, .app-modal, [data-dashboard-filter-menu], .app-guest) :where(input:not([type='checkbox']):not([type='radio']):not([type='hidden']), select) {
+        min-height: 44px;
+    }
+    [data-dashboard-filter-menu] label { min-height: 44px; }
+    .unified-data-table thead th[wire\:click] { height: 44px; }
     .planification-activity-info {
         display: inline-flex;
-        width: 2rem;
-        height: 2rem;
-        flex: 0 0 2rem;
+        flex: 0 0 44px;
         align-items: center;
         justify-content: center;
         border: 1px solid #0891b2;
         border-radius: 9999px;
         color: #0e7490;
         background: #fff;
-        font-size: 0.85rem;
         font-weight: 800;
-        box-shadow: 0 1px 2px rgb(15 23 42 / 0.12);
     }
-
-    .planification-activity-tooltip {
-        font-size: 0.85rem;
-        pointer-events: auto;
+    .planification-activity-tooltip { font-size: 14px; pointer-events: auto; }
+    .data-orders-tooltip,
+    .project-orders-tooltip {
+        position: static;
+        display: block;
+        width: auto;
+        max-width: 100%;
+        margin-top: 0.5rem;
+        opacity: 1;
+        transform: none;
     }
-
-    .dashboard-panel > .flex:first-child > div,
-    .dashboard-panel > .flex:first-child > div > div,
-    .dashboard-panel > .flex:first-child input {
-        min-width: 0;
-        width: 100%;
-    }
-
-    .dashboard-panel > .flex:first-child > div:last-child > * {
-        flex: 1 1 calc(50% - 0.5rem);
-        justify-content: center;
-    }
-
-    .dashboard-panel select,
-    .dashboard-panel input,
-    .dashboard-panel button {
-        min-height: 2.75rem;
-    }
-
-    .dashboard-panel [x-show] > .flex.flex-wrap {
-        align-items: stretch;
-        gap: 0.625rem;
-        padding: 0.75rem;
-    }
-
-    .dashboard-panel [x-show] > .flex.flex-wrap > * {
-        flex: 1 1 calc(50% - 0.625rem);
-        min-width: 0;
-    }
-
-    .dashboard-panel [x-show] > .flex.flex-wrap > label select,
-    .dashboard-panel [x-show] > .flex.flex-wrap > div > button,
-    .dashboard-panel [x-show] > .flex.flex-wrap > button {
-        width: 100%;
-    }
-
-    .dashboard-page-shell textarea,
-    .dashboard-page-shell select,
-    .dashboard-page-shell input {
-        font-size: 16px;
-    }
-
-    .dashboard-page-shell table {
-        font-size: 0.72rem;
-    }
-
-    .dashboard-page-shell .space-y-6 > :not([hidden]) ~ :not([hidden]) {
-        margin-top: 1rem;
-    }
+    .data-orders-tooltip-wrapper,
+    .project-orders-tooltip-wrapper { flex-direction: column; }
+    .data-orders-tooltip::after,
+    .project-orders-tooltip::after { display: none; }
 }
-
-@media (max-width: 767px) {
+@media (max-width: 1279px) {
     .planification-table-scroll [style*="left:"] {
         position: static;
     }
@@ -370,6 +449,18 @@
         -webkit-overflow-scrolling: touch;
         scrollbar-width: thin;
         scrollbar-color: #64748b #e2e8f0;
+    }
+}
+
+/* On short viewports (landscape or keyboard), let the whole dialog scroll. */
+@media (max-height: 600px) {
+    .app-modal [role="dialog"] {
+        overflow-y: auto;
+    }
+
+    .app-modal-content {
+        flex: none;
+        overflow-y: visible;
     }
 }
 

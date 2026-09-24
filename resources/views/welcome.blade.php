@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
+        <x-theme-init />
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#2563eb">
@@ -40,9 +41,9 @@
         </div>
     </body> --}}
 
-    <body class="bg-custom">
+    <body class="app-guest bg-custom">
                 <!-- Navigation -->
-        <nav class="bg-custom flex justify-between py-6 w-full lg:px-48 md:px-12 px-4 content-center bg-secondary border">
+        <nav class="bg-custom flex flex-wrap items-center justify-between gap-4 py-6 w-full lg:px-48 md:px-12 px-4 content-center bg-secondary border">
             <div class="flex items-center gap-3">
                 <img src="{{ \App\Models\BrandSetting::logoUrl() }}" alt="{{ \App\Models\BrandSetting::current()?->name ?? 'DaImperium' }}" class="h-10 w-10 object-contain">
                 <span class="italic font-semibold bg-left-bottom bg-no-repeat pb-4 bg-100%" style="background-image: url('{{ asset('img/Underline1.svg') }}');">
@@ -77,7 +78,7 @@
             </div> --}}
 
             @if (Route::has('login'))
-                <div class="sm:right-0 p-6 text-right z-10">
+                <div class="flex flex-wrap items-center gap-2 text-right z-10">
                     @auth
                         <a href="{{ url('/dashboard') }}" class="font-semibold text-white bg-stone-800 hover:bg-stone-600 focus:outline-none focus:ring focus:ring-gray-400 focus:ring-opacity-50 rounded-md px-4 py-2 transition duration-300 ease-in-out">Dashboard</a>
                     @else
@@ -112,7 +113,7 @@
         <!-- Hero -->
         {{-- <section class="md:mt-0 md:h-screen flex flex-col md:flex-row md:justify-between md:items-center lg:px-24 md:px-6 p-4 text-center md:text-left">
             <div class="md:flex-1 md:mr-10">
-                <h1 class="italic font-semibold text-5xl mb-7">
+                <h1 class="break-words italic font-semibold text-3xl sm:text-5xl mb-7">
                     Project
                     <span class="italic font-semibold bg-left-bottom bg-no-repeat pb-4 bg-100%" style="background-image: url('{{ asset('img/Underline1.svg') }}');">
                         Managment
@@ -136,7 +137,7 @@
         </section> --}}
         <section class="md:mt-0 md:h-screen flex flex-col md:flex-row md:justify-between md:items-center lg:px-24 md:px-6 p-4 text-center md:text-left">
             <div class="md:flex-1 md:mr-10">
-                <h1 class="italic font-semibold text-5xl mb-7">
+                <h1 class="break-words italic font-semibold text-3xl sm:text-5xl mb-7">
                     Project
                     <span class="italic font-semibold bg-left-bottom bg-no-repeat pb-4 bg-100%" style="background-image: url('{{ asset('img/Underline1.svg') }}');">
                         Management

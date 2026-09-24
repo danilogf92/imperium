@@ -28,7 +28,7 @@
         </button>
     @else
         @if ($canCreate ?? false)
-            <x-ui-button :text="__('Create project')" icon="plus" color="#EBB352" hover-opacity="0.75" text-color="#FFFFFF"
+            <x-ui-button compact-mobile :text="__('Create project')" icon="plus" color="#EBB352" hover-opacity="0.75" text-color="#FFFFFF"
                 wire:click="openCreateModal" />
         @endif
     @endif
@@ -50,7 +50,7 @@
 
         <x-slot name="content">
             <div class="min-w-0" x-data="{ activeSection: @js($initialSection) }">
-                <nav class="mb-5 grid grid-cols-3 gap-2 rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm"
+                <nav class="app-form-tabs mb-3 grid grid-cols-3 gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm sm:mb-5 sm:gap-2 sm:p-1.5"
                     aria-label="Project form sections">
                     <button type="button" x-on:click="activeSection = 'details'"
                         x-bind:class="activeSection === 'details' ? 'bg-blue-600 text-white shadow-sm' :
@@ -86,7 +86,7 @@
 
         <x-slot name="footer">
             <div
-                class="flex w-full flex-col-reverse items-stretch justify-end gap-3 sm:flex-row sm:items-center sm:gap-4">
+                class="flex w-full flex-wrap items-center justify-end gap-2 sm:gap-4">
                 <x-secondary-button wire:click="{{ $closeMethod }}" data-no-global-loading wire:loading.attr="disabled"
                     wire:target="{{ $saveMethod }}"
                     style="background-color: #ef4444; border-color: #dc2626; color: #ffffff;"

@@ -20,10 +20,14 @@ class PermissionsTable
                     ->sortable(),
 
                 TextColumn::make('guard_name')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Guard')
                     ->sortable(),
 
                 TextColumn::make('created_at')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -32,7 +36,7 @@ class PermissionsTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->button()->outlined()->labeledFrom('md'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

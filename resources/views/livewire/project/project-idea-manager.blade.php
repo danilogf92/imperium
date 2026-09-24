@@ -1,16 +1,16 @@
 <div wire:key="project-idea-manager-root">
     @if ($isOpen)
-        <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 px-3 py-3 sm:py-6"
+        <div data-modal-open="true" class="app-modal fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 px-3 py-3 sm:py-6"
             wire:key="project-idea-modal-{{ $projectIdeaProjectId }}"
             x-data
             x-on:keydown.escape.window="$wire.closeProjectIdeaModal()">
             <div class="flex min-h-full cursor-pointer items-center justify-center" x-on:click.self="$wire.closeProjectIdeaModal()">
-                <section class="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg cursor-default flex-col overflow-hidden rounded-xl bg-white shadow-2xl sm:max-h-[calc(100vh-3rem)]"
+                <section class="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg cursor-default flex-col overflow-hidden rounded-xl bg-white shadow-2xl sm:max-h-[calc(100dvh-3rem)]"
                     role="dialog" aria-modal="true" aria-labelledby="project-idea-title" x-on:click.stop>
                     <header class="flex shrink-0 items-start justify-between gap-4 border-b border-slate-200 bg-white p-4 sm:p-5">
                         <div class="min-w-0">
                             <h2 id="project-idea-title" class="text-lg font-semibold text-slate-900">Project ideas (Excel)</h2>
-                            <p class="mt-1 truncate text-sm text-slate-500">{{ $projectIdeaProjectCode }}@if ($projectIdeaProjectName !== '') · {{ $projectIdeaProjectName }}@endif</p>
+                            <p class="mt-1 break-words text-sm text-slate-500">{{ $projectIdeaProjectCode }}@if ($projectIdeaProjectName !== '') · {{ $projectIdeaProjectName }}@endif</p>
                         </div>
                         <button wire:click="closeProjectIdeaModal" type="button"
                             class="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"

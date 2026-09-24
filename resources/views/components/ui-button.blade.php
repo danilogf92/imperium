@@ -8,6 +8,7 @@
     'textColor' => '#FFFFFF',
     'href' => null,
     'type' => 'button',
+    'compactMobile' => false,
 ])
 
 @php
@@ -94,21 +95,33 @@
     $iconRight = $iconPosition === 'right';
     $normalizedHoverOpacity = is_numeric($hoverOpacity) ? max(0, min(1, (float) $hoverOpacity)) : 1;
     $useHoverOpacity = $hoverOpacity !== null;
-    $styles = "--ui-button-bg: {$color}; --ui-button-hover: {$hoverColor}; --ui-button-text: {$textColor}; --ui-button-hover-opacity: {$normalizedHoverOpacity};";
+    $readableText = static function ($background, $foreground) {
+        if (!in_array(strtolower($foreground), ['#fff', '#ffffff'], true) || !preg_match('/^#([0-9a-f]{6})$/i', $background, $match)) return $foreground;
+        $channels = array_map(static function ($hex) {
+            $value = hexdec($hex) / 255;
+            return $value <= 0.04045 ? $value / 12.92 : (($value + 0.055) / 1.055) ** 2.4;
+        }, str_split($match[1], 2));
+        $luminance = $channels[0] * 0.2126 + $channels[1] * 0.7152 + $channels[2] * 0.0722;
+        return 1.05 / ($luminance + 0.05) < 4.5 ? '#000000' : $foreground;
+    };
+    $buttonText = $readableText($color, $textColor);
+    $buttonHoverText = $readableText($useHoverOpacity ? $color : $hoverColor, $textColor);
+    $styles = "--ui-button-bg: {$color}; --ui-button-hover: {$hoverColor}; --ui-button-text: {$buttonText}; --ui-button-hover-text: {$buttonHoverText}; --ui-button-hover-opacity: {$normalizedHoverOpacity};";
     $classes =
-        'generic-ui-button inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-transparent px-4 text-sm font-semibold shadow-sm transition duration-150 hover:-translate-y-px hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50';
+        'generic-ui-button inline-flex min-h-10 max-w-full py-2 cursor-pointer items-center justify-center gap-2 rounded-lg border border-transparent px-4 text-sm font-semibold shadow-sm transition duration-150 hover:-translate-y-px hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50';
+    $classes .= $compactMobile && $iconPath ? ' app-icon-action' : '';
     $classes .= $useHoverOpacity ? ' generic-ui-button-opacity-hover' : '';
 @endphp
 
 @if ($href)
-    <a href="{{ $href }}" style="{{ $styles }}" {{ $attributes->class($classes) }}>
+    <a href="{{ $href }}" style="{{ $styles }}" {{ $attributes->merge(['aria-label' => $compactMobile ? ($text ?? strip_tags((string) $slot)) : null, 'title' => $compactMobile ? ($text ?? strip_tags((string) $slot)) : null])->class($classes) }}>
         @if ($iconPath && !$iconRight)
             <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                 aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="{{ $iconPath }}" />
             </svg>
         @endif
-        <span>{{ $text ?? $slot }}</span>
+        <span class="app-action-label">{{ $text ?? $slot }}</span>
         @if ($iconPath && $iconRight)
             <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                 aria-hidden="true">
@@ -117,14 +130,14 @@
         @endif
     </a>
 @else
-    <button type="{{ $type }}" style="{{ $styles }}" {{ $attributes->class($classes) }}>
+    <button type="{{ $type }}" style="{{ $styles }}" {{ $attributes->merge(['aria-label' => $compactMobile ? ($text ?? trim(strip_tags((string) $slot))) : null, 'title' => $compactMobile ? ($text ?? trim(strip_tags((string) $slot))) : null])->class($classes) }}>
         @if ($iconPath && !$iconRight)
             <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                 aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="{{ $iconPath }}" />
             </svg>
         @endif
-        <span>{{ $text ?? $slot }}</span>
+        <span class="app-action-label">{{ $text ?? $slot }}</span>
         @if ($iconPath && $iconRight)
             <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                 aria-hidden="true">

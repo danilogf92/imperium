@@ -22,6 +22,18 @@
             --unified-table-header-hover-text: #1d4ed8;
         }
 
+        .dark {
+            --unified-table-row-bg: #111827;
+            --unified-table-row-even-bg: #182334;
+            --unified-table-row-hover: #23354d;
+            --unified-table-border: #334155;
+            --unified-table-cell-border: #283548;
+            --unified-table-header-bg: #1e293b;
+            --unified-table-header-text: #e2e8f0;
+            --unified-table-text: #cbd5e1;
+            --unified-table-header-hover-bg: #23354d;
+            --unified-table-header-hover-text: #93c5fd;
+        }
         .unified-table-shell {
             width: 100%;
             max-width: 100%;
@@ -29,7 +41,7 @@
             overflow: visible;
             border: 1px solid var(--unified-table-border);
             border-radius: 0.75rem;
-            background: #ffffff;
+            background: var(--unified-table-row-bg);
             box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
         }
 
@@ -42,7 +54,7 @@
             padding: 0.85rem 1rem;
             border-bottom: 1px solid var(--unified-table-border);
             border-radius: 0.75rem 0.75rem 0 0;
-            background: #ffffff;
+            background: var(--unified-table-row-bg);
         }
 
         .unified-table-scroll {
@@ -77,7 +89,7 @@
 
         .unified-data-table thead th {
             padding: 0.75rem 0.875rem;
-            border-bottom: 1px solid #cbd5e1;
+            border-bottom: 1px solid var(--unified-table-border);
             text-align: left;
             vertical-align: middle;
         }
@@ -159,7 +171,7 @@
             padding: 0.85rem 1rem;
             border-top: 1px solid var(--unified-table-border);
             border-radius: 0 0 0.75rem 0.75rem;
-            background: #ffffff;
+            background: var(--unified-table-row-bg);
         }
     </style>
 @endonce

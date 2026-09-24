@@ -148,6 +148,13 @@ class Planification extends Component
         $this->resetPage();
     }
 
+    public function moveActivityWeek(int $direction): void
+    {
+        abort_unless(in_array($direction, [-1, 1], true), 422);
+        $this->activityWeekFilter = $this->selectedActivityWeek()->addWeeks($direction)->format('o-\WW');
+        $this->updatedActivityWeekFilter();
+    }
+
     public function updatedMilestoneCompletionFilter(string $value): void
     {
         if (! in_array($value, ['', 'completed', 'incomplete'], true)) {
@@ -187,6 +194,7 @@ class Planification extends Component
     public function clearFilters(): void
     {
         $this->reset([
+            'search',
             'plantFilter',
             'statusFilter',
             'creationYearFilter',

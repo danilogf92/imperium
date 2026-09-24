@@ -25,10 +25,10 @@
         </div>
     @else
     @php($step = $sourceToken === '' ? 1 : ($mappingConfirmed && $matchesReady ? 3 : 2))
-    <ol class="grid grid-cols-3 gap-2 rounded-xl bg-slate-50 p-3 text-sm" aria-label="{{ __('sap.title') }}">
+    <ol class="grid grid-cols-3 gap-2 rounded-xl bg-slate-50 p-3 text-sm sm:grid-cols-3" aria-label="{{ __('sap.title') }}">
         @foreach (['file', 'mapping', 'projects'] as $index => $label)
             <li @if ($step === $index + 1) aria-current="step" @endif class="flex items-center gap-2 {{ $step === $index + 1 ? 'font-semibold text-blue-700' : 'text-slate-500' }}">
-                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full {{ $step === $index + 1 ? 'bg-blue-600 text-white' : 'bg-slate-200' }}">{{ $index + 1 }}</span>{{ __('sap.'.$label) }}
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full {{ $step === $index + 1 ? 'bg-blue-600 text-white' : 'bg-slate-200' }}">{{ $index + 1 }}</span><span class="{{ $step === $index + 1 ? '' : 'sr-only sm:not-sr-only' }}">{{ __('sap.'.$label) }}</span>
             </li>
         @endforeach
     </ol>

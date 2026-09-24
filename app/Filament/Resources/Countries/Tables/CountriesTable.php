@@ -15,20 +15,32 @@ class CountriesTable
         return $table
             ->columns([
                 TextColumn::make('country_name')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->searchable(),
                 TextColumn::make('country_code')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->searchable(),
                 TextColumn::make('flag')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Flag')
                     ->alignCenter()
                     ->size('lg'),
                 TextColumn::make('phone_code')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->searchable(),
                 TextColumn::make('created_at')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -37,7 +49,7 @@ class CountriesTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->button()->outlined()->labeledFrom('md'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

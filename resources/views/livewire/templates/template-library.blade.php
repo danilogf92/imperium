@@ -79,12 +79,12 @@
                         </div>
                         <h3 class="mt-2 break-words text-sm font-bold leading-5 text-slate-900">{{ $template->name }}</h3>
                         @if ($template->description)
-                            <p class="mt-1 line-clamp-2 text-xs leading-4 text-slate-500" title="{{ $template->description }}">{{ $template->description }}</p>
+                            <p class="mt-1 break-words text-xs leading-4 text-slate-500" title="{{ $template->description }}">{{ $template->description }}</p>
                         @endif
                         <p class="mt-2 text-[11px] font-semibold text-slate-600">
                             {{ $template->is_global ? __('All users') : $template->companies->whereIn('id', $companies->modelKeys())->pluck('company_name')->implode(', ') }}
                         </p>
-                        <p class="mt-1 truncate text-[11px] text-slate-400" title="{{ $template->original_file_name }}">{{ $template->original_file_name }}</p>
+                        <p class="mt-1 break-all text-[11px] text-slate-400" title="{{ $template->original_file_name }}">{{ $template->original_file_name }}</p>
                         <div class="mt-auto pt-2">
                             <a href="{{ route('templates.download', $template) }}" data-no-global-loading
                                 class="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2 py-1 text-xs font-semibold text-white hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">

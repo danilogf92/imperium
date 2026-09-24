@@ -1,6 +1,6 @@
 <div wire:key="project-document-manager-root">
     @if ($isOpen)
-        <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 px-3 py-3 sm:py-6"
+        <div data-modal-open="true" class="app-modal fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 px-3 py-3 sm:py-6"
             wire:key="project-document-modal-{{ $projectId }}" x-data="{ uploading: false, progress: 0 }"
             x-on:keydown.escape.window="$wire.close()"
             x-on:livewire-upload-start="uploading = true; progress = 0"
@@ -9,12 +9,12 @@
             x-on:livewire-upload-error="uploading = false; progress = 0"
             x-on:livewire-upload-cancel="uploading = false; progress = 0">
             <div class="flex min-h-full cursor-pointer items-center justify-center" x-on:click.self="$wire.close()">
-                <section class="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg cursor-default flex-col overflow-hidden rounded-xl bg-white shadow-2xl sm:max-h-[calc(100vh-3rem)]"
+                <section class="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg cursor-default flex-col overflow-hidden rounded-xl bg-white shadow-2xl sm:max-h-[calc(100dvh-3rem)]"
                     role="dialog" aria-modal="true" aria-labelledby="pda-modal-title" x-on:click.stop>
                     <header class="flex shrink-0 items-start justify-between gap-4 border-b border-slate-200 bg-white p-4 sm:p-5">
                         <div class="min-w-0">
                             <h2 id="pda-modal-title" class="text-lg font-semibold text-slate-900">PDA document (PDF)</h2>
-                            <p class="mt-1 truncate text-sm text-slate-500">{{ $projectCode }}@if ($projectName !== '') · {{ $projectName }}@endif</p>
+                            <p class="mt-1 break-words text-sm text-slate-500">{{ $projectCode }}@if ($projectName !== '') · {{ $projectName }}@endif</p>
                         </div>
                         <button wire:click="close" type="button" class="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 focus:ring-2 focus:ring-blue-500" aria-label="Close modal">
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path stroke-linecap="round" d="m5 5 10 10M15 5 5 15" /></svg>
@@ -42,7 +42,7 @@
                                 </span>
                                 <span class="min-w-0 flex-1">
                                     <span class="block text-sm font-semibold text-slate-800">Upload PDA PDF</span>
-                                    <span class="mt-1 block truncate text-xs text-slate-500">
+                                    <span class="mt-1 block break-words text-xs text-slate-500">
                                         <span x-show="! uploading">{{ $document?->getClientOriginalName() ?? 'Click to select one PDF · maximum 10 MB' }}</span>
                                         <span x-show="uploading" x-cloak class="font-semibold text-blue-700">Uploading PDA... <span x-text="`${progress}%`">0%</span></span>
                                     </span>
@@ -59,7 +59,7 @@
                             <div class="mt-5 rounded-xl border border-red-200 bg-red-50 p-4">
                                 <p class="font-semibold text-red-900">Delete this PDA PDF?</p>
                                 <p class="mt-1 text-sm text-red-800">Only the PDA document will be removed.</p>
-                                <div class="mt-3 flex justify-end gap-3">
+                                <div class="mt-3 flex flex-wrap justify-end gap-3">
                                     <button wire:click="$set('deleteConfirmation', false)" type="button" class="cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">Keep PDF</button>
                                     <button wire:click="delete" wire:loading.attr="disabled" type="button" class="cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-wait disabled:opacity-60">Yes, delete PDF</button>
                                 </div>

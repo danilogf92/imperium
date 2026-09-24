@@ -2,29 +2,221 @@
 
 namespace App\Livewire\Activities;
 
-use App\Enums\ProjectPermissionEnum;
 use App\Enums\InvestmentClassificationEnum;
 use App\Enums\InvestmentEnum;
 use App\Enums\ProjectJustificationEnum;
+use App\Enums\ProjectPermissionEnum;
 use App\Livewire\Dashboard\Concerns\InteractsWithDashboardFilters;
 use App\Models\ProjectMilestone;
 use App\Models\ProjectWeeklyActivity;
+use App\Models\User;
+use App\Models\UserPreference;
 use App\Services\Dashboard\DashboardQueryService;
 use App\Services\Planification\PlanificationAccessService;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class ActivitiesDashboard extends Component
 {
-    use InteractsWithDashboardFilters;
+    use InteractsWithDashboardFilters { resetAll as private resetProjectFilters; }
+    use WithPagination;
+
+    private const PAGE_SIZES = [5, 10, 20, 50, 100];
+
+    private const UI_PREFERENCES = [
+        'activityPerPage' => ['activities.detail.per_page', 'count'],
+        'milestonePerPage' => ['activities.milestones.per_page', 'count'],
+        'summaryOpen' => ['activities.summary', 'open'],
+    ];
+
+    private const FILTER_LABELS = [
+        'companyFilter' => 'Companies',
+        'yearSearch' => 'Years',
+        'stateSearch' => 'States',
+        'typeOfProjectSearch' => 'Classifications',
+        'investmentSearch' => 'Investments',
+        'justificationSearch' => 'Justifications',
+        'userFilter' => 'activity_control.user',
+        'projectFilter' => 'activity_control.project',
+        'status' => 'activity_control.status',
+        'search' => 'activity_control.search',
+    ];
+
+    public int $activityPerPage = 10;
+
+    public int $milestonePerPage = 10;
+
+    public bool $summaryOpen = true;
+
+    public string $userFilter = '';
+
+    public string $projectFilter = '';
+
+    public string $dateFrom = '';
+
+    public string $dateTo = '';
+
+    public function resetAll(): void
+    {
+        $this->resetProjectFilters();
+        $this->reset(['userFilter', 'projectFilter', 'dateFrom', 'dateTo', 'status', 'search']);
+        $this->resetValidation();
+        $this->resetListPages();
+    }
+
+    public function updated($property): void
+    {
+        if (isset(self::UI_PREFERENCES[$property])) {
+            if ($property !== 'summaryOpen') {
+                $this->{$property} = $this->validPageSize($this->{$property});
+                $this->resetPage($property === 'activityPerPage' ? 'page' : 'milestonesPage');
+            }
+            [$key, $field] = self::UI_PREFERENCES[$property];
+            UserPreference::query()->updateOrCreate(
+                ['user_id' => auth()->id(), 'key' => $key],
+                ['value' => [$field => $this->{$property}]]
+            );
+
+            return;
+        }
+
+        if (! str_starts_with($property, 'paginators.') && $property !== 'topLimit') {
+            $this->resetListPages();
+        }
+
+        if ($property === 'companyFilter' || str_starts_with($property, 'companyFilter.')) {
+            $this->reset(['userFilter', 'projectFilter']);
+        }
+
+        if (in_array($property, ['dateFrom', 'dateTo'], true)) {
+            $this->validate([
+                'dateFrom' => ['nullable', 'date_format:Y-m-d'],
+                'dateTo' => ['nullable', 'date_format:Y-m-d', ...($this->dateFrom !== '' ? ['after_or_equal:dateFrom'] : [])],
+            ]);
+        }
+    }
+
+    private function validPageSize(mixed $value): int
+    {
+        return in_array($value, self::PAGE_SIZES, true) ? $value : 10;
+    }
+
+    public function toggleSummary(): void
+    {
+        $this->summaryOpen = ! $this->summaryOpen;
+        $this->updated('summaryOpen');
+    }
+
+    private function resetListPages(): void
+    {
+        $this->resetPage();
+        $this->resetPage('milestonesPage');
+    }
+
+    public function removeFilter(string $property, ?string $value = null): void
+    {
+        abort_unless(isset(self::FILTER_LABELS[$property]) || $property === 'due', 422);
+
+        if ($property === 'due') {
+            $this->reset(['dateFrom', 'dateTo']);
+        } elseif (is_array($this->{$property})) {
+            $this->{$property} = array_values(array_filter($this->{$property}, fn ($item) => (string) $item !== $value));
+        } else {
+            $this->reset($property);
+        }
+
+        $this->resetValidation();
+        $this->resetListPages();
+    }
+
+    private function activeFilters(Collection $users, Collection $projects, Collection $companies): array
+    {
+        $chips = [];
+        foreach (self::FILTER_LABELS as $property => $label) {
+            $selection = $this->{$property};
+            if ($selection === '' || $selection === [] || ($property === 'status' && $selection === 'all')) {
+                continue;
+            }
+            foreach (is_array($selection) ? $selection : [$selection] as $value) {
+                $display = match ($property) {
+                    'userFilter' => $users->firstWhere('id', $value)?->name ?? __('activity_control.unavailable_selection'),
+                    'projectFilter' => $projects->firstWhere('id', $value)?->pda_code ?: ($projects->firstWhere('id', $value)?->name ?? __('activity_control.unavailable_selection')),
+                    'companyFilter' => $companies->firstWhere('company_code', $value)?->company_name ?? $value,
+                    'status' => __('activity_control.'.$value),
+                    default => __((string) $value),
+                };
+                $chips[] = ['property' => $property, 'value' => (string) $value, 'label' => __($label).': '.$display];
+            }
+        }
+        if ($this->dateFrom !== '' || $this->dateTo !== '') {
+            $chips[] = ['property' => 'due', 'value' => null, 'label' => __('activity_control.due').': '.($this->dateFrom ?: '…').' – '.($this->dateTo ?: '…')];
+        }
+
+        return $chips;
+    }
+
+    private function matchesDueRange($item): bool
+    {
+        return ($this->dateFrom === '' || $item->due_date->toDateString() >= $this->dateFrom)
+            && ($this->dateTo === '' || $item->due_date->toDateString() <= $this->dateTo);
+    }
+
+    private function paginateItems(Collection $items, int $perPage, string $pageName): LengthAwarePaginator
+    {
+        $page = max(1, min($this->getPage($pageName), max(1, (int) ceil($items->count() / $perPage))));
+        if ($this->getPage($pageName) !== $page) {
+            $this->setPage($page, $pageName);
+        }
+
+        return new LengthAwarePaginator($items->forPage($page, $perPage)->values(), $items->count(), $perPage, $page, [
+            'path' => request()->url(), 'pageName' => $pageName,
+        ]);
+    }
+
+    public function selectUser(int $userId): void
+    {
+        abort_unless($this->visibleUsers()->whereKey($userId)->exists(), 403);
+        $this->userFilter = (string) $userId;
+        $this->resetListPages();
+        $this->dispatch('activities-user-selected');
+    }
+
+    public function showUserOverdue(int $userId): void
+    {
+        abort_unless($this->visibleUsers()->whereKey($userId)->exists(), 403);
+        $this->userFilter = (string) $userId;
+        $this->status = 'overdue';
+        $this->resetListPages();
+        $this->dispatch('activities-filtered');
+    }
+
+    private function visibleUsers(): Builder
+    {
+        $companies = auth()->user()->companiesForPermissionQuery(ProjectPermissionEnum::View)
+            ->when($this->companyFilter, fn (Builder $query) => $query->whereIn('company_code', $this->companyFilter))
+            ->select('companies.id')->reorder();
+
+        return User::query()->whereHas('roles', fn (Builder $roles) => $roles
+            ->whereIn('company_id', $companies)
+            ->whereHas('permissions', fn (Builder $permissions) => $permissions->where('name', ProjectPermissionEnum::View->value)));
+    }
 
     public function mount(DashboardQueryService $queries): void
     {
         abort_unless(auth()->check(), 403);
         $this->years = $queries->availableYears(auth()->user());
+        $stored = auth()->user()->preferences()->whereIn('key', array_column(self::UI_PREFERENCES, 0))->get()->keyBy('key');
+        foreach (self::UI_PREFERENCES as $property => [$key, $field]) {
+            $value = $stored->get($key)?->value[$field] ?? $this->{$property};
+            $this->{$property} = $property === 'summaryOpen'
+                ? (is_bool($value) ? $value : true)
+                : $this->validPageSize($value);
+        }
     }
 
     public string $status = 'all';
@@ -50,12 +242,14 @@ class ActivitiesDashboard extends Component
     public function render(PlanificationAccessService $access): View
     {
         $this->sanitizeFilters();
+        $this->activityPerPage = $this->validPageSize($this->activityPerPage);
+        $this->milestonePerPage = $this->validPageSize($this->milestonePerPage);
         $today = CarbonImmutable::today();
-        [$lastYear, $lastWeek] = $this->currentMonthLastWeek($today);
-        $metrics = $this->activityMetrics($access, $today);
-        $topOverdueActivities = $this->topOverdueActivities($access, $today);
+        $companies = auth()->user()->companiesForPermission(ProjectPermissionEnum::View);
+        $users = $this->visibleUsers()->orderBy('name')->get(['id', 'name']);
+        $projects = app(DashboardQueryService::class)->projectQuery(auth()->user(), $this->filters())
+            ->orderBy('name')->get(['projects.id', 'name', 'pda_code']);
         $activities = $this->activityQuery($access)
-            ->where(fn (Builder $query) => $this->whereOnOrBeforeWeek($query, $lastYear, $lastWeek))
             ->get()
             ->map(function (ProjectWeeklyActivity $activity) use ($today): ProjectWeeklyActivity {
                 $activity->setAttribute('dashboard_status', $this->activityStatus($activity, $today));
@@ -63,6 +257,17 @@ class ActivitiesDashboard extends Component
                     $activity->week_year,
                     $activity->week_number
                 )->startOfWeek());
+
+                $activity->setAttribute('due_date', $activity->week_start->endOfWeek());
+
+                return $activity;
+            })->filter(fn (ProjectWeeklyActivity $activity) => $this->matchesDueRange($activity))
+            ->when($this->status !== 'all', fn (Collection $items) => $items->where('dashboard_status', $this->status));
+        $metrics = $this->summarize($activities);
+        $topOverdueActivities = $activities->where('dashboard_status', 'overdue')
+            ->sortBy('due_date')->take(5)->map(function (ProjectWeeklyActivity $activity) use ($today) {
+                $activity->setAttribute('planned_month', $activity->week_start->startOfMonth()->locale('en'));
+                $activity->setAttribute('days_overdue', (int) $activity->due_date->startOfDay()->diffInDays($today));
 
                 return $activity;
             });
@@ -76,11 +281,18 @@ class ActivitiesDashboard extends Component
                     : ($today->isAfter($dueDate) ? 'overdue' : 'pending'));
 
                 return $milestone;
-            });
+            })->filter(fn (ProjectMilestone $milestone) => $this->matchesDueRange($milestone))
+            ->when($this->status !== 'all', fn (Collection $items) => $items->where('dashboard_status', $this->status));
 
-        $filtered = $this->status === 'all'
-            ? $activities
-            : $activities->where('dashboard_status', $this->status);
+        $filtered = $activities;
+        $userSummary = $users->when($this->userFilter !== '', fn (Collection $items) => $items->where('id', $this->userFilter))
+            ->map(fn (User $user) => ['user' => $user, ...$this->summarize($filtered->where('assigned_to', $user->id))])
+            ->sortByDesc('overdue')->values();
+        $sorted = $filtered->sortBy(fn (ProjectWeeklyActivity $activity) => sprintf('%d-%04d-%02d-%010d', match ($activity->dashboard_status) {
+            'overdue' => 0,
+            'pending' => 1,
+            default => 2,
+        }, $activity->week_year, $activity->week_number, $activity->id))->values();
         $charts = $this->chartData($activities, $milestones, $today);
         $milestoneMetrics = [
             'total' => $milestones->count(),
@@ -93,28 +305,26 @@ class ActivitiesDashboard extends Component
             : 0;
 
         return view('livewire.activities.activities-dashboard', [
-            'companies' => auth()->user()->companiesForPermission(ProjectPermissionEnum::View),
+            'companies' => $companies,
+            'activeFilters' => $this->activeFilters($users, $projects, $companies),
+            'pageSizes' => self::PAGE_SIZES,
             'stateOptions' => $this->reportableStateOptions(),
             'classificationOptions' => InvestmentClassificationEnum::cases(),
             'investmentOptions' => InvestmentEnum::cases(),
             'justificationOptions' => ProjectJustificationEnum::cases(),
             'metrics' => $metrics,
+            'users' => $users,
+            'projects' => $projects,
+            'userSummary' => $userSummary,
             'milestoneMetrics' => $milestoneMetrics,
             ...$charts,
             'topOverdueActivities' => $topOverdueActivities,
             'topProjects' => $this->topProjects($activities),
-            'urgentMilestones' => $milestones
+            'urgentMilestones' => $this->paginateItems($milestones
                 ->whereIn('dashboard_status', ['overdue', 'pending'])
-                ->sortBy(fn (ProjectMilestone $milestone) => $milestone->due_date->timestamp)
-                ->take(12)
-                ->values(),
-            'activities' => $filtered->sortBy(
-                fn (ProjectWeeklyActivity $activity) => sprintf('%d-%04d-%02d', match ($activity->dashboard_status) {
-                    'overdue' => 0,
-                    'pending' => 1,
-                    default => 2,
-                }, $activity->week_year, $activity->week_number)
-            )->take(50)->values(),
+                ->sortBy(fn (ProjectMilestone $milestone) => [$milestone->due_date->timestamp, $milestone->id])
+                ->values(), $this->milestonePerPage, 'milestonesPage'),
+            'activities' => $this->paginateItems($sorted, $this->activityPerPage, 'page'),
         ])->layout('layouts.app');
     }
 
@@ -124,7 +334,10 @@ class ActivitiesDashboard extends Component
             ->whereHas('project', fn (Builder $query) => $query
                 ->whereIn('company_id', $access->allowedCompanyIds())
                 ->whereIn('projects.id', $this->filteredProjectIds()))
-            ->with(['project:id,name,slug,pda_code,company_id', 'author:id,name'])
+            ->where(fn (Builder $query) => $query->whereNull('assigned_to')
+                ->orWhereIn('assigned_to', $this->visibleUsers()->select('users.id')))
+            ->when($this->userFilter !== '', fn (Builder $query) => $query->where('assigned_to', $this->userFilter))
+            ->with(['project:id,name,slug,pda_code,company_id', 'author:id,name', 'assignee:id,name'])
             ->when(trim($this->search) !== '', function (Builder $query): void {
                 $term = '%'.trim($this->search).'%';
                 $query->where(function (Builder $query) use ($term): void {
@@ -161,6 +374,7 @@ class ActivitiesDashboard extends Component
     {
         return app(DashboardQueryService::class)
             ->projectQuery(auth()->user(), $this->filters())
+            ->when($this->projectFilter !== '', fn (Builder $query) => $query->where('projects.id', $this->projectFilter))
             ->select('projects.id');
     }
 
@@ -170,60 +384,25 @@ class ActivitiesDashboard extends Component
             return 'completed';
         }
 
-        $plannedMonth = CarbonImmutable::now()
+        $dueDate = CarbonImmutable::now()
             ->setISODate($activity->week_year, $activity->week_number)
-            ->startOfWeek()
-            ->startOfMonth();
+            ->endOfWeek();
 
-        return $plannedMonth->isBefore($today->startOfMonth()) ? 'overdue' : 'pending';
+        return $dueDate->isBefore($today) ? 'overdue' : 'pending';
     }
 
-    private function activityMetrics(PlanificationAccessService $access, CarbonImmutable $today): array
+    private function summarize(Collection $activities): array
     {
-        $query = $this->activityQuery($access);
-        [$cutoffYear, $cutoffWeek] = $this->currentMonthWeekCutoff($today);
-        [$lastYear, $lastWeek] = $this->currentMonthLastWeek($today);
-        $plannedThroughCurrentMonth = fn (Builder $query) => $this->whereOnOrBeforeWeek($query, $lastYear, $lastWeek);
-        $total = (clone $query)->where($plannedThroughCurrentMonth)->count();
-        $completed = (clone $query)->where($plannedThroughCurrentMonth)->whereNotNull('executed_at')->count();
-        $overdue = (clone $query)->whereNull('executed_at')
-            ->where(fn (Builder $query) => $this->whereBeforeWeek($query, $cutoffYear, $cutoffWeek))
-            ->count();
+        $total = $activities->count();
+        $completed = $activities->where('dashboard_status', 'completed')->count();
 
         return [
             'total' => $total,
+            'pending' => $activities->where('dashboard_status', 'pending')->count(),
+            'overdue' => $activities->where('dashboard_status', 'overdue')->count(),
             'completed' => $completed,
-            'overdue' => $overdue,
-            'pending' => $total - $completed - $overdue,
-            'completion' => $total > 0 ? (int) round(($completed / $total) * 100) : 0,
+            'completion' => $total > 0 ? (int) round($completed / $total * 100) : 0,
         ];
-    }
-
-    private function topOverdueActivities(PlanificationAccessService $access, CarbonImmutable $today): Collection
-    {
-        [$cutoffYear, $cutoffWeek] = $this->currentMonthWeekCutoff($today);
-
-        return $this->activityQuery($access)
-            ->whereNull('executed_at')
-            ->where(fn (Builder $query) => $this->whereBeforeWeek($query, $cutoffYear, $cutoffWeek))
-            ->orderBy('week_year')
-            ->orderBy('week_number')
-            ->orderBy('id')
-            ->limit(5)
-            ->get()
-            ->map(function (ProjectWeeklyActivity $activity) use ($today): ProjectWeeklyActivity {
-                $plannedMonth = CarbonImmutable::now()
-                    ->setISODate($activity->week_year, $activity->week_number)
-                    ->startOfWeek()
-                    ->startOfMonth()
-                    ->locale('en');
-
-                $activity->setAttribute('planned_month', $plannedMonth);
-                $activity->setAttribute('months_overdue', max(1, (int) $plannedMonth->diffInMonths($today->startOfMonth())));
-
-                return $activity;
-            })
-            ->values();
     }
 
     private function topProjects(Collection $activities): Collection
@@ -241,41 +420,6 @@ class ActivitiesDashboard extends Component
             ->sortByDesc('total')
             ->take($this->topLimit)
             ->values();
-    }
-
-    private function currentMonthWeekCutoff(CarbonImmutable $today): array
-    {
-        $firstDay = $today->startOfMonth();
-        $firstWeekStartingInMonth = $firstDay->startOfWeek();
-
-        if ($firstWeekStartingInMonth->isBefore($firstDay)) {
-            $firstWeekStartingInMonth = $firstWeekStartingInMonth->addWeek();
-        }
-
-        return [(int) $firstWeekStartingInMonth->isoWeekYear, (int) $firstWeekStartingInMonth->isoWeek];
-    }
-
-    private function whereBeforeWeek(Builder $query, int $year, int $week): void
-    {
-        $query->where('week_year', '<', $year)
-            ->orWhere(fn (Builder $query) => $query
-                ->where('week_year', $year)
-                ->where('week_number', '<', $week));
-    }
-
-    private function currentMonthLastWeek(CarbonImmutable $today): array
-    {
-        $lastWeekStartingInMonth = $today->endOfMonth()->startOfWeek();
-
-        return [(int) $lastWeekStartingInMonth->isoWeekYear, (int) $lastWeekStartingInMonth->isoWeek];
-    }
-
-    private function whereOnOrBeforeWeek(Builder $query, int $year, int $week): void
-    {
-        $query->where('week_year', '<', $year)
-            ->orWhere(fn (Builder $query) => $query
-                ->where('week_year', $year)
-                ->where('week_number', '<=', $week));
     }
 
     private function chartData(Collection $activities, Collection $milestones, CarbonImmutable $today): array

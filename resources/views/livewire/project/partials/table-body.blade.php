@@ -1,7 +1,7 @@
 <tbody>
     @forelse ($projects as $project)
         @php
-            $projectName = \Illuminate\Support\Str::limit($project->name, 50);
+            $projectName = $project->name;
         @endphp
 
         <tr wire:key="project-row-{{ $project->id }}"
@@ -34,7 +34,7 @@
 
             {{-- Dashboard y órdenes --}}
             <td class="whitespace-nowrap px-2 py-2">
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
 
                     @if ($project->data_uploaded)
                         <a href="{{ route('projects.dashboard', ['project' => $project->slug]) }}" wire:navigate
@@ -73,7 +73,7 @@
 
             {{-- Archivo --}}
             <td class="whitespace-nowrap px-2 py-2">
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
 
                     @if (in_array((int) $project->company_id, $updateCompanyIds, true))
                         @if (filled($project->upload_pda))

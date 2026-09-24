@@ -1,4 +1,4 @@
-<div x-data="{ open: true }"
+<div x-data="{ open: window.matchMedia('(min-width: 768px)').matches }" data-compact-filters x-on:resize.window.debounce.150ms="if (window.innerWidth >= 768) open = true"
     class="relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md dark:bg-gray-800">
     {{-- Encabezado --}}
     <div
@@ -13,9 +13,9 @@
             </span>
         </div>
 
-        <button type="button" x-on:click="open = !open"
+        <button type="button" x-on:click="open = !open" x-bind:aria-expanded="open" aria-label="{{ __('Filters') }}"
             class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-600 transition hover:bg-gray-200 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-            x-bind:title="open ? '{{ __('Collapse') }}' : '{{ __('Expand') }}'" x-bind:aria-expanded="open">
+            x-bind:title="open ? '{{ __('Collapse') }}' : '{{ __('Expand') }}'">
             <span class="sr-only" x-text="open ? '{{ __('Collapse filters') }}' : '{{ __('Expand filters') }}'"></span>
 
             <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -31,7 +31,7 @@
     </div>
 
     {{-- Contenido colapsable --}}
-    <div x-show="open" x-collapse class="overflow-hidden">
+    <div x-show="open" x-cloak x-collapse class="overflow-hidden">
         <div class="px-4 py-4">
             <div class="flex flex-wrap items-center justify-start gap-3">
 
@@ -136,4 +136,6 @@
         </div>
 
     </div>
+
+<x-filter-chips clear="resetAll" :filters="[['model' => 'plantFilter', 'label' => 'Plants', 'value' => $plantFilter, 'options' => $companies->pluck('company_name', 'company_code')->all()],['model' => 'yearSearch', 'label' => 'Years', 'value' => $yearSearch],['model' => 'stateSearch', 'label' => 'Status', 'value' => $stateSearch],['model' => 'typeOfProjectSearch', 'label' => 'Classification', 'value' => $typeOfProjectSearch],['model' => 'investmentFilter', 'label' => 'Investments', 'value' => $investmentFilter],['model' => 'projectIdeaFilter', 'label' => 'Project ideas', 'value' => $projectIdeaFilter],['model' => 'search', 'label' => 'Search', 'value' => $search, 'action' => 'clearSearch'], ['model' => 'orderByProject', 'label' => 'Order', 'value' => $orderByProject, 'default' => false, 'options' => [1 => 'Order by remaining'], 'action' => 'projectOrder'] ]" />
 </div>

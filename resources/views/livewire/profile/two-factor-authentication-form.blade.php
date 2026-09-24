@@ -119,7 +119,7 @@ new class extends Component
         </form>
     @elseif ($isPending)
         <div class="mt-6 grid gap-6 lg:grid-cols-[220px_1fr]">
-            <div class="flex items-center justify-center rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="flex items-center justify-center rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:bg-white">
                 <div class="overflow-hidden rounded-lg">{!! $user->twoFactorQrCodeSvg() !!}</div>
             </div>
             <div>

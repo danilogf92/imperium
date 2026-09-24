@@ -35,7 +35,7 @@
                                     @foreach ($sampleRows as $row)
                                         <tr>
                                             @foreach ($row as $value)
-                                                <td class="max-w-64 truncate border-r border-slate-100 px-3 py-2 text-slate-700" title="{{ $value }}">{{ $value }}</td>
+                                                <td class="min-w-36 max-w-64 whitespace-normal break-words border-r border-slate-100 px-3 py-2 text-slate-700" title="{{ $value }}">{{ $value }}</td>
                                             @endforeach
                                         </tr>
                                     @endforeach
@@ -140,7 +140,7 @@
                                             @foreach ($previewRows as $row)
                                                 <tr wire:key="tools-preview-{{ $previewPage }}-{{ $loop->index }}" class="even:bg-slate-50">
                                                     @foreach ($row as $value)
-                                                        <td class="max-w-64 truncate border-r border-slate-100 px-3 py-2 text-slate-700" title="{{ $value }}">{{ $value }}</td>
+                                                        <td class="min-w-36 max-w-64 whitespace-normal break-words border-r border-slate-100 px-3 py-2 text-slate-700" title="{{ $value }}">{{ $value }}</td>
                                                     @endforeach
                                                 </tr>
                                             @endforeach
@@ -148,7 +148,7 @@
                                     </table>
                                 </div>
                                 @if ($lastPage > 1)
-                                    <div class="flex items-center justify-between gap-3 border-t border-slate-200 px-4 py-3 text-sm text-slate-600">
+                                    <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-3 text-sm text-slate-600">
                                         <span>{{ __('tools.page', ['current' => $previewPage, 'total' => $lastPage]) }}</span>
                                         <div class="flex gap-2">
                                             <button type="button" wire:click="goToPage({{ $previewPage - 1 }})" wire:loading.attr="disabled" wire:target="goToPage" @disabled($previewPage <= 1) data-no-global-loading class="rounded-lg border border-slate-300 px-3 py-1.5 font-semibold hover:bg-slate-50 disabled:opacity-40">{{ __('tools.previous') }}</button>

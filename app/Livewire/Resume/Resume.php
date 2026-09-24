@@ -149,6 +149,9 @@ class Resume extends Component
             'cashFlowSummary' => $cashFlow['summary'],
             'plannedCashFlowChartOptions' => $cashFlow['planned_options'],
             'plannedCashFlowSummary' => $cashFlow['planned_summary'],
+            'projectionChartOptions' => $cashFlow['projection_options'],
+            'projectionRows' => $cashFlow['projection']['rows'],
+            'projectionSummaries' => $cashFlow['projection']['summaries'],
             'availableChart' => $availableChart,
             'companies' => $companies,
             'years' => $years,
@@ -545,10 +548,42 @@ class Resume extends Component
             'legend' => ['show' => false],
             'grid' => ['show' => true, 'borderColor' => '#E2E8F0'],
         ];
-        $comparison = $this->plannedExecutionComparison($permission, $monthlyValues, $options);
+        $realColumn = $this->currency === 'dollar' ? 'real_value' : 'real_value_euros';
+        $realRows = \App\Models\Data::query()
+            ->whereIn('project_id', $this->filteredProjectQuery($permission)->select('projects.id'))
+            ->get(['document_date', 'accounting_date', $realColumn]);
+        $comparison = $this->plannedExecutionComparison($realRows, $realColumn, $monthlyValues, $options);
+        $documentValues = $this->monthlyRealValues($realRows, 'document_date', $realColumn);
+        $options['series'] = [
+            ['name' => 'Planning', 'data' => $visibleValues->values()->all()],
+            ['name' => 'Real', 'data' => $visibleValues->keys()->map(fn (string $period): float => (float) $documentValues->get($period, 0.0))->all()],
+        ];
+        $options['colors'] = ['#94A3B8', '#38BDF8'];
+        $options['chart']['stacked'] = false;
+        $options['plotOptions']['bar']['distributed'] = false;
+        $options['legend'] = ['show' => true, 'position' => 'top'];
+        $options['tooltip']['shared'] = true;
+        $options['tooltip']['intersect'] = false;
+        $options['tooltip']['hideEmptySeries'] = false;
+        $options['tooltip']['x'] = ['show' => true];
+        unset($options['yaxis']['min']); // Real values may contain negative adjustments.
+
+        $projection = app(\App\Services\Resume\CashFlowForecast::class)->annualProjection($monthlyValues, $documentValues, $periods);
+        $projectionOptions = $options;
+        $projectionOptions['series'] = [
+            ['name' => __('cash_flow_projection.planned'), 'data' => array_column($projection['rows'], 'planned')],
+            ['name' => __('cash_flow_projection.actual'), 'data' => array_column($projection['rows'], 'actual')],
+            ['name' => __('cash_flow_projection.projected'), 'data' => array_column($projection['rows'], 'projected')],
+        ];
+        $projectionOptions['colors'] = ['#94A3B8', '#38BDF8', '#8B5CF6'];
+        $projectionOptions['xaxis']['categories'] = array_column($projection['rows'], 'month');
+        $encodedSymbol = json_encode($symbol, JSON_THROW_ON_ERROR);
+        $projectionOptions['tooltip']['y']['formatter'] = "function(value) { return value == null ? '—' : {$encodedSymbol} + ' ' + Number(value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); }";
 
         return [
             'options' => $options,
+            'projection_options' => $projectionOptions,
+            'projection' => $projection,
             'planned_options' => $comparison['options'],
             'summary' => [
                 'years' => implode(', ', $displayYears),
@@ -561,15 +596,16 @@ class Resume extends Component
         ];
     }
 
-    private function plannedExecutionComparison(ProjectPermissionEnum $permission, Collection $planned, array $options): array
+    private function monthlyRealValues(Collection $rows, string $dateColumn, string $valueColumn): Collection
     {
-        $column = $this->currency === 'dollar' ? 'real_value' : 'real_value_euros';
-        $rows = \App\Models\Data::query()
-            ->whereIn('project_id', $this->filteredProjectQuery($permission)->select('projects.id'))
-            ->get(['accounting_date', $column]);
-        $dated = $rows->filter(fn ($row) => filled($row->accounting_date));
-        $actual = $dated->groupBy(fn ($row) => substr($row->accounting_date, 0, 7))
-            ->map(fn (Collection $items) => round((float) $items->sum($column), 2));
+        return $rows->filter(fn ($row) => filled($row->{$dateColumn}))
+            ->groupBy(fn ($row) => substr($row->{$dateColumn}, 0, 7))
+            ->map(fn (Collection $items): float => round((float) $items->sum($valueColumn), 2));
+    }
+
+    private function plannedExecutionComparison(Collection $rows, string $column, Collection $planned, array $options): array
+    {
+        $actual = $this->monthlyRealValues($rows, 'accounting_date', $column);
         $years = $this->yearFilter !== [] ? array_map('intval', $this->yearFilter)
             : $planned->keys()->merge($actual->keys())->map(fn ($period) => (int) substr($period, 0, 4))->unique()->all();
         sort($years);

@@ -1,6 +1,6 @@
 <div>
     @if (session()->has('delete-project'))
-        <div class="fixed top-4 right-4 z-50 w-full max-w-sm px-4 sm:px-0" role="alert">
+        <div class="fixed top-4 right-3 left-3 z-50 max-w-sm sm:left-auto sm:right-4 sm:w-full" role="alert">
             <div
                 class="flex items-start justify-between rounded-lg border-l-4 border-orange-700 bg-red-500 p-4 text-white shadow-lg">
                 <div class="flex items-start gap-3">
@@ -21,7 +21,7 @@
     @endif
 
     @if (session()->has('create-project'))
-        <div class="fixed top-4 right-4 z-50 w-full max-w-sm px-4 sm:px-0" role="alert">
+        <div class="fixed top-4 right-3 left-3 z-50 max-w-sm sm:left-auto sm:right-4 sm:w-full" role="alert">
             <div
                 class="flex items-start justify-between rounded-lg border-l-4 border-green-700 bg-green-400 p-4 text-green-900 shadow-lg">
                 <div class="flex items-start gap-3">
@@ -41,7 +41,7 @@
     @endif
 
     @if (session()->has('edit-project'))
-        <div class="fixed top-4 right-4 z-50 w-full max-w-sm px-4 sm:px-0" role="alert">
+        <div class="fixed top-4 right-3 left-3 z-50 max-w-sm sm:left-auto sm:right-4 sm:w-full" role="alert">
             <div
                 class="flex items-start justify-between rounded-lg border-l-4 border-orange-700 bg-red-500 p-4 text-white shadow-lg">
                 <div class="flex items-start gap-3">
@@ -62,7 +62,7 @@
     @endif
 
     @if (session()->has('delete-excel-data'))
-        <div class="fixed top-4 right-4 z-50 w-full max-w-sm px-4 sm:px-0" role="alert">
+        <div class="fixed top-4 right-3 left-3 z-50 max-w-sm sm:left-auto sm:right-4 sm:w-full" role="alert">
             <div
                 class="flex items-start justify-between rounded-lg border-l-4 border-orange-700 bg-red-500 p-4 text-white shadow-lg">
                 <div class="flex items-start gap-3">
@@ -83,7 +83,7 @@
     @endif
 
     @if (session()->has('load-excel-data'))
-        <div class="fixed top-4 right-4 z-50 w-full max-w-sm px-4 sm:px-0" role="alert">
+        <div class="fixed top-4 right-3 left-3 z-50 max-w-sm sm:left-auto sm:right-4 sm:w-full" role="alert">
             <div
                 class="flex items-start justify-between rounded-lg border-l-4 border-green-700 bg-green-400 p-4 text-green-900 shadow-lg">
                 <div class="flex items-start gap-3">

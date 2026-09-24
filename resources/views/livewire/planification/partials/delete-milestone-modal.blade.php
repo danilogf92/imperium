@@ -1,5 +1,5 @@
 @if ($pendingDeleteId)
-    <div wire:key="planification-delete-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4" x-data
+    <div wire:key="planification-delete-modal" role="dialog" aria-modal="true" aria-label="Confirm deletion" data-modal-open="true" class="app-modal fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4" x-data
         x-on:keydown.escape.window="$wire.cancelDelete()">
 
         {{-- ============================================================
@@ -15,9 +15,9 @@
             CONTENIDO DEL MODAL
 
             relative + z-10 mantiene el contenido encima del fondo.
-            wire:click.stop evita que un click dentro cierre el modal.
+            x-on:click.stop evita que un click dentro cierre el modal.
             ============================================================ --}}
-        <div wire:click.stop
+        <div x-on:click.stop
             class="relative z-10 max-h-[calc(100dvh-1rem)] w-full max-w-md overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-2xl sm:rounded-2xl">
 
             {{-- ========================================================

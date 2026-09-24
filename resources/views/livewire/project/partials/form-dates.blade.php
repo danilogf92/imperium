@@ -1,5 +1,5 @@
                 {{-- Dates --}}
-                <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <section x-show="activeSection === 'dates'" x-cloak class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                     <div class="border-b border-gray-200 bg-gray-50 px-5 py-4">
                         <h3 class="font-semibold text-gray-900">
                             Project dates

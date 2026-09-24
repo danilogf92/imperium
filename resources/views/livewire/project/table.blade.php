@@ -1,4 +1,4 @@
-<div>
+<div x-data="{ fullTable: false }" x-bind:class="{ 'app-table-full': fullTable }" data-mobile-table>
     <x-unified-table-theme />
     @php
         $columnKeys = array_keys($columnOptions);
@@ -48,6 +48,7 @@
         <div class="unified-table-shell relative">
             @include('livewire.project.partials.table-styles')
             @include('livewire.project.partials.table-toolbar')
+            <x-table-density-toggle />
 
             <div class="unified-table-scroll">
                 <table class="project-table unified-data-table">

@@ -247,6 +247,7 @@ class DashboardProjects extends Component
     {
         $this->searchData = 'area';
         $this->investments = 'global_price_euros';
+        $this->dollarOrEuro = 'euro';
         $this->updated('resetAll', null);
     }
 

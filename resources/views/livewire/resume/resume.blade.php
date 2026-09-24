@@ -16,7 +16,7 @@
                 @if ($canExport)
                     {{-- <x-excel-export-button method="exportExcel" label="Export resume" /> --}}
 
-                    <x-ui-button icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
+                    <x-ui-button compact-mobile icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
                         wire:click="exportExcel" wire:loading.attr="disabled" wire:target="exportExcel"
                         data-no-global-loading>
                         <span wire:loading.remove wire:target="exportExcel">
@@ -32,7 +32,7 @@
         </header>
 
 
-        <section x-data="{ open: true }" class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <section x-data="{ open: window.matchMedia('(min-width: 768px)').matches }" data-compact-filters x-on:resize.window.debounce.150ms="if (window.innerWidth >= 768) open = true" class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <div
                 class="soft-title-surface flex flex-col items-start gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                 <div>
@@ -48,7 +48,7 @@
                     <p class="mt-0.5 text-sm text-slate-500">
                         {{ __('Filter the projects included in the annual totals.') }}</p>
                 </div>
-                <button type="button" x-on:click="open = !open"
+                <button type="button" x-on:click="open = !open" x-bind:aria-expanded="open" aria-label="{{ __('Filters') }}"
                     class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <svg class="h-5 w-5 transition-transform" x-bind:class="{ 'rotate-180': !open }" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2">
@@ -57,8 +57,8 @@
                 </button>
             </div>
 
-            <div x-show="open" x-collapse>
-                <div class="flex flex-wrap items-center gap-2 px-4 py-4 sm:px-5 sm:py-5 xl:flex-nowrap">
+            <div x-show="open" x-cloak x-collapse>
+                <div class="flex flex-wrap items-center gap-2 px-4 py-4 sm:px-5 sm:py-5">
                     <div class="relative w-full shrink-0 sm:w-52">
                         <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -134,7 +134,9 @@
                     <x-clear-filters-button method="clearFilters" :active="$hasActiveFilters" :global-loading="false" />
                 </div>
             </div>
-        </section>
+
+<x-filter-chips clear="clearFilters" :filters="[['model' => 'search', 'label' => 'Search', 'value' => $search],['model' => 'plantFilter', 'label' => 'Plants', 'value' => $plantFilter],['model' => 'yearFilter', 'label' => 'Years', 'value' => $yearFilter],['model' => 'stateFilter', 'label' => 'Status', 'value' => $stateFilter],['model' => 'investmentFilter', 'label' => 'Investments', 'value' => $investmentFilter],['model' => 'classificationFilter', 'label' => 'Classification', 'value' => $classificationFilter],['model' => 'justificationFilter', 'label' => 'Justifications', 'value' => $justificationFilter],['model' => 'currency', 'label' => 'Currency', 'value' => $currency, 'default' => 'euro'] ]" />
+</section>
 
         @php
             $totals = [
@@ -148,8 +150,8 @@
         @endphp
 
         <section class="overflow-x-auto pb-1">
-            <div class="gap-4"
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 175px), 1fr));">
+            <div class="dashboard-metrics-grid gap-4"
+                data-summary-metrics>
                 @foreach ([['label' => 'Projects', 'value' => $totals['projects'], 'money' => false, 'accent' => 'bg-indigo-500', 'text' => 'text-indigo-600'], ['label' => 'Budgeted', 'value' => $totals['budgeted'], 'money' => true, 'accent' => 'bg-sky-500', 'text' => 'text-sky-600'], ['label' => 'Approved', 'value' => $totals['approved'], 'money' => true, 'accent' => 'bg-blue-500', 'text' => 'text-blue-600'], ['label' => 'Booked (Real SAP)', 'value' => $totals['booked'], 'money' => true, 'accent' => 'bg-amber-500', 'text' => 'text-amber-600'], ['label' => 'Committed', 'value' => $totals['committed'], 'money' => true, 'accent' => 'bg-orange-500', 'text' => 'text-orange-600'], ['label' => 'Available', 'value' => $totals['available'], 'money' => true, 'accent' => $totals['available'] < 0 ? 'bg-red-500' : 'bg-emerald-500', 'text' => $totals['available'] < 0 ? 'text-red-600' : 'text-emerald-600']] as $metric)
                     <article class="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                         <span class="{{ $metric['accent'] }} absolute inset-y-0 left-0 w-1"></span>
@@ -220,8 +222,7 @@
                                         <x-compact-money :value="$row[$field]" :symbol="$currencySymbol" />
                                     </td>
                                 @endforeach
-                                <td class="whitespace-nowrap px-4 py-3 text-right font-bold"
-                                    style="color: {{ $row['available'] < 0 ? '#dc2626' : '#7c3aed' }}">
+                                <td class="whitespace-nowrap px-4 py-3 text-right font-bold {{ $row['available'] < 0 ? 'text-red-600' : 'text-violet-600' }}">
                                     <x-compact-money :value="$row['available']" :symbol="$currencySymbol" />
                                 </td>
                             </tr>
@@ -289,104 +290,7 @@
                         chart-key="resume-average-{{ md5(json_encode($averageChartOptions)) }}" />
                 </x-dashboard-chart-card>
 
-                @if (($cashFlowChartOptions['series'][0]['data'] ?? []) !== [])
-                    <x-dashboard-chart-card title="Milestone cash flow"
-                        subtitle="Monthly sum of project budget allocated through milestone percentages"
-                        filename="monthly-milestone-cash-flow" height="38rem">
-                        <div style="display: flex; flex-direction: column; gap: 8px; height: 100%;">
-                            <section class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
-                                <div class="flex flex-wrap justify-between gap-2">
-                                    <span class="font-semibold text-red-700">
-                                        Total {{ $cashFlowSummary['years'] }}:
-                                        {{ \App\Support\MoneyValueFormatter::thousands($cashFlowSummary['total'], $currencySymbol) }}
-                                    </span>
-                                    <span class="font-semibold text-slate-600">
-                                        Outside selected years{{ $cashFlowSummary['outside_years'] !== '' ? ' (' . $cashFlowSummary['outside_years'] . ')' : '' }}:
-                                        {{ \App\Support\MoneyValueFormatter::thousands($cashFlowSummary['outside_total'], $currencySymbol) }}
-                                    </span>
-                                </div>
-                            </section>
-                            <div style="height: 300px; min-height: 300px; flex: 0 0 300px;">
-                                <x-dashboard-apex-chart :options="$cashFlowChartOptions"
-                                    chart-key="resume-cash-flow-{{ md5(json_encode($cashFlowChartOptions)) }}" />
-                            </div>
-                        </div>
-                        <x-slot:footer>
-                            Orange: before the current month. Light blue: current month onward.
-                            Other years are included only in the summary box.
-                        </x-slot:footer>
-                    </x-dashboard-chart-card>
-
-                @endif
-                @if (($plannedCashFlowChartOptions['series'][0]['data'] ?? []) !== [])
-                    <x-dashboard-chart-card title="Planned milestone cash flow test"
-                        subtitle="Monthly planned milestones compared with Real SAP by accounting date"
-                        filename="monthly-planned-milestone-cash-flow" height="64rem">
-                        <div style="display: flex; flex-direction: column; gap: 8px; height: 100%;">
-                            <section class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
-                                <div class="flex flex-wrap justify-between gap-2">
-                                    <span class="font-semibold text-slate-600">
-                                        Planned {{ $plannedCashFlowSummary['years'] }}:
-                                        {{ \App\Support\MoneyValueFormatter::thousands($plannedCashFlowSummary['total'], $currencySymbol) }}
-                                    </span>
-                                    <span class="font-semibold text-slate-600">
-                                        Planned outside selected years:
-                                        {{ \App\Support\MoneyValueFormatter::thousands($plannedCashFlowSummary['outside_total'], $currencySymbol) }}
-                                    </span>
-                                    <span class="font-semibold text-slate-600">
-                                        Real SAP: {{ \App\Support\MoneyValueFormatter::thousands($plannedCashFlowSummary['actual_total'], $currencySymbol) }}
-                                    </span>
-                                    <span class="text-slate-600">
-                                        Real SAP outside selected years: {{ \App\Support\MoneyValueFormatter::thousands($plannedCashFlowSummary['outside_actual'], $currencySymbol) }}
-                                    </span>
-                                    @if ($plannedCashFlowSummary['undated_total'] != 0)
-                                        <span class="text-slate-600">Real SAP without accounting date (not plotted): {{ \App\Support\MoneyValueFormatter::thousands($plannedCashFlowSummary['undated_total'], $currencySymbol) }}</span>
-                                    @endif
-                                </div>
-                            </section>
-                            <div style="height: 300px; min-height: 300px; flex: 0 0 300px;">
-                                <x-dashboard-apex-chart :options="$plannedCashFlowChartOptions"
-                                    chart-key="resume-planned-cash-flow-{{ md5(json_encode($plannedCashFlowChartOptions)) }}" />
-                            </div>
-                            <p class="text-xs text-slate-600">Variance = Real SAP − base plan. Positive: above plan; negative: below plan. Neither alone indicates good or bad performance.</p>
-                            <div class="max-h-80 overflow-auto rounded-lg border border-slate-200">
-                                <table class="w-full whitespace-nowrap text-right text-xs">
-                                    <thead class="sticky top-0 bg-slate-100 text-slate-700">
-                                        <tr>
-                                            @foreach (['Month', 'Status', 'Base plan', 'Real SAP', 'Variance +/−', 'Variance %', 'Carry-in', 'Adjusted forecast', 'Remaining to spend', 'Carry-out'] as $heading)
-                                                <th class="px-3 py-2">{{ $heading }}</th>
-                                            @endforeach
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($plannedCashFlowSummary['forecast_rows'] as $forecast)
-                                            <tr class="border-t border-slate-200">
-                                                <td class="px-3 py-2 font-semibold">{{ $forecast['month'] }}</td>
-                                                <td class="px-3 py-2">{{ $forecast['status'] }}</td>
-                                                @foreach (['base', 'actual', 'difference', 'variance_percent', 'incoming', 'adjusted', 'remaining', 'outgoing'] as $field)
-                                                    <td @class(['px-3 py-2 tabular-nums', 'font-semibold text-red-700' => $field === 'difference' && $forecast[$field] > 0, 'font-semibold text-blue-700' => $field === 'difference' && $forecast[$field] < 0])>
-                                                        @if ($forecast[$field] === null)
-                                                            —
-                                                        @elseif ($field === 'variance_percent')
-                                                            {{ $forecast[$field] > 0 ? '+' : '' }}{{ number_format($forecast[$field], 1) }}%
-                                                        @else
-                                                            {{ in_array($field, ['difference', 'incoming', 'outgoing']) && $forecast[$field] > 0 ? '+' : '' }}{{ $currencySymbol }}{{ number_format($forecast[$field], 2) }}
-                                                        @endif
-                                                    </td>
-                                                @endforeach
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                            <p class="text-xs text-slate-600">Adjusted forecast = base plan + carry-in, minimum zero. Closed months roll unspent amounts forward and deduct overspending. Current month is provisional; future months assume the adjusted forecast is spent. This does not change saved milestones. Values without Accounting Date are excluded.</p>
-                        </div>
-                        <x-slot:footer>
-                            Planned: orange before the current month, light blue from the current month onward.
-                            Gray: Real SAP by Accounting Date. Completed milestones remain in the plan.
-                        </x-slot:footer>
-                    </x-dashboard-chart-card>
-                @endif
+                @include('livewire.resume.partials.annual-projection')
             </section>
         @endif
 

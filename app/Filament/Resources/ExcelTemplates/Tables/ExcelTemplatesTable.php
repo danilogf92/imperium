@@ -20,14 +20,20 @@ class ExcelTemplatesTable
                     ->sortable(),
 
                 IconColumn::make('is_global')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('All users')
                     ->boolean(),
 
                 TextColumn::make('companies.company_name')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Allowed plants')
                     ->badge(),
 
                 TextColumn::make('category')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Category')
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
@@ -43,6 +49,8 @@ class ExcelTemplatesTable
                     }),
 
                 TextColumn::make('original_file_name')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('File')
                     ->icon('heroicon-o-document-text')
                     ->limit(25)
@@ -54,11 +62,15 @@ class ExcelTemplatesTable
                     ->sortable(),
 
                 TextColumn::make('uploader.name')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Uploaded by')
                     ->placeholder('System')
                     ->toggleable(),
 
                 TextColumn::make('updated_at')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Updated')
                     ->dateTime()
                     ->sortable(),
@@ -67,7 +79,7 @@ class ExcelTemplatesTable
             ->defaultPaginationPageOption(10)
             ->paginationPageOptions([5, 10, 20, 50, 100])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->button()->outlined()->labeledFrom('md'),
                 DeleteAction::make(),
             ]);
     }

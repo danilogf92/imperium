@@ -1,0 +1,62 @@
+/* Shared semantic surfaces; the normal panel uses Filament's .dark convention. */
+:root { --app-page: #f1f5f9; --app-surface: #fff; --app-muted: #f8fafc; --app-border: #e2e8f0; --app-text: #0f172a; --app-subtle: #475569; }
+.dark { color-scheme: dark; --app-page: #0b1220; --app-surface: #111827; --app-muted: #1e293b; --app-border: #334155; --app-text: #f1f5f9; --app-subtle: #cbd5e1; }
+.dark body, .dark .app-page-frame, .dark .dashboard-page-shell { background: var(--app-page); color: var(--app-text); }
+.dark .dashboard-panel, .dark .soft-title-surface { background: var(--app-surface); border-color: var(--app-border); }
+.dark .dashboard-page-content :is(section, header), .dark .unified-table-shell { border-color: var(--app-border); }
+.dark .app-user-summary-table :is(th, td):first-child { background: var(--app-muted); }
+.dark :is(input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea) { background-color: var(--app-surface); color: var(--app-text); border-color: var(--app-border); }
+.dark :is(input, textarea)::placeholder { color: #94a3b8; }
+.dark :is(input, select, textarea):disabled { background-color: #1e293b; color: #94a3b8; }
+.dark .app-pagination button:not(:disabled):hover { background: #1e3a5f; color: #bfdbfe; }
+.dark .app-pagination :is([aria-disabled=true] > span, button:disabled) { background: #1e293b; border-color: #334155; color: #94a3b8; }
+.dark select.app-per-page-select { background: var(--app-surface); color: var(--app-text); border-color: var(--app-border); }
+.dark select.app-per-page-select:hover { border-color: #60a5fa; }
+.dark .apexcharts-canvas { color: #e2e8f0; }
+.dark .apexcharts-canvas :is(.apexcharts-xaxis-label, .apexcharts-yaxis-label, .apexcharts-title-text, .apexcharts-subtitle-text, .apexcharts-datalabel-label, .apexcharts-datalabel-value) { fill: #cbd5e1 !important; }
+.dark .apexcharts-legend-text { color: #cbd5e1 !important; }
+.dark .apexcharts-gridline { stroke: #334155; }
+.dark .apexcharts-tooltip, .dark .apexcharts-tooltip.apexcharts-theme-light, .dark .apexcharts-menu { background: #111827; border-color: #475569; color: #f1f5f9; }
+.dark .apexcharts-tooltip.apexcharts-theme-light .apexcharts-tooltip-title { background: #1e293b; border-color: #475569; }
+.dark .apexcharts-menu-item:hover { background: #334155; }
+.dark .hero-visual::before { background: #111827; }
+.dark .hero-visual::after { background: #1e293b; color: #bae6fd; }
+.dark .planification-activity-info-button { background: #1e293b; color: #67e8f9; }
+.dark #global-loading-overlay { background: rgb(11 18 32 / 75%); }
+.dark .app-modal .bg-gray-500 { background: #020617; }
+.dark :focus-visible { --tw-ring-offset-color: #111827; }
+.dark .planification-table-scroll thead :is(th, tr) { background-color: #172d48 !important; color: #e2e8f0; }
+.unified-data-table [data-allocation] { background-color: var(--allocation-bg) !important; }
+.dark .unified-data-table [data-allocation=complete] { --allocation-bg: #12372c !important; }
+.dark .unified-data-table [data-allocation=pending] { --allocation-bg: #422819 !important; }
+
+@media (max-width: 767px) {
+    [data-compact-filters] > :first-child { flex-direction: row; align-items: center; justify-content: space-between; gap: .5rem; padding: .5rem .75rem; }
+    [data-compact-filters] > :first-child p { display: none; }
+    [data-compact-filters] > :first-child h2 { font-size: .875rem; }
+    .app-icon-action { width: 44px; min-width: 44px; padding-inline: .5rem; flex: none; }
+    .app-icon-action .app-action-label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+    .dashboard-page-content > header { padding: .75rem; gap: .5rem; }
+    .dashboard-page-shell .dashboard-metrics-grid,
+    .dashboard-page-shell .project-summary-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+    .dashboard-page-shell .dashboard-metrics-grid article { padding: .625rem; min-height: 96px; }
+    .dashboard-metrics-grid article > .flex { flex-wrap: wrap; gap: .375rem; }
+    .dashboard-metrics-grid article > .flex > span:has(svg) { width: 1.5rem; height: 1.5rem; flex-shrink: 0; }
+    .dashboard-metrics-grid article svg { width: 1rem; height: 1rem; }
+    .dashboard-page-shell .dashboard-page-content { row-gap: .75rem; }
+    .dashboard-page-shell .dashboard-page-content.space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: .75rem; }
+    .dashboard-metrics-grid :is(.text-3xl, .text-2xl) { font-size: 1.25rem; }
+    .app-filter-chips button { min-height: 36px; }
+    [data-mobile-table]:not(.app-table-full) [data-mobile-secondary=true] { display: none; }
+    [data-mobile-table]:not(.app-table-full) > table.unified-data-table { min-width: 100% !important; width: 100%; }
+    .planification-table-scroll[data-mobile-table]:not(.app-table-full) > table.unified-data-table { min-width: var(--mobile-timeline-width) !important; }
+    [data-mobile-table]:not(.app-table-full) col[data-mobile-secondary=true] { visibility: collapse; }
+    [data-mobile-table]:not(.app-table-full) td { white-space: normal; overflow-wrap: anywhere; }
+    .project-table > tbody > tr > td:last-child > .flex { flex-wrap: wrap; }
+    [data-order-scope=all]:not(.app-table-full) tr > :is(:nth-child(2), :nth-child(3), :nth-child(4)),
+    [data-order-scope=project]:not(.app-table-full) tr > :is(:nth-child(2), :nth-child(3), :nth-child(4), :nth-child(5), :nth-child(7)),
+    [data-mobile-table]:not(.app-table-full) .app-user-summary-table tr > :is(:nth-child(3), :nth-child(5)) { display: none; }
+    .app-user-summary-table :is(th, td) { padding: .5rem; }
+    .app-form-tabs button { padding-inline: .25rem; font-size: .75rem; gap: .25rem; }
+    .app-modal-footer > .flex { flex-direction: row; align-items: center; gap: .5rem; }
+}

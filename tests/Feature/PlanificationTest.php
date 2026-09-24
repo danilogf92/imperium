@@ -463,6 +463,28 @@ class PlanificationTest extends TestCase
         $this->assertStringContainsString(__('notes.unknown_author'), $activity->fresh()->attribution());
     }
 
+    public function test_week_navigation_moves_both_columns_and_handles_year_boundaries(): void
+    {
+        [$user, $project] = $this->projectContext();
+        $this->travelTo(now()->setDate(2026, 12, 28));
+        $project->weeklyActivities()->create(['activity' => 'Week eleven task', 'week_year' => 2026, 'week_number' => 11]);
+
+        Livewire::actingAs($user)->test(Planification::class)
+            ->set('search', $project->pda_code)
+            ->call('moveActivityWeek', 1)
+            ->assertSet('activityWeekFilter', '2027-W01')->assertSet('creationYearFilter', [2027])
+            ->assertViewHas('activityWeeks', fn ($weeks) => $weeks[0]['week'] === 1 && $weeks[0]['year'] === 2027 && $weeks[1]['week'] === 2)
+            ->call('moveActivityWeek', -1)
+            ->assertSet('activityWeekFilter', '2026-W53')->assertSet('creationYearFilter', [2026])
+            ->assertViewHas('activityWeeks', fn ($weeks) => $weeks[0]['week'] === 53 && $weeks[1]['week'] === 1 && $weeks[1]['year'] === 2027)
+            ->set('activityWeekFilter', '2026-W10')->call('setPage', 2)
+            ->call('moveActivityWeek', 1)->assertSet('activityWeekFilter', '2026-W11')
+            ->assertSet('paginators.page', 1)->assertSet('search', $project->pda_code)
+            ->assertViewHas('plannedProjects', fn ($projects) => $projects->first()->weeklyActivities->first()->activity === 'Week eleven task')
+            ->call('openWeeklyActivity', $project->id, 0)->assertSet('activityWeekNumber', 11)
+            ->call('moveActivityWeek', 5)->assertStatus(422);
+    }
+
     /** @return array{User, Project} */
     private function projectContext(): array
     {

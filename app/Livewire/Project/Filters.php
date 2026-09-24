@@ -128,6 +128,7 @@ class Filters extends Component
     #[On('project-reset-all')]
     public function resetAll(): void
     {
+        $this->dispatch('project-clear-search');
         $this->resetNormalFilters();
 
         $this->orderByProject = false;
@@ -136,6 +137,12 @@ class Filters extends Component
         $this->loadYears();
 
         $this->dispatchFilters();
+    }
+
+    public function clearSearch(): void
+    {
+        $this->search = '';
+        $this->dispatch('project-clear-search');
     }
 
     /**

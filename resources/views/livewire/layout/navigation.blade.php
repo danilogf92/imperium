@@ -18,7 +18,7 @@ new class extends Component {
     }
 }; ?>
 
-<nav x-data="{ open: false }" class="border-b border-sky-100 bg-white shadow-sm">
+<nav x-data="{ open: false }" x-on:keydown.escape.window="open = false" class="border-b border-sky-100 bg-white shadow-sm">
     @php($assignmentNoticeCount = auth()->user()?->unreadPlanificationAssignments()->count() ?? 0)
     <!-- Primary Navigation Menu -->
     <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -77,6 +77,7 @@ new class extends Component {
                 </div>
             </div>
 
+            <div class="ml-auto mr-2 flex items-center"><x-panel-switcher /></div>
             <!-- Settings Dropdown -->
             <div class="hidden 2xl:flex 2xl:items-center 2xl:ms-4">
                 <x-dropdown align="right" width="48">
@@ -129,7 +130,7 @@ new class extends Component {
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div id="main-mobile-navigation" :class="{ 'block': open, 'hidden': !open }" class="hidden 2xl:hidden">
+    <div id="main-mobile-navigation" :class="{ 'block': open, 'hidden': !open }" class="hidden max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain 2xl:hidden">
         <div class="grid gap-1 px-4 pt-2 pb-3 sm:grid-cols-2 lg:grid-cols-3">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
@@ -179,7 +180,7 @@ new class extends Component {
             <div class="px-4">
                 <div class="font-medium text-base text-gray-800" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
                     x-on:profile-updated.window="name = $event.detail.name"></div>
-                <div class="font-medium text-sm text-gray-500">{{ auth()->user()->email }}</div>
+                <div class="break-all font-medium text-sm text-gray-500">{{ auth()->user()->email }}</div>
             </div>
 
             <div class="mt-3 space-y-1">

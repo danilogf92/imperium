@@ -1,4 +1,4 @@
-@props(['name', 'show' => false, 'maxWidth' => '2xl', 'closeMethod' => null])
+@props(['name', 'show' => false, 'maxWidth' => '2xl', 'closeMethod' => null, 'scrollable' => true])
 
 @php
     $maxWidthClasses = [
@@ -71,7 +71,7 @@
         let selector = 'a, button, input:not([type=\'hidden\']), textarea, select, details, [tabindex]:not([tabindex=\'-1\'])';
 
         return [...$el.querySelectorAll(selector)]
-            .filter(element => !element.hasAttribute('disabled'));
+            .filter(element => !element.hasAttribute('disabled') && element.getClientRects().length > 0 && getComputedStyle(element).visibility !== 'hidden');
     },
 
     firstFocusable() {
@@ -131,7 +131,7 @@
     "
     x-on:keydown.shift.tab.prevent="
         prevFocusable().focus()
-    " x-show="show"
+    " x-show="show" :data-modal-open="show"
     class="app-modal fixed inset-0 z-50 overflow-hidden px-2 py-2 sm:px-6 sm:py-6" style="display: {{ $show ? 'block' : 'none' }};">
     {{-- Fondo oscuro --}}
     <div x-show="show" class="fixed inset-0 cursor-pointer transform transition-all"
@@ -147,7 +147,8 @@
         {{-- Caja principal del modal --}}
         <div x-show="show"
             x-on:click.stop
-            class="relative flex max-h-[calc(100dvh-1rem)] w-full cursor-default flex-col overflow-hidden rounded-lg bg-white shadow-xl transform transition-all sm:max-h-[calc(100vh-3rem)] {{ $maxWidthClass }}"
+            role="dialog" aria-modal="true" aria-label="{{ $name }}"
+            class="relative flex min-w-0 max-h-[calc(100dvh-1rem)] w-full cursor-default flex-col {{ $scrollable ? 'overflow-y-auto' : 'overflow-hidden' }} overscroll-contain rounded-lg bg-white shadow-xl transform transition-all sm:max-h-[calc(100dvh-3rem)] {{ $maxWidthClass }}"
             x-transition:enter="ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200"

@@ -49,23 +49,23 @@
     {{-- Acciones de la barra superior --}}
     <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
 
-        <x-dashboard-filter-dropdown label="Columns" model="visibleColumns" :options="collect($fixedColumnOptions)
+        <div class="w-32 shrink-0"><x-dashboard-filter-dropdown label="Columns" compact model="visibleColumns" :options="collect($fixedColumnOptions)
             ->map(fn($label, $value) => ['value' => $value, 'label' => $label])
             ->values()" :selected="$visibleColumns"
-            multiple />
+            multiple /></div>
 
         {{-- <button type="button" wire:click="resetColumns" data-no-global-loading
             class="inline-flex h-10 cursor-pointer items-center rounded-lg bg-slate-600 px-3 text-sm font-semibold text-white hover:bg-slate-500">
             Default columns
         </button> --}}
 
-        <x-ui-button :text="__('Default columns')" color="#4B5569" hover-opacity="0.80" text-color="#FFFFFF"
+        <x-ui-button compact-mobile :text="__('Default columns')" icon="refresh" color="#4B5569" hover-opacity="0.80" text-color="#FFFFFF"
             wire:click="resetColumns" data-no-global-loading />
 
         @if ($canExport)
             {{-- <x-excel-export-button method="exportExcel" /> --}}
 
-            <x-ui-button icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
+            <x-ui-button compact-mobile icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
                 wire:click="exportExcel" wire:loading.attr="disabled" wire:target="exportExcel" data-no-global-loading>
                 <span wire:loading.remove wire:target="exportExcel">
                     {{ __('Export Excel') }}
@@ -92,7 +92,7 @@
         </button> --}}
 
         @if ($canUpdatePlanification)
-            <x-ui-button :text="__('Add milestone')" icon="plus" color="#EBB352" hover-opacity="0.80" text-color="#FFFFFF"
+            <x-ui-button compact-mobile :text="__('Add milestone')" icon="plus" color="#EBB352" hover-opacity="0.80" text-color="#FFFFFF"
                 wire:click="openCreate" data-no-global-loading />
         @endif
     </div>

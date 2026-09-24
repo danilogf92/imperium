@@ -102,6 +102,7 @@ class Actions extends Component
         $this->dispatch('project-reset-all');
     }
 
+    #[On('project-clear-search')]
     public function clearSearch(): void
     {
         $this->search = '';

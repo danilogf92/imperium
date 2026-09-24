@@ -15,6 +15,8 @@ class CompaniesTable
         return $table
             ->columns([
                 TextColumn::make('city.name')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('City')
                     ->sortable()
                     ->searchable(),
@@ -24,14 +26,20 @@ class CompaniesTable
                 TextColumn::make('company_code')
                     ->searchable(),
                 TextColumn::make('multiplier')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Multiplier')
                     ->numeric(decimalPlaces: 6)
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -40,7 +48,7 @@ class CompaniesTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->button()->outlined()->labeledFrom('md'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

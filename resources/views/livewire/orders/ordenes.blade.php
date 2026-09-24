@@ -41,7 +41,7 @@
                         {{ __('Dashboard') }}
                     </a> --}}
 
-                    <x-ui-button :href="route('projects.dashboard', ['project' => $project->slug])" :text="__('Dashboard')" icon="chart" color="#7DB9F1" hover-opacity="0.80"
+                    <x-ui-button compact-mobile :href="route('projects.dashboard', ['project' => $project->slug])" :text="__('Dashboard')" icon="chart" color="#7DB9F1" hover-opacity="0.80"
                         text-color="#FFFFFF" wire:navigate />
 
                     {{-- <a href="{{ route('projects.data', ['project' => $project->slug]) }}" wire:navigate
@@ -54,7 +54,7 @@
                         {{ __('Data') }}
                     </a> --}}
 
-                    <x-ui-button :href="route('projects.data', ['project' => $project->slug])" :text="__('Data')" icon="database" color="#60BD84"
+                    <x-ui-button compact-mobile :href="route('projects.data', ['project' => $project->slug])" :text="__('Data')" icon="database" color="#60BD84"
                         hover-opacity="0.80" text-color="#FFFFFF" wire:navigate />
 
                     {{-- <a href="{{ route('orders') }}" wire:navigate
@@ -66,13 +66,13 @@
                         {{ __('Back to orders') }}
                     </a> --}}
 
-                    <x-ui-button :href="route('orders')" :text="__('Back to orders')" icon="arrow-left" color="#eab308"
+                    <x-ui-button compact-mobile :href="route('orders')" :text="__('Back to orders')" icon="arrow-left" color="#eab308"
                         hover-opacity="0.80" text-color="#FFFFFF" wire:navigate />
                 </div>
             @endif
         </header>
 
-        <section x-data="{ open: true }"
+        <section x-data="{ open: window.matchMedia('(min-width: 768px)').matches }" data-compact-filters x-on:resize.window.debounce.150ms="if (window.innerWidth >= 768) open = true"
             class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md gap-4 my-6">
             <div
                 class="soft-title-surface flex flex-col items-start gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
@@ -93,7 +93,7 @@
                         </div>
                     </div>
                 </div>
-                <button type="button" x-on:click="open = !open"
+                <button type="button" x-on:click="open = !open" x-bind:aria-expanded="open" aria-label="{{ __('Filters') }}"
                     class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <svg class="h-5 w-5 transition-transform" x-bind:class="{ 'rotate-180': !open }" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2">
@@ -102,7 +102,7 @@
                 </button>
             </div>
 
-            <div x-show="open" x-collapse>
+            <div x-show="open" x-cloak x-collapse>
                 <div
                     class="flex flex-col gap-4 border-b border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
                     <div class="flex min-w-0 flex-1 flex-wrap items-center gap-3">
@@ -140,7 +140,9 @@
                 </div>
             </div>
 
-            <div class="unified-table-scroll">
+            <x-filter-chips clear="resetFilters" :filters="[['model' => 'search', 'label' => 'Search', 'value' => $search],['model' => 'plantFilter', 'label' => 'Plants', 'value' => $plantFilter],['model' => 'yearFilter', 'label' => 'Years', 'value' => $yearFilter],['model' => 'orderFilter', 'label' => 'Orders', 'value' => $orderFilter] ]" />
+            <div class="unified-table-scroll" x-data="{ fullTable: false }" x-bind:class="{ 'app-table-full': fullTable }" data-mobile-table data-order-scope="{{ $project ? 'project' : 'all' }}">
+                <x-table-density-toggle />
                 <table class="unified-data-table cursor-pointer">
                     <thead
                         class="border-b border-slate-200 bg-slate-100/80 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
@@ -378,6 +380,8 @@
                     {{ $orders->links() }}
                 </div>
             @endif
-        </section>
+
+
+</section>
     </div>
 </div>

@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'previous_week' => 'Semana anterior',
+    'next_week' => 'Semana siguiente',
     'title' => 'Activities / notas del proyecto',
     'open' => 'Abrir Activities del proyecto',
     'created_by' => 'Creado por',

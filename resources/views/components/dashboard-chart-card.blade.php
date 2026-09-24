@@ -7,7 +7,7 @@
 
 <article data-chart-card
     {{ $attributes->class('dashboard-chart-card flex min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:border-sky-200 hover:shadow-md') }}
-    style="height: {{ $height }};">
+    style="--chart-card-height: {{ $height }};">
     <header class="flex min-h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-200 bg-white px-5 py-3.5">
         <div class="min-w-0">
             <h3 class="truncate text-sm font-bold tracking-tight text-slate-800">{{ __($title) }}</h3>
@@ -21,7 +21,7 @@
         </div>
     </header>
 
-    <div class="min-h-0 flex-1 p-4">
+    <div class="dashboard-chart-body min-w-0 flex-1 p-4">
         {{ $slot }}
     </div>
 
@@ -38,8 +38,8 @@
             display: none;
         }
 
-        .dashboard-chart-card > .min-h-0 > div,
-        .dashboard-chart-card > .min-h-0 > div > div {
+        .dashboard-chart-body > [wire\:ignore],
+        .dashboard-chart-body > [wire\:ignore] > div {
             height: 100%;
         }
     </style>

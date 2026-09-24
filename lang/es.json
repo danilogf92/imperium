@@ -211,5 +211,14 @@
     "Remove profile photo?": "¿Eliminar la foto de perfil?",
     "Your current photo will be permanently removed. Your initials will be shown instead.": "Tu foto actual se eliminará permanentemente. En su lugar se mostrarán tus iniciales.",
     "Remove photo": "Eliminar foto",
-    "Removing...": "Eliminando..."
+    "Removing...": "Eliminando...",
+    "Appearance": "Apariencia",
+    "System": "Sistema",
+    "Light": "Claro",
+    "Dark": "Oscuro",
+    "Filters": "Filtros",
+    "Active filters": "Filtros activos",
+    "Remove filter": "Quitar filtro",
+    "All columns": "Todas las columnas",
+    "Compact view": "Vista compacta"
 }

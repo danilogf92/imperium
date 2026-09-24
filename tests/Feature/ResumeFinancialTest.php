@@ -111,10 +111,12 @@ class ResumeFinancialTest extends TestCase
                         && $chart['xaxis']['categories'][0] === 'Jan 2026'
                         && $chart['xaxis']['categories'][11] === 'Dec 2026'
                         && $bars[7] === 200.0 * $rate
-                        && $chart['colors'][7] === '#F97316'
+                        && $chart['colors'] === ['#94A3B8', '#38BDF8']
                         && $bars[8] === 300.0 * $rate
-                        && $chart['colors'][8] === '#7DD3FC'
-                        && $chart['colors'][9] === '#7DD3FC'
+                        && $chart['series'][0]['name'] === 'Planning'
+                        && $chart['series'][1]['name'] === 'Real'
+                        && $chart['series'][1]['data'] === array_fill(0, 12, 0.0)
+                        && $chart['chart']['stacked'] === false
                         && $chart['chart']['type'] === 'bar'
                         && $chart['chart']['height'] === 300
                         && ! isset($chart['annotations'])
@@ -145,7 +147,7 @@ class ResumeFinancialTest extends TestCase
         $component->set('yearFilter', ['2026'])
             ->assertViewHas('cashFlowSummary', fn ($summary) => $summary['total'] === 0.0 && $summary['outside_total'] === 1000.0)
             ->assertViewHas('cashFlowChartOptions', fn ($chart) => count($chart['series'][0]['data']) === 12)
-            ->assertSee('Outside selected years (2027)');
+            ->assertDontSee('monthly-milestone-cash-flow');
     }
 
     public function test_cash_flow_comparison_uses_accounting_month_and_keeps_undated_amounts_separate(): void
@@ -162,7 +164,16 @@ class ResumeFinancialTest extends TestCase
         $component = Livewire::actingAs($user)->test(Resume::class)->set('yearFilter', ['2026']);
         foreach (['euro' => 1, 'dollar' => 2] as $currency => $rate) {
             $component->set('currency', $currency)
-                ->assertSee('Planned milestone cash flow test')
+                ->assertDontSee('Planned milestone cash flow test')
+                ->assertViewHas('cashFlowChartOptions', fn ($chart) =>
+                    $chart['series'][1]['data'][1] === 130.0 * $rate
+                    && $chart['series'][1]['data'][7] === 0.0
+                    && count($chart['series'][1]['data']) === 12
+                    && $chart['plotOptions']['bar']['distributed'] === false
+                    && $chart['tooltip']['shared'] === true
+                    && $chart['tooltip']['intersect'] === false
+                    && $chart['tooltip']['hideEmptySeries'] === false
+                    && $chart['tooltip']['x']['show'] === true)
                 ->assertViewHas('plannedCashFlowChartOptions', fn ($chart) =>
                     $chart['series'][1]['data'][7]['y'] === 80.0 * $rate
                     && $chart['series'][1]['data'][1]['y'] === 0.0
@@ -174,6 +185,79 @@ class ResumeFinancialTest extends TestCase
                     && $summary['outside_actual'] === 50.0 * $rate
                     && $summary['undated_total'] === 25.0 * $rate);
         }
+    }
+
+    public function test_cash_flow_planning_and_document_values_share_all_project_filters_and_permissions(): void
+    {
+        $this->seed();
+        $user = User::where('email', 'test@example.com')->sole();
+        $this->project($user, 2026, 'Execution', 1000, 0, 0);
+        $selected = Project::sole();
+        $this->project($user, 2025, 'Planning', 9000, 0, 0);
+        $other = Project::whereKeyNot($selected->id)->sole();
+        $other->update([
+            'company_id' => Company::where('company_code', 'GRALCO')->value('id'),
+            'investments' => 'Maintenance', 'classification_of_investments' => 'Land', 'justification' => 'Special Project',
+        ]);
+        foreach ([$selected, $other] as $project) {
+            ProjectMilestone::create([
+                'project_id' => $project->id, 'milestone_id' => Milestone::where('code', 'PO')->value('id'),
+                'cycle_year' => 2026, 'month' => 2, 'percentage' => 100, 'sequence' => 1,
+            ]);
+            Data::create([
+                'project_id' => $project->id, 'document_date' => '2026-02-15', 'accounting_date' => '2026-06-01',
+                'real_value_euros' => $project->id === $selected->id ? -20 : 900, 'real_value' => $project->id === $selected->id ? -40 : 1800,
+            ]);
+        }
+        foreach ([
+            'search' => $selected->pda_code, 'plantFilter' => [(string) $selected->company_id],
+            'yearFilter' => ['2026'], 'stateFilter' => ['Execution'], 'investmentFilter' => ['Innovation'],
+            'classificationFilter' => ['Buildings'], 'justificationFilter' => ['Normal Capex'],
+        ] as $filter => $value) {
+            Livewire::actingAs($user)->test(Resume::class)->set($filter, $value)
+                ->assertViewHas('cashFlowChartOptions', fn ($chart) =>
+                    $chart['series'][0]['data'][1] === 1000.0 && $chart['series'][1]['data'][1] === -20.0
+                    && $chart['series'][1]['data'][5] === 0.0 && ! isset($chart['yaxis']['min']));
+        }
+        $viewer = User::factory()->create();
+        $viewer->assignRole('PROJECT MANAGER CIESA');
+        Livewire::actingAs($viewer)->test(Resume::class)
+            ->assertViewHas('cashFlowChartOptions', fn ($chart) =>
+                $chart['series'][0]['data'][1] === 1000.0 && $chart['series'][1]['data'][1] === -20.0);
+    }
+
+    public function test_new_projection_reuses_filtered_document_values_and_preserves_existing_charts(): void
+    {
+        $this->seed();
+        $this->travelTo(now()->setDate(2026, 9, 23));
+        $user = User::where('email', 'test@example.com')->sole();
+        $this->project($user, 2026, 'Execution', 1000, 0, 50);
+        $project = Project::sole();
+        foreach ([[7, 20], [9, 30]] as $index => [$month, $percentage]) {
+            ProjectMilestone::create([
+                'project_id' => $project->id, 'milestone_id' => Milestone::where('code', 'PO')->value('id'),
+                'cycle_year' => 2026, 'month' => $month, 'percentage' => $percentage, 'sequence' => $index + 1,
+            ]);
+        }
+        Data::create(['project_id' => $project->id, 'document_date' => '2026-08-15', 'accounting_date' => '2026-09-15', 'real_value_euros' => 100, 'real_value' => 200]);
+        $this->project($user, 2025, 'Execution', 5000, 0, 999);
+
+        $component = Livewire::actingAs($user)->test(Resume::class)->set('yearFilter', ['2026']);
+        foreach (['euro' => 1, 'dollar' => 2] as $currency => $rate) {
+            $component->set('currency', $currency)
+                ->assertSee('Cash flow: Planning, Real and Projected')
+                ->assertViewHas('projectionChartOptions', fn ($chart) => count($chart['series']) === 3
+                    && $chart['chart']['stacked'] === false
+                    && count($chart['series'][2]['data']) === 12
+                    && $chart['series'][2]['data'][7] === null
+                    && $chart['series'][2]['data'][8] === 325.0 * $rate)
+                ->assertViewHas('projectionSummaries', fn ($items) => $items[0]['closed_planned'] === 200.0 * $rate
+                    && $items[0]['closed_actual'] === 100.0 * $rate && $items[0]['remaining_months'] === 4)
+                ->assertViewHas('cashFlowChartOptions', fn ($chart) => count($chart['series']) === 2 && $chart['series'][1]['data'][7] === 100.0 * $rate)
+                ->assertViewHas('plannedCashFlowChartOptions', fn ($chart) => count($chart['series']) === 2 && $chart['series'][1]['data'][8]['y'] === 100.0 * $rate);
+        }
+        $component->set('search', 'no-such-project')
+            ->assertViewHas('projectionSummaries', fn ($items) => $items[0]['closed_actual'] === 0.0 && $items[0]['closed_planned'] === 0.0);
     }
 
     private function project(User $user, int $year, string $state, float $budget, float $assigned, float $sap): void

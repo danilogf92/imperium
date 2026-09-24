@@ -2,6 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
+    <x-theme-init />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
@@ -11,7 +12,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased">
+<body class="app-guest font-sans antialiased">
     @php
         $fallbackUrl = auth()->check() ? route('dashboard') : route('login');
         $fallbackLabel = auth()->check() ? __('Go to dashboard') : __('Go to sign in');
@@ -22,7 +23,7 @@
         <div class="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-blue-200/40 blur-3xl"></div>
         <div class="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-cyan-200/40 blur-3xl"></div>
 
-        <section class="relative w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-xl shadow-slate-200/60 sm:p-10">
+        <section class="relative w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-xl shadow-slate-200/60 sm:p-10">
             <a href="{{ $fallbackUrl }}" class="mx-auto inline-flex" aria-label="{{ config('app.name', 'DaImperium') }}">
                 <x-application-logo class="h-16 w-16 object-contain" />
             </a>
@@ -35,12 +36,12 @@
             </div>
 
             <p class="mt-6 text-sm font-bold uppercase tracking-[0.22em] text-blue-600">{{ __('Error 404') }}</p>
-            <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">{{ __('Page not found') }}</h1>
+            <h1 class="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">{{ __('Page not found') }}</h1>
             <p class="mx-auto mt-4 max-w-md text-sm leading-6 text-slate-600 sm:text-base">
                 {{ __('The page you requested does not exist, may have moved, or the address may be incorrect.') }}
             </p>
 
-            <div class="mt-8 flex flex-col-reverse justify-center gap-3 sm:flex-row">
+            <div class="mt-6 flex flex-wrap justify-center gap-2 sm:mt-8 sm:gap-3">
                 <a href="{{ $fallbackUrl }}"
                     class="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                     {{ $fallbackLabel }}

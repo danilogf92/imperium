@@ -35,6 +35,8 @@ class AuditLogsTable
             })
             ->columns([
                 TextColumn::make('created_at')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Date')
                     ->dateTime('Y-m-d H:i:s')
                     ->sortable(),
@@ -52,22 +54,32 @@ class AuditLogsTable
                         default => 'gray',
                     }),
                 TextColumn::make('auditable_type')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Module')
                     ->formatStateUsing(fn (string $state): string => Str::headline(class_basename($state)))
                     ->searchable(),
                 TextColumn::make('auditable_id')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Record ID')
                     ->sortable(),
                 TextColumn::make('company.company_name')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Company')
                     ->placeholder('—')
                     ->searchable(),
                 TextColumn::make('project.name')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Project')
                     ->placeholder('—')
                     ->limit(35)
                     ->searchable(),
                 TextColumn::make('ip_address')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('IP')
                     ->placeholder('—')
                     ->toggleable(),

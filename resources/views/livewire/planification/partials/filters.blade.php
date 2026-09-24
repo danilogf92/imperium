@@ -1,5 +1,5 @@
 <div
-                x-data="{ open: true }"
+                x-data="{ open: window.matchMedia('(min-width: 768px)').matches }" data-compact-filters x-on:resize.window.debounce.150ms="if (window.innerWidth >= 768) open = true"
                 class="border-b border-slate-200">
 
                 {{-- Cabecera del área de filtros --}}
@@ -60,7 +60,7 @@
                     {{-- Abrir/cerrar panel de filtros --}}
                     <button
                         type="button"
-                        x-on:click="open = !open"
+                        x-on:click="open = !open" x-bind:aria-expanded="open" aria-label="{{ __('Filters') }}"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
 
                         <svg
@@ -84,7 +84,7 @@
                     x-show="open"
                     x-collapse>
 
-                    <div class="flex flex-nowrap items-center gap-3 overflow-x-auto bg-white px-4 py-4">
+                    <div class="dashboard-filter-controls grid grid-cols-1 items-end gap-3 bg-white px-4 py-4 sm:flex sm:flex-wrap sm:items-center">
 
                         {{-- Planta --}}
                         <x-dashboard-filter-dropdown
@@ -240,4 +240,6 @@
                             " />
                     </div>
                 </div>
+
+<x-filter-chips clear="clearFilters" :filters="[['model' => 'plantFilter', 'label' => 'Plants', 'value' => $plantFilter],['model' => 'statusFilter', 'label' => 'Status', 'value' => $statusFilter],['model' => 'creationYearFilter', 'label' => 'Years', 'value' => $creationYearFilter],['model' => 'activityWeekFilter', 'label' => 'Week', 'value' => $activityWeekFilter],['model' => 'milestoneCompletionFilter', 'label' => 'Milestones', 'value' => $milestoneCompletionFilter],['model' => 'activityExecutionFilter', 'label' => 'Activities', 'value' => $activityExecutionFilter],['model' => 'search', 'label' => 'Search', 'value' => $search], ['model' => 'currency', 'label' => 'Currency', 'value' => $currency, 'default' => 'usd'], ['model' => 'cellDisplay', 'label' => 'Display', 'value' => $cellDisplay, 'default' => 'combined'], ['model' => 'onlyWithMilestones', 'label' => 'Milestones', 'value' => $onlyWithMilestones, 'default' => false, 'options' => [1 => 'With milestones']] ]" />
 </div>

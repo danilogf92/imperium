@@ -107,7 +107,7 @@
                                 Project dashboard
                             </span>
                         </div>
-                        <h1 class="mt-1 truncate text-xl font-bold tracking-tight text-slate-900">
+                        <h1 class="mt-1 break-words text-xl font-bold tracking-tight text-slate-900">
                             {{ $project->name }}
                         </h1>
                         <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-slate-500">
@@ -124,7 +124,7 @@
                         @if ($canExportReport)
                             {{-- <x-excel-export-button method="exportReport" /> --}}
 
-                            <x-ui-button icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
+                            <x-ui-button compact-mobile icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
                                 wire:click="exportReport" wire:loading.attr="disabled" wire:target="exportReport"
                                 data-no-global-loading>
                                 <span wire:loading.remove wire:target="exportReport">
@@ -147,7 +147,7 @@
                             Back to data
                         </a> --}}
 
-                        <x-ui-button :href="route('projects.data', ['project' => $project->slug])" :text="__('Back to data')" icon="arrow-left" color="#7DB9F1"
+                        <x-ui-button compact-mobile :href="route('projects.data', ['project' => $project->slug])" :text="__('Back to data')" icon="arrow-left" color="#7DB9F1"
                             hover-opacity="0.80" text-color="#FFFFFF" wire:navigate />
 
                         @if ($hasOrders)
@@ -181,9 +181,10 @@
                 </div>
             </div>
 
-            <div class="p-5">
-                <div class="overflow-x-auto">
-                    <div class="flex min-w-max items-center gap-3">
+            <div class="p-3 sm:p-5" x-data="{ open: window.innerWidth >= 768 }" x-on:resize.window.debounce="if (window.innerWidth >= 768) open = true">
+                <div class="mb-2 md:hidden"><x-filter-toggle /></div>
+                <div x-show="open" x-cloak>
+                    <div class="dashboard-filter-controls flex flex-wrap items-center gap-3">
                         <x-dashboard-filter-dropdown label="Group by" model="searchData" :options="collect($columnNames)->map(
                             fn($columnName) => [
                                 'value' => $columnName,
@@ -219,29 +220,11 @@
                     ];
                 @endphp
 
-                <div class="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
-                    <span class="mr-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                        Active filters
-                    </span>
-
-                    <span
-                        class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
-                        <span class="text-blue-400">Group by:</span>
-                        {{ $this->formatText($searchData) }}
-                    </span>
-
-                    <span
-                        class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-                        <span class="text-emerald-500">Value:</span>
-                        {{ $financialFilterLabels[$investments] ?? $this->formatText($investments) }}
-                    </span>
-
-                    <span
-                        class="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700">
-                        <span class="text-violet-500">Currency:</span>
-                        {{ $dollarOrEuro === 'dollar' ? 'Dollar ($)' : 'Euro (€)' }}
-                    </span>
-                </div>
+                <x-filter-chips clear="resetAll" :filters="[
+                    ['model' => 'searchData', 'label' => 'Group by', 'value' => $searchData, 'default' => 'area'],
+                    ['model' => 'investments', 'label' => 'Financial value', 'value' => $investments, 'default' => 'global_price_euros', 'options' => $financialFilterLabels],
+                    ['model' => 'dollarOrEuro', 'label' => 'Currency', 'value' => $dollarOrEuro, 'default' => 'euro'],
+                ]" />
             </div>
         </section>
 
@@ -292,7 +275,7 @@
         <style>
             .project-summary-metrics {
                 display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
                 gap: 8px;
             }
             @media (min-width: 640px) {
@@ -344,10 +327,10 @@
                                     @endif
                                 </svg>
                             </span>
-                            <p class="min-w-0 font-medium leading-tight text-slate-500" style="font-size: 11px;">{{ $metric['label'] }}
+                            <p class="min-w-0 text-xs font-medium leading-tight text-slate-500">{{ $metric['label'] }}
                             </p>
                         </div>
-                        <p class="mt-2 font-bold tracking-tight text-slate-900" style="font-size: clamp(11px, 1vw, 16px); line-height: 1.2; overflow-wrap: anywhere;">
+                        <p class="mt-2 break-words text-base font-bold leading-tight tracking-tight text-slate-900">
                             {{ $metric['value'] }}
                         </p>
                     </article>
@@ -414,7 +397,9 @@
             @foreach ($charts as $chart)
                 <x-dashboard-chart-card :title="$chart['title']" subtitle="Project {{ $project->pda_code }}"
                     :filename="$project->pda_code . '-' . $chart['name']">
-                    @if ($chart['type'] === 'column')
+                    @if (empty($chart['model']->toArray()['data']))
+                        <p role="status" class="flex h-full items-center justify-center p-4 text-center text-sm text-slate-500">{{ __('No data available') }}</p>
+                    @elseif ($chart['type'] === 'column')
                         <livewire:livewire-column-chart key="{{ $chart['model']->reactiveKey() }}"
                             :column-chart-model="$chart['model']" />
                     @elseif ($chart['type'] === 'pie')

@@ -15,10 +15,10 @@ class ListProjects extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            ImportAction::make()
+            ImportAction::make()->icon('heroicon-m-arrow-up-tray')->labeledFrom('sm')
                 ->importer(ProjectImporter::class)
                 ->label('Import projects'),
-            CreateAction::make(),
+            CreateAction::make()->icon('heroicon-m-plus')->labeledFrom('sm'),
         ];
     }
 }

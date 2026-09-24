@@ -27,20 +27,28 @@ class MilestonesTable
                     ->sortable(),
 
                 ColorColumn::make('color')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Export color')
                     ->copyable(),
 
                 ColorColumn::make('view_color')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('View color')
                     ->copyable(),
 
                 TextColumn::make('created_at')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Created')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('updated_at')
+                    ->extraCellAttributes(['data-mobile-secondary' => 'true'])
+                    ->extraHeaderAttributes(['data-mobile-secondary' => 'true'])
                     ->label('Updated')
                     ->dateTime()
                     ->sortable()
@@ -50,7 +58,7 @@ class MilestonesTable
             ->defaultPaginationPageOption(10)
             ->paginationPageOptions([5, 10, 20, 50, 100])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->button()->outlined()->labeledFrom('md'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -1,12 +1,12 @@
 @if ($pendingActivityDeleteId)
     <div wire:key="weekly-activity-delete-modal"
-        class="fixed inset-0 z-[80] flex items-center justify-center p-2 sm:p-4"
+        role="dialog" aria-modal="true" aria-label="Confirm deletion" data-modal-open="true" class="app-modal fixed inset-0 z-[80] flex items-center justify-center p-2 sm:p-4"
         x-data x-on:keydown.escape.window="$wire.cancelDeleteWeeklyActivity()">
         <div class="absolute inset-0 cursor-pointer bg-slate-900/60 backdrop-blur-sm"
             wire:click="cancelDeleteWeeklyActivity" data-no-global-loading></div>
 
-        <div wire:click.stop
-            class="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+        <div x-on:click.stop
+            class="relative z-10 max-h-[calc(100dvh-1rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl">
             <div class="px-6 pb-5 pt-6 text-center">
                 <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

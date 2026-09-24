@@ -35,10 +35,10 @@
 
                         <div class="min-w-0">
                             <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-200">Personal profile</p>
-                            <h1 class="mt-1 truncate text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                            <h1 class="mt-1 break-words text-2xl font-bold tracking-tight text-white sm:text-3xl">
                                 {{ $profileUser->name }}
                             </h1>
-                            <p class="mt-1 truncate text-sm text-blue-100/80">{{ $profileUser->email }}</p>
+                            <p class="mt-1 break-all text-sm text-blue-100/80">{{ $profileUser->email }}</p>
                             @if ($profileUser->area)
                                 <p class="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-blue-100/70">
                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -65,6 +65,11 @@
                         </span>
                     </div>
                 </div>
+            </section>
+
+            <section id="appearance" class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+                <h2 class="text-lg font-semibold text-slate-900">{{ __('Appearance') }}</h2>
+                <x-theme-switcher />
             </section>
 
             <div class="grid items-start gap-6 xl:grid-cols-2">

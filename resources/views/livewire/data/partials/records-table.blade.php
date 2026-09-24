@@ -1,9 +1,11 @@
-<div class="unified-table-scroll">
+<div x-data="{ fullTable: false }" x-bind:class="{ 'app-table-full': fullTable }" data-mobile-table class="unified-table-scroll">
+    @php($mobilePrimaryColumns = array_values(array_unique(['actions', in_array('description', $visibleColumns, true) ? 'description' : (collect($visibleColumns)->first(fn ($column) => $column !== 'actions') ?? 'description'), 'real_value'])))
+    <x-table-density-toggle />
     <table class="unified-data-table" style="min-width: max(100%, {{ max(count($visibleColumns), 1) * 145 }}px)">
         <thead class="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-700">
             <tr>
                 @foreach ($visibleColumns as $column)
-                    <th @if ($column !== 'actions') wire:click="setSortBy('{{ $column }}')" data-global-loading @endif
+                    <th data-mobile-secondary="{{ in_array($column, $mobilePrimaryColumns, true) ? 'false' : 'true' }}" @if ($column !== 'actions') wire:click="setSortBy('{{ $column }}')" data-global-loading @endif
                         @class([
                             'whitespace-nowrap px-3 py-3 transition',
                             'cursor-pointer hover:bg-blue-100 hover:text-blue-700' =>
@@ -31,7 +33,7 @@
                     ])>
                     @foreach ($visibleColumns as $column)
                         @if ($column === 'actions')
-                            <td class="whitespace-nowrap px-3 py-2">
+                            <td data-mobile-secondary="{{ in_array($column, $mobilePrimaryColumns, true) ? 'false' : 'true' }}" class="whitespace-nowrap px-3 py-2">
                                 <div class="flex items-center justify-center gap-2">
                                     @if ($canEditData)
                                         <button wire:click="openEditModal({{ $item->id }})" data-no-global-loading
@@ -61,7 +63,7 @@
                                 </div>
                             </td>
                         @else
-                            <td @class([
+                            <td data-mobile-secondary="{{ in_array($column, $mobilePrimaryColumns, true) ? 'false' : 'true' }}" @class([
                                 'px-3 py-2',
                                 'whitespace-nowrap' => !in_array(
                                     $column,

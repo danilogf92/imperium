@@ -31,7 +31,7 @@
             'icon' => 'execution-finished',
         ],
         [
-            'label' => 'Booked',
+            'label' => 'Assigned',
             'value' => $formatMoney($booked),
             'accent' => 'bg-amber-500',
             'text' => 'text-amber-600',
@@ -47,7 +47,7 @@
             'icon' => 'executed',
         ],
         [
-            'label' => 'Real (SAP)',
+            'label' => 'Booked',
             'value' => $formatMoney($realValue),
             'accent' => 'bg-violet-500',
             'text' => 'text-violet-600',

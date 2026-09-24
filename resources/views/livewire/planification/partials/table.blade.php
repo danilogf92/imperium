@@ -23,12 +23,13 @@
                 }
 
             @endphp
-            <div class="planification-table-scroll unified-table-scroll overflow-x-auto overscroll-x-contain">
+            <div x-data="{ fullTable: false }" x-bind:class="{ 'app-table-full': fullTable }" data-mobile-table class="planification-table-scroll unified-table-scroll overflow-x-auto overscroll-x-contain">
+                <x-table-density-toggle />
                 <table class="unified-data-table cursor-pointer"
-                    style="min-width: {{ $fixedWidth + $timelineColumnCount * 192 }}px">
+                    style="--mobile-timeline-width: {{ $visibleFixedColumns->filter(fn($column) => in_array($column, ['name', 'actual_week', 'next_week'], true))->sum(fn($column) => $fixedWidths[$column]) + $timelineColumnCount * 192 }}px; min-width: {{ $fixedWidth + $timelineColumnCount * 192 }}px">
                     <colgroup>
                         @foreach ($visibleFixedColumns as $column)
-                            <col
+                            <col data-mobile-secondary="{{ in_array($column, ['name', 'actual_week', 'next_week'], true) ? 'false' : 'true' }}"
                                 style="width: {{ $fixedWidths[$column] }}px; min-width: {{ $fixedWidths[$column] }}px; max-width: {{ $fixedWidths[$column] }}px">
                         @endforeach
                         @foreach ($timelineYears as $year)
@@ -41,7 +42,7 @@
                         <tr class="bg-[#7DB9F1] text-slate-900">
 
                             @foreach ($visibleFixedColumns->filter(fn($column) => !in_array($column, ['actual_week', 'next_week'], true)) as $column)
-                                <th rowspan="2"
+                                <th rowspan="2" data-mobile-secondary="{{ $column === 'name' ? 'false' : 'true' }}"
                                     class="sticky z-30 border-r border-blue-300 bg-[#7DB9F1] px-2 py-2 text-[10px] font-bold uppercase tracking-wide"
                                     style="left: {{ $fixedOffsets[$column] }}px; width: {{ $fixedWidths[$column] }}px; text-align: {{ in_array($column, ['budgeted']) ? 'right' : (in_array($column, ['forecast_year', 'status']) ? 'center' : 'left') }}">
                                     {{ __($fixedColumnOptions[$column]) }}
@@ -55,9 +56,19 @@
                                         class="sticky z-30 border-r border-blue-300 bg-[#7DB9F1] px-2 py-2 text-center text-[10px] font-bold uppercase tracking-wide"
                                         style="left: {{ $fixedOffsets[$activityColumn] }}px; width: {{ $fixedWidths[$activityColumn] }}px">
                                         {{ $week['offset'] === 0 ? 'Actual Week' : 'Next Week' }}
-                                        <span class="mt-1 block font-medium text-blue-900">
-                                            W{{ str_pad($week['week'], 2, '0', STR_PAD_LEFT) }} · {{ $week['year'] }}
-                                        </span>
+                                        <div class="mt-1 flex items-center justify-center gap-2">
+                                            <button type="button" wire:click="moveActivityWeek(-1)" wire:loading.attr="disabled" wire:target="moveActivityWeek" data-no-global-loading
+                                                title="{{ __('planification_activities.previous_week') }}" aria-label="{{ __('planification_activities.previous_week') }}"
+                                                class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-blue-300 bg-white text-blue-800 shadow-sm hover:bg-blue-50 active:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:cursor-wait disabled:opacity-50">
+                                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m12 5-5 5 5 5" /></svg>
+                                            </button>
+                                            <span class="whitespace-nowrap font-semibold text-blue-900">W{{ str_pad($week['week'], 2, '0', STR_PAD_LEFT) }} · {{ $week['year'] }}</span>
+                                            <button type="button" wire:click="moveActivityWeek(1)" wire:loading.attr="disabled" wire:target="moveActivityWeek" data-no-global-loading
+                                                title="{{ __('planification_activities.next_week') }}" aria-label="{{ __('planification_activities.next_week') }}"
+                                                class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-blue-300 bg-white text-blue-800 shadow-sm hover:bg-blue-50 active:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:cursor-wait disabled:opacity-50">
+                                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8 5 5 5-5 5" /></svg>
+                                            </button>
+                                        </div>
                                     </th>
                                 @endif
                             @endforeach
@@ -109,16 +120,16 @@
                             <tr wire:key="planned-project-{{ $plannedProject->id }}" class="group min-h-10">
 
                                 @if (in_array('forecast_year', $visibleColumns, true))
-                                    <td style="left: {{ $fixedOffsets['forecast_year'] }}px"
+                                    <td data-mobile-secondary="true" style="left: {{ $fixedOffsets['forecast_year'] }}px"
                                         class="planification-sticky-cell sticky z-10 w-24 border-b border-r border-gray-200 px-2 py-1.5 text-center text-xs font-medium text-slate-700">
                                         {{ $plannedProject->forecast_start_date?->year }}
                                     </td>
                                 @endif
 
                                 @if (in_array('plant', $visibleColumns, true))
-                                    <td style="left: {{ $fixedOffsets['plant'] }}px"
+                                    <td data-mobile-secondary="true" style="left: {{ $fixedOffsets['plant'] }}px"
                                         class="planification-sticky-cell sticky z-10 w-40 border-b border-r border-gray-200 px-2 py-1.5 text-xs text-slate-700">
-                                        <div class="truncate" title="{{ $plannedProject->company?->company_name }}">
+                                        <div class="break-words" title="{{ $plannedProject->company?->company_name }}">
                                             {{ $plannedProject->company?->company_name ?? '—' }}
                                         </div>
                                     </td>
@@ -128,10 +139,10 @@
                                     @php
                                         $displayPdaCode = preg_replace('/^.*-(?=[^-]+-[^-]+$)/', '', $plannedProject->pda_code ?? '') ?: '—';
                                     @endphp
-                                    <td style="left: {{ $fixedOffsets['pda_code'] }}px"
+                                    <td data-mobile-secondary="true" style="left: {{ $fixedOffsets['pda_code'] }}px"
                                         class="planification-sticky-cell sticky z-10 w-40 border-b border-r border-gray-200 px-2 py-1.5 text-xs font-semibold text-slate-700">
                                         <div class="flex items-center gap-2">
-                                            <div class="truncate" title="{{ $plannedProject->pda_code }}">{{ $displayPdaCode }}</div>
+                                            <div class="break-words" title="{{ $plannedProject->pda_code }}">{{ $displayPdaCode }}</div>
                                             @if (! in_array('name', $visibleColumns, true))
                                                 <x-project-notes-trigger :project="$plannedProject" context="code" />
                                             @endif
@@ -164,7 +175,7 @@
                                             </span>
                                             <a href="{{ route('projects.dashboard', $plannedProject->slug) }}"
                                                 wire:navigate @class([
-                                                    'line-clamp-2 min-w-0 text-xs font-semibold leading-tight hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
+                                                    'break-words min-w-0 text-xs font-semibold leading-tight hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
                                                     'text-emerald-700' => $allocationComplete,
                                                     'text-orange-700' => !$allocationComplete,
                                                 ])
@@ -189,9 +200,9 @@
                                             '%';
                                     @endphp
 
-                                    <td style="
+                                    <td data-allocation="{{ $allocationComplete ? 'complete' : 'pending' }}" style="
             left: {{ $fixedOffsets['name'] }}px;
-            background-color: {{ $allocationComplete ? '#D1FAE5' : '#FFEDD5' }} !important;
+            --allocation-bg: {{ $allocationComplete ? '#D1FAE5' : '#FFEDD5' }};
         "
                                         class="planification-sticky-cell sticky z-10 w-64 border-b border-r border-gray-200 px-4 py-1.5 align-middle">
                                         <div class="flex items-center gap-3">
@@ -214,7 +225,7 @@
                                             <a href="{{ route('projects.dashboard', $plannedProject->slug) }}" wire:navigate
                                                 title="{{ $plannedProject->name }}"
                                                 @class([
-                                                    'line-clamp-2 min-w-0 flex-1 text-xs font-semibold leading-tight hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
+                                                    'break-words min-w-0 flex-1 text-xs font-semibold leading-tight hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
                                                     'text-emerald-700' => $allocationComplete,
                                                     'text-orange-700' => !$allocationComplete,
                                                 ])>
@@ -227,13 +238,13 @@
                                 @endif
 
                                 @if (in_array('budgeted', $visibleColumns, true))
-                                    <td style="left: {{ $fixedOffsets['budgeted'] }}px"
+                                    <td data-mobile-secondary="true" style="left: {{ $fixedOffsets['budgeted'] }}px"
                                         class="planification-sticky-cell sticky z-10 w-36 border-b border-r border-gray-200 px-2 py-1.5 text-right text-xs font-bold text-slate-800">
                                         {{ $currencySymbol }}{{ number_format($projectBudget, 2) }}
                                     </td>
                                 @endif
                                 @if (in_array('status', $visibleColumns, true))
-                                    <td style="left: {{ $fixedOffsets['status'] }}px"
+                                    <td data-mobile-secondary="true" style="left: {{ $fixedOffsets['status'] }}px"
                                         class="planification-sticky-cell sticky z-10 w-28 border-b border-r-2 border-gray-200 px-2 py-1.5 text-center">
                                         @php
                                             $statusValue = $plannedProject->state?->value ?? '—';
@@ -268,16 +279,17 @@
                                         <td class="sticky z-10 border-b border-r border-cyan-200 bg-cyan-50 px-1.5 py-1.5 text-center"
                                             style="left: {{ $fixedOffsets[$activityColumn] }}px">
                                             <div class="relative flex min-h-8 items-center justify-center gap-1"
-                                                @click.outside="tooltipOpen = false" x-data="{
+                                                @click.outside="tooltipOpen = false" @keydown.escape.window="tooltipOpen = false" @resize.window="tooltipOpen = false" x-data="{
                                                     tooltipOpen: false,
                                                     tooltipStyle: '',
                                                     showTooltip(event) {
                                                         const rect = event.currentTarget.getBoundingClientRect();
                                                         const width = Math.min(320, window.innerWidth - 24);
                                                         const left = Math.max(12, Math.min(rect.left + rect.width / 2 - width / 2, window.innerWidth - width - 12));
-                                                        const showBelow = rect.top < 180;
+                                                        const showBelow = window.innerHeight - rect.bottom > rect.top;
                                                         const top = showBelow ? rect.bottom + 10 : rect.top - 10;
-                                                        this.tooltipStyle = `position:fixed;width:${width}px;left:${left}px;${showBelow ? `top:${top}px` : `top:${top}px;transform:translateY(-100%)`}`;
+                                                        const available = Math.max(44, (showBelow ? window.innerHeight - rect.bottom : rect.top) - 20);
+                                                        this.tooltipStyle = `position:fixed;width:${width}px;max-height:${Math.min(352, available)}px;left:${left}px;${showBelow ? `top:${top}px` : `top:${top}px;transform:translateY(-100%)`}`;
                                                         this.tooltipOpen = true;
                                                     }
                                                 }">

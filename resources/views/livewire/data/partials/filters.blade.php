@@ -1,4 +1,4 @@
-<div x-data="{ open: true }" class="rounded-xl border border-slate-200 bg-white shadow-sm">
+<div x-data="{ open: window.matchMedia('(min-width: 768px)').matches }" data-compact-filters x-on:resize.window.debounce.150ms="if (window.innerWidth >= 768) open = true" class="rounded-xl border border-slate-200 bg-white shadow-sm">
         <div
             class="soft-title-surface flex flex-col items-start gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <div class="flex items-center gap-3">
@@ -24,7 +24,7 @@
                     </p>
                 </div>
             </div>
-            <button type="button" x-on:click="open = !open"
+            <button type="button" x-on:click="open = !open" x-bind:aria-expanded="open" aria-label="{{ __('Filters') }}"
                 class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <svg class="h-5 w-5 transition-transform" x-bind:class="{ 'rotate-180': !open }" viewBox="0 0 24 24"
                     fill="none" stroke="currentColor" stroke-width="2">
@@ -33,7 +33,7 @@
             </button>
         </div>
 
-        <div x-show="open" x-collapse>
+        <div x-show="open" x-cloak x-collapse>
             <div class="flex min-w-0 flex-wrap items-end gap-3 overflow-x-hidden px-4 py-4">
                 <div class="relative min-w-0 flex-[1_1_16rem]">
                     <svg class="pointer-events-none absolute h-4 w-4 text-slate-400 transition-colors"
@@ -66,4 +66,6 @@
                 <x-clear-filters-button method="resetFilters" :active="$hasActiveFilters" />
             </div>
         </div>
-    </div>
+
+<x-filter-chips clear="resetFilters" :filters="[['model' => 'search', 'label' => 'Search', 'value' => $search],['model' => 'areaFilter', 'label' => 'Area', 'value' => $areaFilter],['model' => 'classificationFilter', 'label' => 'Classification', 'value' => $classificationFilter],['model' => 'itemTypeFilter', 'label' => 'Item type', 'value' => $itemTypeFilter],['model' => 'stageFilter', 'label' => 'Stage', 'value' => $stageFilter],['model' => 'supplierFilter', 'label' => 'Supplier', 'value' => $supplierFilter],['model' => 'orderYearFilter', 'label' => 'Year', 'value' => $orderYearFilter] ]" />
+</div>

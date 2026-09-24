@@ -37,8 +37,8 @@
 
                 .project-table>thead>tr>th {
                     min-width: 0;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                    overflow-wrap: anywhere;
+                    white-space: normal;
                     font-size: 0.68rem !important;
                     line-height: 0.95rem !important;
                 }
@@ -46,8 +46,8 @@
                 .project-table>tbody>tr:not(.project-empty-row)>th,
                 .project-table>tbody>tr:not(.project-empty-row)>td {
                     min-width: 0;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                    overflow-wrap: anywhere;
+                    white-space: normal;
                     font-size: 0.75rem !important;
                     line-height: 1rem !important;
                 }
@@ -68,7 +68,7 @@
 
                 .project-table {
                     display: block;
-                    min-width: max(100%, {{ max($columnCount, 1) * 116 }}px);
+                    width: max(100%, {{ max($columnCount, 1) * 144 }}px);
                 }
 
                 .project-table>thead,
@@ -79,7 +79,7 @@
                 .project-table>thead>tr,
                 .project-table>tbody>tr:not(.project-empty-row) {
                     display: grid;
-                    grid-template-columns: repeat({{ max($columnCount, 1) }}, minmax(116px, 1fr));
+                    grid-template-columns: repeat({{ max($columnCount, 1) }}, minmax(144px, 1fr));
                 }
 
                 @foreach ($physicalColumns as $physicalIndex => $columnKey)
@@ -95,4 +95,18 @@
                         }
                     @endif
                 @endforeach
+                @media (max-width: 767px) {
+                    [data-mobile-table]:not(.app-table-full) .project-table { width: 100%; }
+                    [data-mobile-table]:not(.app-table-full) .project-table > thead > tr,
+                    [data-mobile-table]:not(.app-table-full) .project-table > tbody > tr:not(.project-empty-row) { grid-template-columns: minmax(0, 1fr) 7rem; }
+                    @foreach ($physicalColumns as $physicalIndex => $columnKey)
+                        @if (in_array($columnKey, ['name', 'actions'], true))
+                            [data-mobile-table]:not(.app-table-full) .project-table > thead > tr > :nth-child({{ $physicalIndex + 1 }}),
+                            [data-mobile-table]:not(.app-table-full) .project-table > tbody > tr:not(.project-empty-row) > :nth-child({{ $physicalIndex + 1 }}) { display: block; }
+                        @else
+                            [data-mobile-table]:not(.app-table-full) .project-table > thead > tr > :nth-child({{ $physicalIndex + 1 }}),
+                            [data-mobile-table]:not(.app-table-full) .project-table > tbody > tr:not(.project-empty-row) > :nth-child({{ $physicalIndex + 1 }}) { display: none; }
+                        @endif
+                    @endforeach
+                }
             </style>

@@ -1,6 +1,6 @@
 @if ($showFormModal)
 
-    <div wire:key="planification-form-modal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4" x-data
+    <div wire:key="planification-form-modal" role="dialog" aria-modal="true" aria-label="Milestone" data-modal-open="true" class="app-modal fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4" x-data
         x-on:keydown.escape.window="$wire.closeForm()">
 
         {{-- ============================================================
@@ -14,8 +14,8 @@
         {{-- ============================================================
             CONTENIDO DEL MODAL
             ============================================================ --}}
-        <form wire:submit="saveMilestone" wire:click.stop
-            class="relative z-10 flex max-h-[calc(100dvh-1rem)] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl sm:max-h-[calc(100vh-2rem)] sm:rounded-2xl">
+        <form wire:submit="saveMilestone" x-on:click.stop
+            class="relative z-10 flex max-h-[calc(100dvh-1rem)] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl">
 
             {{-- ====================================================
                 CABECERA DEL MODAL

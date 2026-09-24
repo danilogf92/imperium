@@ -59,7 +59,7 @@
                         loading-label="Preparing import file..." /> --}}
                     {{-- <x-excel-export-button method="exportExcel" label="Export data" /> --}}
 
-                    <x-ui-button icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
+                    <x-ui-button compact-mobile icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
                         wire:click="exportImportReadyExcel" wire:loading.attr="disabled"
                         wire:target="exportImportReadyExcel" data-no-global-loading>
                         <span wire:loading.remove wire:target="exportImportReadyExcel">
@@ -71,7 +71,7 @@
                         </span>
                     </x-ui-button>
 
-                    <x-ui-button icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
+                    <x-ui-button compact-mobile icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
                         wire:click="exportExcel" wire:loading.attr="disabled" wire:target="exportExcel"
                         data-no-global-loading>
                         <span wire:loading.remove wire:target="exportExcel">
@@ -95,7 +95,7 @@
                     </button> --}}
 
 
-                    <x-ui-button :text="__('New row')" icon="plus" color="#7D7D7D" hover-opacity="0.80"
+                    <x-ui-button compact-mobile :text="__('New row')" icon="plus" color="#7D7D7D" hover-opacity="0.80"
                         text-color="#FFFFFF" wire:click="openCreateModal" data-no-global-loading />
                 @endif
                 {{-- <a href="{{ route('projects.dashboard', ['project' => $project->slug]) }}" wire:navigate
@@ -108,7 +108,7 @@
                     Dashboard
                 </a> --}}
 
-                <x-ui-button :href="route('projects.dashboard', ['project' => $project->slug])" :text="__('Dashboard')" icon="chart" color="#7DB9F1" hover-opacity="0.80"
+                <x-ui-button compact-mobile :href="route('projects.dashboard', ['project' => $project->slug])" :text="__('Dashboard')" icon="chart" color="#7DB9F1" hover-opacity="0.80"
                     text-color="#FFFFFF" wire:navigate />
 
 

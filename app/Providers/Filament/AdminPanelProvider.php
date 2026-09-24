@@ -43,6 +43,8 @@ class AdminPanelProvider extends PanelProvider
                     ->label(fn (): string => __('Profile'))
                     ->url(fn (): string => route('profile')),
             ])
+            ->renderHook('tables::toolbar.start', fn () => view('filament.mobile-table-toggle'))
+            ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, fn () => view('filament.panel-switcher'))
             ->colors([
                 'primary' => Color::Sky,
                 'warning' => Color::Orange,
@@ -132,6 +134,39 @@ class AdminPanelProvider extends PanelProvider
                             border-color: #1d4ed8;
                             background: #1e3a8a;
                             color: #dbeafe;
+                        }
+
+                        .dark .fi-body { background: #0b1220; }
+                        .dark :is(.fi-section-header, .fi-ta-header, .fi-modal-header, .fi-wi-stats-overview-stat-description) { background-color: #1e293b; border-color: #334155; }
+                        .dark :is(.fi-section-content, .fi-ta-content, .fi-modal-content) { background-color: #111827; }
+                        .dark :is(.fi-section, .fi-ta-ctn, .fi-fo-field-wrp > div) { border-color: #334155; }
+                        .dark .fi-sidebar-item:not(.fi-active) > .fi-sidebar-item-btn:hover { background: #1e293b; }
+                        .app-admin-table-toggle { display: none; }
+                        @media (max-width: 767px) {
+                            .app-admin-table-toggle { display: inline-flex; align-items: center; border: 1px solid #94a3b8; border-radius: .5rem; padding: .25rem .5rem; font-size: .75rem; }
+                            .fi-ta-ctn:not(.app-table-full) [data-mobile-secondary=true] { display: none; }
+                            .fi-ta-ctn:not(.app-table-full) .fi-ta-text-item { white-space: normal; overflow-wrap: anywhere; }
+                            .fi-main { padding-inline: .75rem; }
+                            .fi-header { padding-top: .5rem; gap: .5rem; }
+                            .fi-header-heading { font-size: 1.25rem; }
+                            .fi-header-actions { gap: .375rem; }
+                            .fi-ta-cell, .fi-ta-header-cell { padding-inline: .5rem; }
+                            .fi-ta-ctn:not(.app-table-full) .fi-ta-col { padding: .5rem .25rem; }
+                            .fi-ta-selection-cell { width: 2rem; }
+                            .fi-ta-ctn:not(.app-table-full) .fi-ta-cell-name { min-width: 8rem; }
+                            .fi-section-header, .fi-section-content, .fi-modal-header, .fi-modal-content, .fi-modal-footer { padding: .75rem; }
+                        }
+                        /* Keep Filament's responsive layouts and enlarge touch controls. */
+                        @media (max-width: 639px), (pointer: coarse) {
+                            .fi-body :is(button:not([role="switch"]), .fi-btn, .fi-sidebar-item-btn, .fi-pagination-item-btn) {
+                                min-height: 44px;
+                            }
+                            .fi-body button:not([role="switch"]) { min-width: 44px; }
+                            .fi-body :is(.fi-input, .fi-select-input) {
+                                min-height: 44px;
+                                font-size: 16px;
+                            }
+                            .fi-main { min-width: 0; }
                         }
                     </style>
                     HTML

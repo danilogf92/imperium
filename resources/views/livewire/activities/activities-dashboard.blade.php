@@ -1,34 +1,8 @@
 <div class="activities-dashboard dashboard-page-shell">
-    <style>
-        @media (max-width: 639px) {
-            .activities-dashboard .dashboard-page-content {
-                gap: 1rem;
-            }
 
-            .activities-dashboard .activities-chart-grid {
-                gap: 1rem;
-            }
-
-            .activities-dashboard .dashboard-chart-card {
-                height: 27rem !important;
-            }
-
-            .activities-dashboard .dashboard-chart-card.activities-risk-chart {
-                height: 31rem !important;
-            }
-
-            .activities-dashboard .dashboard-metrics-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-
-            .activities-dashboard .dashboard-metrics-grid article {
-                min-height: 7rem;
-            }
-        }
-    </style>
     <div class="dashboard-page-content space-y-6">
         <header class="module-accent-line dashboard-panel relative overflow-hidden">
-            <div class="flex flex-col gap-5 bg-white px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex flex-col gap-3 bg-white px-3 py-3 sm:px-5 sm:py-5 lg:flex-row lg:items-center lg:justify-between">
                 <div class="flex items-center gap-4">
                     <div
                         class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#7DB9F1] text-white shadow-sm ring-4 ring-blue-50">
@@ -67,7 +41,7 @@
             </div>
         </header>
 
-        @include('livewire.dashboard.partials.filters', ['showCurrency' => false, 'filterTitle' => 'Activities filters'])
+        @include('livewire.activities.partials.filters')
 
         <section class="dashboard-metrics-grid">
             @foreach ([
@@ -116,45 +90,100 @@
             @endforeach
         </section>
 
+        <section class="dashboard-panel overflow-hidden" id="user-summary">
+            <div class="soft-title-surface border-b px-5 py-3">
+                <h2>
+                    <button type="button" wire:click="toggleSummary" aria-controls="user-summary-content"
+                        aria-expanded="{{ $summaryOpen ? 'true' : 'false' }}"
+                        class="flex w-full items-center justify-between gap-3 rounded text-left font-bold text-sky-950 focus:outline-none focus:ring-2 focus:ring-sky-400">
+                        <span>{{ __('activity_control.summary') }}</span>
+                        <span class="inline-flex shrink-0 items-center gap-2 rounded-lg border border-sky-200 bg-white px-3 py-2 text-xs font-semibold text-sky-700 shadow-sm">
+                            {{ __($summaryOpen ? 'activity_control.collapse' : 'activity_control.expand') }}
+                            <svg class="{{ $summaryOpen ? 'rotate-180' : '' }} h-4 w-4 transition-transform" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m5 7.5 5 5 5-5" />
+                            </svg>
+                        </span>
+                    </button>
+                </h2>
+                @if ($summaryOpen)
+                    <p class="mt-2 text-sm font-semibold text-sky-800">
+                        @if ($dateFrom !== '' || $dateTo !== '')
+                            {{ __('activity_control.summary_date_scope', ['from' => $dateFrom ?: __('activity_control.no_date_limit'), 'to' => $dateTo ?: __('activity_control.no_date_limit')]) }}
+                        @else
+                            {{ __('activity_control.summary_all_weeks') }}
+                        @endif
+                    </p>
+                    <p class="mt-1 text-xs text-slate-500">{{ __('activity_control.summary_hint') }}</p>
+                    <p class="mt-1 text-xs text-slate-500">{{ __('activity_control.summary_total_hint') }}</p>
+                @endif
+            </div>
+            @if ($summaryOpen)
+            <div id="user-summary-content" class="overflow-x-auto" x-data="{ fullTable: false }" x-bind:class="{ 'app-table-full': fullTable }" data-mobile-table>
+                <x-table-density-toggle />
+                <table class="app-user-summary-table w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-slate-600"><tr>
+                        @foreach (['user', 'total', 'pending', 'overdue', 'completed'] as $column)
+                            <th scope="col" class="px-5 py-3">{{ __('activity_control.'.$column) }}</th>
+                        @endforeach
+                    </tr></thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse ($userSummary as $row)
+                            <tr wire:key="user-summary-{{ $row['user']->id }}">
+                                <th scope="row" class="px-5 py-3 font-semibold text-slate-800">
+                                    <button type="button" wire:click="selectUser({{ $row['user']->id }})"
+                                        aria-label="{{ __('activity_control.select_user', ['user' => $row['user']->name]) }}"
+                                        class="rounded text-left text-sky-700 underline decoration-sky-200 underline-offset-4 hover:text-sky-900 focus:outline-none focus:ring-2 focus:ring-sky-400">{{ $row['user']->name }}</button>
+                                </th>
+                                <td class="px-5 py-3">{{ $row['total'] }}</td>
+                                <td class="px-5 py-3">{{ $row['pending'] }}</td>
+                                <td class="px-5 py-3">
+                                    <button type="button" wire:click="showUserOverdue({{ $row['user']->id }})"
+                                        aria-label="{{ __('activity_control.show_overdue', ['user' => $row['user']->name]) }}"
+                                        class="rounded-full bg-orange-50 px-3 py-1 font-bold text-orange-800 underline hover:bg-orange-100 focus:ring-2 focus:ring-orange-400">{{ $row['overdue'] }}</button>
+                                </td>
+                                <td class="px-5 py-3">{{ $row['completed'] }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="p-6 text-center text-slate-500">{{ __('activity_control.no_users') }}</td></tr>
+                        @endforelse
+                    </tbody>
+                    <tfoot class="border-t-2 border-sky-200 bg-sky-50 font-bold text-sky-950">
+                        <tr>
+                            <th scope="row" class="px-5 py-3">{{ __('activity_control.summary_total') }}</th>
+                            @foreach (['total', 'pending', 'overdue', 'completed'] as $column)
+                                <td class="px-5 py-3 {{ $column === 'overdue' ? 'text-orange-800' : '' }}">{{ number_format($userSummary->sum($column), 0, '.', ' ') }}</td>
+                            @endforeach
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            @endif
+        </section>
+
         @if ($metrics['total'] > 0 || $milestoneMetrics['total'] > 0)
             <section class="rounded-xl border border-orange-200 bg-orange-50 p-4 shadow-sm">
-                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-wide text-blue-700">Management focus</p>
-                        <div class="mt-3 space-y-3">
-                            @forelse ($topOverdueActivities->groupBy(fn ($activity) => $activity->planned_month->format('Y-m')) as $monthActivities)
-                                <p class="text-xs font-bold uppercase tracking-wide text-blue-700">
-                                    {{ $monthActivities->first()->planned_month->translatedFormat('F Y') }}
-                                </p>
-                                @foreach ($monthActivities as $activity)
-                                    <div class="rounded-lg border border-orange-200 bg-white p-3 shadow-sm">
-                                        <div class="flex flex-wrap items-start justify-between gap-2">
-                                            <div class="min-w-0">
-                                                <p class="whitespace-pre-line text-sm font-semibold text-slate-800">
-                                                    {{ $activity->activity }}</p><p class="mt-1 text-xs text-slate-500">{{ $activity->attribution() }}</p>
-                                                <a href="{{ route('projects.dashboard', $activity->project) }}"
-                                                    class="mt-1 block text-xs font-bold text-sky-700 hover:text-orange-700">
-                                                    {{ $activity->project->name }}@if ($activity->project->pda_code)
-                                                        · PDA {{ $activity->project->pda_code }}
-                                                    @endif
-                                                </a>
-                                            </div>
-                                            <span
-                                                class="shrink-0 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-bold text-blue-800">
-                                                {{ $activity->months_overdue }}
-                                                {{ Str::plural('month', $activity->months_overdue) }} overdue
-                                            </span>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            @empty
-                                <p class="text-sm font-semibold text-sky-800">There are no overdue activities.</p>
-                            @endforelse
-                        </div>
-                    </div>
+                <h2 class="text-xs font-bold uppercase tracking-wide text-blue-700">Management focus</h2>
+                <div class="mt-3 grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                    @forelse ($topOverdueActivities as $activity)
+                        <article wire:key="focus-{{ $activity->id }}" class="flex min-w-0 flex-col rounded-lg border border-orange-200 bg-white p-4 shadow-sm">
+                            <p class="text-xs font-bold uppercase tracking-wide text-blue-700">{{ $activity->planned_month->translatedFormat('F Y') }}</p>
+                            <p class="mt-2 text-xs font-semibold text-slate-600">{{ __('activity_control.planned_week', ['week' => $activity->week_number, 'year' => $activity->week_year]) }}</p>
+                            <p class="mt-3 whitespace-pre-line break-words text-sm font-semibold text-slate-800">{{ $activity->activity }}</p>
+                            <p class="mt-2 break-words text-xs text-slate-500">{{ $activity->attribution() }}</p>
+                            <a href="{{ route('projects.dashboard', $activity->project) }}" class="mt-2 break-words text-xs font-bold text-sky-700 hover:text-orange-700">
+                                {{ $activity->project->name }}@if ($activity->project->pda_code) · PDA {{ $activity->project->pda_code }}@endif
+                            </a>
+                            <div class="mt-auto pt-4">
+                                <span class="inline-flex rounded-full bg-orange-100 px-2.5 py-1 text-xs font-bold text-blue-800">
+                                    {{ $activity->days_overdue }} {{ Str::plural('day', $activity->days_overdue) }} overdue
+                                </span>
+                            </div>
+                        </article>
+                    @empty
+                        <p class="text-sm font-semibold text-sky-800 sm:col-span-2">There are no overdue activities.</p>
+                    @endforelse
                 </div>
             </section>
-
             <section class="activities-chart-grid grid gap-5 xl:grid-cols-2">
                 <x-dashboard-chart-card class="activities-health-chart" title="Activity health"
                     filename="activity-health" subtitle="Completed, overdue and upcoming activities" height="27rem">
@@ -217,12 +246,13 @@
         @endif
 
         <section class="dashboard-panel overflow-hidden bg-white">
-            <div class="soft-title-surface flex items-center justify-between border-b px-5 py-4">
+            <div class="soft-title-surface flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">
                 <div>
                     <h2 class="font-bold text-sky-950">Milestones requiring attention</h2>
                     <p class="text-xs text-slate-500">Overdue milestones first, followed by the nearest upcoming
                         commitments</p>
                 </div>
+                <x-per-page-select model="milestonePerPage" id="milestone-per-page" label="activity_control.per_page" aria-label="activity_control.milestone_page_size" :options="$pageSizes" />
                 <span
                     class="rounded-full bg-white px-3 py-1 text-xs font-bold text-orange-700 shadow-sm">{{ $milestoneMetrics['overdue'] }}
                     overdue</span>
@@ -236,10 +266,10 @@
                     <div
                         class="grid gap-3 p-4 hover:bg-sky-50/40 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-center">
                         <div class="min-w-0">
-                            <p class="truncate text-sm font-bold text-slate-800">
+                            <p class="break-words text-sm font-bold text-slate-800">
                                 {{ $item->milestone?->name ?? ($item->milestone?->code ?? 'Milestone') }}</p>
                             <a href="{{ route('projects.dashboard', $item->project) }}"
-                                class="mt-1 block truncate text-xs font-semibold text-sky-700 hover:text-orange-700">{{ $item->project->name }}
+                                class="mt-1 block break-words text-xs font-semibold text-sky-700 hover:text-orange-700">{{ $item->project->name }}
                                 @if ($item->project->pda_code)
                                     · {{ $item->project->pda_code }}
                                 @endif
@@ -255,6 +285,7 @@
                     <p class="p-10 text-center text-sm text-slate-500">No milestones require attention.</p>
                 @endforelse
             </div>
+            <div class="px-5 py-3">{{ $urgentMilestones->links(data: ['scrollTo' => false]) }}</div>
         </section>
 
         <section class="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
@@ -275,7 +306,7 @@
                         <div class="rounded-lg border border-sky-100 bg-white p-3">
                             <div class="mb-2 flex items-center justify-between gap-3">
                                 <a href="{{ route('projects.dashboard', $item['project']) }}"
-                                    class="truncate text-sm font-bold text-sky-900 hover:text-orange-700">{{ $item['project']->name }}</a>
+                                    class="break-words text-sm font-bold text-sky-900 hover:text-orange-700">{{ $item['project']->name }}</a>
                                 <span
                                     class="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-sky-800 shadow-sm">{{ $item['total'] }}</span>
                             </div>
@@ -321,25 +352,15 @@
             </aside>
         </section>
 
-        <section class="dashboard-panel overflow-hidden">
+        <section id="activity-detail" class="dashboard-panel overflow-hidden" x-data x-on:activities-filtered.window="$el.scrollIntoView({ behavior: 'smooth', block: 'start' })">
             <div
                 class="soft-title-surface flex flex-col gap-3 border-b p-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                     <h2 class="font-bold text-sky-950">Activity detail</h2>
-                    <p class="text-xs text-slate-500">Up to 50 activities, with overdue items first</p>
+                    <p class="text-xs text-slate-500">{{ __('activity_control.detail_hint', ['count' => $activityPerPage]) }}</p>
                 </div>
-                <div class="flex flex-col gap-2 sm:flex-row">
-                    <input type="search" wire:model.live.debounce.350ms="search"
-                        placeholder="Search activity or project..."
-                        class="rounded-lg border-sky-200 bg-white text-sm focus:border-orange-400 focus:ring-orange-300 sm:w-72">
-                    <select wire:model.live="status"
-                        class="rounded-lg border-sky-200 bg-white text-sm focus:border-orange-400 focus:ring-orange-300">
-                        <option value="all">All statuses</option>
-                        <option value="completed">Completed</option>
-                        <option value="overdue">Overdue</option>
-                        <option value="pending">Upcoming</option>
-                    </select>
-                </div>
+                <x-per-page-select model="activityPerPage" id="activity-per-page" label="activity_control.per_page" aria-label="activity_control.activity_page_size" :options="$pageSizes" />
+
             </div>
             <div class="divide-y divide-sky-100">
                 @forelse ($activities as $activity)
@@ -363,13 +384,15 @@
                         };
                     @endphp
                     <div
-                        class="grid gap-3 border-l-4 border-transparent p-4 transition hover:border-orange-300 hover:bg-sky-50/50 sm:grid-cols-[1fr_auto] sm:items-center">
+                        class="{{ $activity->dashboard_status === 'overdue' ? 'border-orange-400 bg-orange-50/50' : 'border-transparent' }} grid gap-3 border-l-4 p-4 transition hover:border-orange-300 hover:bg-sky-50/50 sm:grid-cols-[1fr_auto] sm:items-center">
                         <div class="flex min-w-0 gap-3"><span
                                 class="{{ $style['marker'] }} mt-1.5 h-3 w-3 shrink-0 rounded-full"></span>
                             <div class="min-w-0">
-                                <p class="whitespace-pre-line text-sm text-slate-800">{{ $activity->activity }}</p><p class="mt-1 text-xs text-slate-500">{{ $activity->attribution() }}</p><a
+                                <p class="whitespace-pre-line text-sm text-slate-800">{{ $activity->activity }}</p>
+                                <p class="mt-1 text-xs text-slate-500">{{ __('planification_activities.assigned_to') }}: {{ $activity->assignee?->name ?? __('planification_activities.unassigned') }} · {{ __('activity_control.due') }}: {{ $activity->due_date->format('d/m/Y') }}</p>
+                                <p class="mt-1 text-xs text-slate-500">{{ $activity->attribution() }}</p><a
                                     href="{{ route('projects.dashboard', $activity->project) }}"
-                                    class="mt-1 block truncate text-xs font-bold text-sky-700 hover:text-orange-700">{{ $activity->project->name }}
+                                    class="mt-1 block break-words text-xs font-bold text-sky-700 hover:text-orange-700">{{ $activity->project->name }}
                                     @if ($activity->project->pda_code)
                                         · {{ $activity->project->pda_code }}
                                     @endif
@@ -386,6 +409,7 @@
                     <p class="p-12 text-center text-sm text-slate-500">No activities match these filters.</p>
                 @endforelse
             </div>
+            <div class="px-5 py-3">{{ $activities->links(data: ['scrollTo' => false]) }}</div>
         </section>
     </div>
 </div>

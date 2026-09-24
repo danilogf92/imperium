@@ -17,7 +17,7 @@
                 </p>
                 @foreach ($weekActivities as $activity)
                     <div wire:key="weekly-activity-{{ $activity['id'] }}"
-                        class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                        class="flex flex-wrap items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                         @if (! $notesOnly)<button type="button" @if ($canEditActivity) wire:click="toggleWeeklyActivityExecuted({{ $activity['id'] }})" @else disabled @endif
                             data-no-global-loading
                             title="{{ $canEditActivity ? ($activity['executed'] ? 'Executed — click to change' : 'Not executed — click to mark as executed') : ($activity['executed'] ? 'Executed' : 'Not executed') }}"
@@ -25,7 +25,7 @@
                                 {{ $canEditActivity ? 'cursor-pointer' : 'cursor-default' }} {{ $activity['executed'] ? 'border-green-600 bg-green-600 text-white' : ($activity['expired'] ? 'border-red-600 bg-red-600 text-white hover:bg-red-500' : 'border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-100') }}">
                             {{ $activity['executed'] ? '✓' : ($activity['expired'] ? '×' : '○') }}
                         </button>@endif
-                        <div class="min-w-0 flex-1">
+                        <div class="min-w-0 flex-1 basis-[60%]">
                             <p class="text-xs text-slate-500">{{ __('planification_activities.created_by') }}: {{ $activity['attribution'] }}</p>
                             @if (! $notesOnly)<p class="mt-1 text-xs text-slate-500">{{ $activity['period'] }} · {{ __('planification_activities.assigned_to') }}: {{ $activity['assignee'] ?? __('planification_activities.unassigned') }}</p>@endif
                             <p class="mt-1 whitespace-pre-line break-words text-sm text-slate-700">{{ $activity['activity'] }}</p>

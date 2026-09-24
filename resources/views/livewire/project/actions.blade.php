@@ -4,7 +4,7 @@
 
     {{-- Encabezado --}}
     <div
-        class="flex flex-col items-start gap-2 border-b border-b-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-b-gray-700">
+        class="flex items-center justify-between gap-2 border-b border-b-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-b-gray-700">
 
 
 
@@ -13,7 +13,7 @@
         </h2>
 
         {{-- Botón colapsar/desplegar --}}
-        <button type="button" x-on:click="open = !open"
+        <button type="button" x-on:click="open = !open" x-bind:aria-expanded="open" aria-label="{{ __('Project Actions') }}"
             class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-600 transition hover:bg-gray-200 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
             x-bind:title="open ? '{{ __('Collapse') }}' : '{{ __('Expand') }}'">
             {{-- Flecha arriba --}}
@@ -33,10 +33,10 @@
     {{-- Contenido colapsable --}}
     <div x-show="open" x-collapse class="overflow-hidden transition-all duration-100 py-2">
         <div>
-            <div class="grid w-full grid-cols-1 items-center gap-3 px-4 py-4 sm:grid-cols-2 lg:flex lg:flex-nowrap">
+            <div class="flex w-full flex-wrap items-center gap-2 px-3 py-3 sm:gap-3 sm:px-4">
 
                 {{-- Buscar y limpiar --}}
-                <div class="min-w-0 flex-1 sm:col-span-2 lg:min-w-64">
+                <div class="min-w-0 basis-full md:basis-64 md:flex-1">
                     <label for="projects-search" class="sr-only">{{ __('Search projects') }}</label>
                     <div class="relative">
                         <svg class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
@@ -63,7 +63,8 @@
                 {{-- Botones de exportación --}}
                 <div class="flex shrink-0 items-center gap-3">
                     @if ($canExportProjects)
-                        <x-ui-button icon="chart" color="#7DB9F1" hover-opacity="0.80" text-color="#FFFFFF"
+                        <x-ui-button compact-mobile icon="chart" color="#7DB9F1" hover-opacity="0.80" text-color="#FFFFFF"
+                            :aria-label="__('Dashboard Excel')" :title="__('Dashboard Excel')"
                             wire:click="exportDashboard" wire:loading.attr="disabled" wire:target="exportDashboard"
                             data-no-global-loading>
                             <span wire:loading.remove wire:target="exportDashboard">
@@ -75,7 +76,8 @@
                             </span>
                         </x-ui-button>
 
-                        <x-ui-button icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
+                        <x-ui-button compact-mobile icon="excel" color="#60BD84" hover-opacity="0.80" text-color="#FFFFFF"
+                            :aria-label="__('Export projects')" :title="__('Export projects')"
                             wire:click="export" wire:loading.attr="disabled" wire:target="export"
                             data-no-global-loading>
                             <span wire:loading.remove wire:target="export">

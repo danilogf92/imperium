@@ -29,31 +29,66 @@
             : null;
 @endphp
 
-<div wire:key="dashboard-filter-{{ $model }}-{{ md5(json_encode($selectedValues)) }}" x-data="{ open: false, search: '' }"
-    x-init="
+<div wire:key="dashboard-filter-{{ $model }}-{{ md5(json_encode($selectedValues)) }}" x-data="{
+    open: false, search: '', cleanup: null,
+    positionMenu() {
+        if (!this.open) return;
+        const rect = this.$refs.trigger.getBoundingClientRect();
+        const viewport = window.visualViewport;
+        const height = viewport?.height ?? window.innerHeight;
+        const top = viewport?.offsetTop ?? 0;
+        if (rect.bottom < top || rect.top > top + height) {
+            this.open = false;
+            return;
+        }
+        const width = Math.min(288, window.innerWidth - 16);
+        const below = height + top - rect.bottom - 16;
+        const above = rect.top - top - 16;
+        const upwards = below < 240 && above > below;
+        Object.assign(this.$refs.menu.style, {
+            width: `${width}px`,
+            left: `${Math.max(8, Math.min(rect.left, window.innerWidth - width - 8))}px`,
+            maxHeight: `${Math.max(44, Math.min(400, upwards ? above : below))}px`,
+            top: upwards ? 'auto' : `${rect.bottom + 8}px`,
+            bottom: upwards ? `${window.innerHeight - rect.top + 8}px` : 'auto'
+        });
+    },
+    init() {
         const close = () => {
-            open = false;
-            search = '';
+            this.open = false;
+            this.search = '';
         };
         const closeOnExternalScroll = (event) => {
-            if ($refs.menu?.contains(event.target)) return;
+            if (this.$refs.menu?.contains(event.target)) return;
+            if (this.$refs.menu?.contains(document.activeElement)) {
+                this.positionMenu();
+                return;
+            }
             close();
         };
         const closeOnOutsideClick = (event) => {
-            if (!open || $refs.trigger?.contains(event.target) || $refs.menu?.contains(event.target)) return;
+            if (!this.open || this.$refs.trigger?.contains(event.target) || this.$refs.menu?.contains(event.target)) return;
             close();
         };
+        const resize = () => this.positionMenu();
         window.addEventListener('scroll', closeOnExternalScroll, true);
         document.addEventListener('pointerdown', closeOnOutsideClick, true);
-        $cleanup(() => {
+        window.addEventListener('resize', resize);
+        window.visualViewport?.addEventListener('resize', resize);
+        this.cleanup = () => {
             window.removeEventListener('scroll', closeOnExternalScroll, true);
             document.removeEventListener('pointerdown', closeOnOutsideClick, true);
-        });
-    "
-    x-on:keydown.escape.window="open = false; search = ''; $refs.trigger?.focus()"
+            window.removeEventListener('resize', resize);
+            window.visualViewport?.removeEventListener('resize', resize);
+        };
+    },
+    destroy() { this.cleanup?.(); }
+    }"
+    x-on:keydown.escape.window="if (open) { open = false; search = ''; $refs.trigger?.focus(); }"
     @class(['w-full', 'min-w-0 max-w-full' => $truncateSelection, 'sm:w-auto sm:shrink-0' => ! $truncateSelection])>
     <button x-ref="trigger" type="button"
-        @click="open = !open; if (open) { $nextTick(() => { const rect = $refs.trigger.getBoundingClientRect(); const width = Math.min(288, window.innerWidth - 16); $refs.menu.style.width = `${width}px`; $refs.menu.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - width - 8))}px`; $refs.menu.style.top = `${rect.bottom + 8}px`; }); }"
+        :aria-expanded="open.toString()"
+        @click="open = !open; if (open) $nextTick(() => positionMenu())"
         :class="open ? 'border-blue-500 ring-2 ring-blue-500/25 text-blue-700' : 'border-slate-300'"
         @if ($truncateSelection) title="{{ $selectedOptionLabel ?: __($label) }}" @endif
         @class([
